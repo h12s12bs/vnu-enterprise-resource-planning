@@ -1,0 +1,32 @@
+{
+  "valid_customers": [
+    {
+      "id": "C001",
+      "name": "台灣宏達數位科技",
+      "tax_id": "12345678",
+      "credit_limit": 500000
+    },
+    {
+      "id": "C003",
+      "name": "桃聯智慧製造",
+      "tax_id": "23456789",
+      "credit_limit": 1000000
+    }
+  ],
+  "valid_items": [
+    {
+      "sku": "BIKE-001",
+      "name": "26吋碳纖維登山車",
+      "standard_price": 28500,
+      "safety_stock": 20
+    },
+    {
+      "sku": "WHEEL-02",
+      "name": "26吋越野跑胎輪組",
+      "standard_price": 3200,
+      "safety_stock": 40
+    }
+  ],
+  "total_valid_customers": 2,
+  "total_valid_items": 2
+}

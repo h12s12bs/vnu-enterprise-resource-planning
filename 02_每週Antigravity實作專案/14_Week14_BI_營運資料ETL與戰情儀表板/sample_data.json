@@ -1,0 +1,39 @@
+{
+  "sales_orders": [
+    {
+      "order_id": "SO-01",
+      "revenue": 120000,
+      "cost": 75000,
+      "promise_delivery_date": "2026-05-01",
+      "actual_delivery_date": "2026-05-01"
+    },
+    {
+      "order_id": "SO-02",
+      "revenue": 85000,
+      "cost": 50000,
+      "promise_delivery_date": "2026-05-03",
+      "actual_delivery_date": "2026-05-05"
+    },
+    {
+      "order_id": "SO-03",
+      "revenue": 210000,
+      "cost": 130000,
+      "promise_delivery_date": "2026-05-10",
+      "actual_delivery_date": "2026-05-09"
+    }
+  ],
+  "inventory_snapshots": [
+    {
+      "sku": "OLD-GEAR-01",
+      "name": "庫存 8 速齒盤",
+      "qty": 150,
+      "days_in_warehouse": 120
+    },
+    {
+      "sku": "NEW-TIRE-02",
+      "name": "新款防刺外胎",
+      "qty": 80,
+      "days_in_warehouse": 25
+    }
+  ]
+}

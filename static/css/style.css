@@ -1,0 +1,138 @@
+/* 萬能科技大學 ERP ✕ Agentic AI 互動教學平台 Style */
+:root {
+  --primary: #1e40af; /* 萬能深藍 */
+  --primary-hover: #1d4ed8;
+  --secondary: #0f766e; /* 科技綠/ERP */
+  --accent: #7c3aed; /* Agentic AI 紫 */
+  --accent-light: #ede9fe;
+  --warning: #d97706; /* 審核/門檻 琥珀黃 */
+  --danger: #dc2626; /* 異常 紅 */
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Transitions */
+.tab-btn {
+  transition: all 0.2s ease-in-out;
+}
+.tab-btn.active {
+  background-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.simulator-btn.active {
+  background-color: var(--secondary);
+  color: #ffffff;
+  border-color: var(--secondary);
+}
+
+.agent-template-btn.active {
+  border-color: var(--accent);
+  background-color: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Terminal / ReAct simulation log styling */
+.react-terminal {
+  background: #090d16;
+  border-radius: 0.75rem;
+  color: #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.react-badge-thought {
+  background: #1e293b;
+  color: #fbbf24;
+  border: 1px solid #d97706;
+}
+
+.react-badge-action {
+  background: #082f49;
+  color: #38bdf8;
+  border: 1px solid #0284c7;
+}
+
+.react-badge-obs {
+  background: #064e3b;
+  color: #34d399;
+  border: 1px solid #059669;
+}
+
+.react-badge-guard {
+  background: #451a03;
+  color: #fb923c;
+  border: 1px solid #ea580c;
+}
+
+.react-badge-final {
+  background: #3b0764;
+  color: #c084fc;
+  border: 1px solid #9333ea;
+}
+
+/* Print styles for student project proposal */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-proposal-modal, #printable-proposal-modal * {
+    visibility: visible;
+  }
+  #printable-proposal-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+}

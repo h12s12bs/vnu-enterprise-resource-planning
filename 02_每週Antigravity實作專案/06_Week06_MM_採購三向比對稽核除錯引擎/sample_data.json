@@ -1,0 +1,40 @@
+[
+  {
+    "case_id": "CASE-01",
+    "purchase_order": {
+      "po_id": "PO-101",
+      "supplier": "台灣鏈條實業",
+      "sku": "CHN-11",
+      "qty": 100,
+      "unit_price": 450
+    },
+    "goods_receipt": {
+      "gr_id": "GR-501",
+      "accepted_qty": 100
+    },
+    "invoice": {
+      "inv_id": "INV-901",
+      "qty": 100,
+      "unit_price": 450
+    }
+  },
+  {
+    "case_id": "CASE-02",
+    "purchase_order": {
+      "po_id": "PO-102",
+      "supplier": "捷峰金屬鑄造",
+      "sku": "FRAME-AL",
+      "qty": 50,
+      "unit_price": 3200
+    },
+    "goods_receipt": {
+      "gr_id": "GR-502",
+      "accepted_qty": 40
+    },
+    "invoice": {
+      "inv_id": "INV-902",
+      "qty": 50,
+      "unit_price": 3200
+    }
+  }
+]

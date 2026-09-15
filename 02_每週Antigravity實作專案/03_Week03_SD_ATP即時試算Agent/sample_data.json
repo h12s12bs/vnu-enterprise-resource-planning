@@ -1,0 +1,21 @@
+{
+  "on_hand_stock": 100,
+  "safety_stock": 20,
+  "periods": [
+    {
+      "period": "W1",
+      "planned_receipt": 0,
+      "committed_orders": 45
+    },
+    {
+      "period": "W2",
+      "planned_receipt": 50,
+      "committed_orders": 30
+    },
+    {
+      "period": "W3",
+      "planned_receipt": 80,
+      "committed_orders": 60
+    }
+  ]
+}

@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>萬能科技大學 - 企業資源規劃 (ERP) ✕ Agentic AI 互動教學平台</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Firebase SDK (v10 Compat for Google Sign-In & Firestore Cloud Storage) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo & School Info -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-700 flex items-center justify-center text-white font-bold text-xl shadow">
+            萬
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-lg text-blue-900 tracking-tight">萬能科技大學</span>
+              <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-bold">11501 企業資源規劃</span>
+              <span class="bg-indigo-100 text-indigo-900 text-xs px-2.5 py-0.5 rounded-full font-bold">進企四系4甲</span>
+              <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <i data-lucide="clock" class="w-3 h-3"></i> 週四 16:20~17:50 (電腦教室)
+              </span>
+              <span class="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <i data-lucide="award" class="w-3 h-3"></i> 考取AI賦能ERP或相關證照就加分！
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">授課教師：邱俊維 博士 ｜ 課業諮詢 (Office Hour)：週一 15:00~16:00 ｜ 研究室：育英樓 J801-1</p>
+          </div>
+        </div>
+
+        <!-- Right Side: Classroom IP & Firebase Auth -->
+        <div class="flex items-center space-x-3">
+          <!-- Classroom LAN badge -->
+          <div id="classroom-ip-badge" class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer hover:bg-emerald-100 transition" onclick="copyClassroomUrl()" title="點擊複製全班連線網址">
+            <i data-lucide="wifi" class="w-4 h-4 text-emerald-600"></i>
+            <span>教室網址: <strong id="header-lan-ip">載入中...</strong></span>
+            <i data-lucide="copy" class="w-3 h-3 text-emerald-600 ml-1"></i>
+          </div>
+
+          <!-- Google Login Button (shown when not logged in) -->
+          <button type="button" id="btn-google-login" onclick="loginWithGoogle()" class="inline-flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs sm:text-sm transition border border-slate-300 shadow-sm">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span class="hidden sm:inline">Google 登入</span>
+            <span class="inline sm:hidden">登入</span>
+          </button>
+
+          <!-- User Profile Dropdown (shown when logged in) -->
+          <div class="relative hidden" id="user-auth-box">
+            <button type="button" onclick="toggleUserDropdown()" id="userDropdownBtn" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition border border-slate-200">
+              <img id="user-avatar-img" src="" alt="avatar" class="w-6 h-6 rounded-full object-cover hidden">
+              <div id="user-avatar-icon" class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+              </div>
+              <span id="header-student-name">載入中...</span>
+              <span id="header-badge-count" class="bg-blue-600 text-white text-xs px-1.5 py-0.2 rounded-full font-bold">0</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500"></i>
+            </button>
+            <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 text-xs">
+              <div class="px-3 py-2 border-b border-slate-100">
+                <div class="font-bold text-blue-900 truncate" id="dropdown-user-role">萬能 ERP 學員</div>
+                <div class="text-slate-500 truncate mt-0.5" id="dropdown-user-email">email@example.com</div>
+              </div>
+              <button type="button" onclick="openStudentModal(); toggleUserDropdown(false);" class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center space-x-2 text-slate-700">
+                <i data-lucide="id-card" class="w-4 h-4 text-amber-500"></i>
+                <span>修改學號與姓名</span>
+              </button>
+              <button type="button" id="teacher-export-menu-item" onclick="exportStudentRecordsToExcel(); toggleUserDropdown(false);" class="w-full text-left px-3 py-2 hover:bg-emerald-50 text-emerald-700 font-semibold flex items-center space-x-2 hidden">
+                <i data-lucide="sheet" class="w-4 h-4 text-emerald-600"></i>
+                <span>匯出全班學習記錄 (CSV/Excel)</span>
+              </button>
+              <div class="border-t border-slate-100 my-1"></div>
+              <button type="button" onclick="logoutUser(); toggleUserDropdown(false);" class="w-full text-left px-3 py-2 hover:bg-rose-50 text-rose-600 font-bold flex items-center space-x-2">
+                <i data-lucide="log-out" class="w-4 h-4 text-rose-500"></i>
+                <span>登出 Google 帳號</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN NAVIGATION TABS -->
+      <nav class="flex space-x-1 sm:space-x-4 border-t border-slate-100 py-2 overflow-x-auto">
+        <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shrink-0">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>18週教學進度</span>
+        </button>
+        <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2 shrink-0">
+          <i data-lucide="terminal" class="w-4 h-4 text-purple-600"></i>
+          <span>💻 Antigravity 實戰專案包</span>
+          <span class="bg-purple-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">動手做成果</span>
+        </button>
+        <button onclick="switchTab('simulators')" id="nav-simulators" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          <span>流程成果驗證沙盒</span>
+        </button>
+        <button onclick="switchTab('agentic')" id="nav-agentic" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center space-x-2 shrink-0">
+          <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+          <span>ReAct 推理引擎展示</span>
+        </button>
+        <button onclick="switchTab('exam')" id="nav-exam" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+          <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+          <span>ERP 實務題庫測驗</span>
+          <span class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded font-bold">200+題</span>
+        </button>
+        <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+          <i data-lucide="bookmark-check" class="w-4 h-4"></i>
+          <span>學習成就與錯題</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== TAB 1: 18 週課程教學進度與課堂指引 ==================== -->
+    <section id="tab-curriculum" class="space-y-6">
+      
+      <!-- 課程基本資訊、授課教師簡介、評分標準與節奏看板 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <!-- 頂部標題與開課資訊標籤 -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="bg-blue-900 text-white text-xs px-3 py-1 rounded-full font-bold">11501 學期</span>
+              <span class="bg-indigo-100 text-indigo-900 text-xs px-3 py-1 rounded-full font-bold">進修部 企業管理系 四系 4 甲 (進企四系4甲)</span>
+              <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i> 每週四 16:20 ~ 17:50 (電腦教室)
+              </span>
+              <span class="bg-purple-100 text-purple-800 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> 考取 AI 賦能 ERP 或 ERP 相關證照直接加分！
+              </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">企業資源規劃 (ERP) ✕ Agentic AI 課程教學與互動平台</h1>
+          </div>
+        </div>
+
+        <!-- 三大資訊卡片：教師自我介紹、評分標準、每週教學節奏 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- 區塊 1: 授課教師個人自我介紹 -->
+          <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-700 text-white font-bold text-lg flex items-center justify-center shadow">
+                  邱
+                </div>
+                <div>
+                  <h3 class="font-bold text-base text-slate-900">邱俊維 博士 (Dr. Chun-Wei Chiu)</h3>
+                  <p class="text-xs text-slate-500">萬能科技大學 企業管理系 助理教授</p>
+                </div>
+              </div>
+
+              <div class="text-xs space-y-2 text-slate-700">
+                <div><strong>🎓 學歷：</strong>長庚大學 管理研究所 博士</div>
+                <div><strong>🔬 專長領域：</strong>決策分析與作業研究、AI Agent 與軟體實務、全端開發、運籌與供應鏈管理、企業資源規劃 (ERP)</div>
+                <div><strong>💼 實務經歷：</strong>光明健康事業研發工程師兼特助、長庚大學國科會計畫研究助理、校務研究中心研究助理</div>
+                <div><strong>🏢 研究室：</strong>育英樓 (J棟) <strong class="text-blue-900 font-bold">J801-1 研究室</strong></div>
+                <div class="p-2.5 bg-blue-50/80 rounded-lg border border-blue-200 text-blue-950 font-medium space-y-1">
+                  <div><strong>🕒 授課時間：</strong>每週四 16:20 ~ 17:50 (電腦教室)</div>
+                  <div><strong>🏢 Office Hour (課業諮詢時間)：</strong>每週一 15:00 ~ 16:00 (育英樓 J801-1 研究室)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200 text-xs space-y-1 text-slate-500">
+              <div>📧 信箱: <a href="mailto:cwchiu@vnu.edu.tw" class="text-blue-600 hover:underline">cwchiu@vnu.edu.tw</a> ｜ <a href="mailto:kevin87332000@gmail.com" class="text-blue-600 hover:underline">kevin87332000@gmail.com</a></div>
+              <div>📞 電話: 0976-595-981</div>
+              <div>🌐 個人網站: <a href="https://h12s12bs.github.io/vanung-faculty-portfolio/index.html" target="_blank" class="text-blue-600 hover:underline">邱俊維博士教師專長網頁 ↗</a></div>
+            </div>
+          </div>
+
+          <!-- 區塊 2: 學期評分標準與證照加分特別條款 -->
+          <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                學期成績評量標準 (Grading Policy)
+              </h3>
+              
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
+                  <span class="font-medium text-slate-700">• 平時出缺席與課堂參與</span>
+                  <span class="font-bold text-blue-700">20%</span>
+                </div>
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
+                  <span class="font-medium text-slate-700">• 每週隨堂測驗與課堂實作</span>
+                  <span class="font-bold text-blue-700">20%</span>
+                </div>
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
+                  <span class="font-medium text-slate-700">• 期中考（理論與流程測驗）</span>
+                  <span class="font-bold text-blue-700">25%</span>
+                </div>
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
+                  <span class="font-medium text-slate-700">• 期末考／綜合實戰評量</span>
+                  <span class="font-bold text-blue-700">25%</span>
+                </div>
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
+                  <span class="font-medium text-slate-700">• AI 輔助企業流程專題提案</span>
+                  <span class="font-bold text-purple-700">10%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 證照特別加分公告 (醒目金色/紫色框) -->
+            <div class="p-3.5 bg-gradient-to-r from-amber-50 to-purple-50 rounded-xl border border-amber-300 text-xs space-y-1">
+              <div class="font-bold text-amber-900 flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
+                🌟 專業證照特別加分機制
+              </div>
+              <p class="text-slate-700 leading-relaxed font-medium">
+                修課期間考取<strong>「AI 賦能 ERP 規劃師」</strong>或<strong>「ERP 規劃師 / 基礎檢定」</strong>等相關專業證照，<strong>直接計入學期總成績特別加分！</strong>鼓勵全班同學踴躍報考取得專業資格！
+              </p>
+            </div>
+          </div>
+
+          <!-- 區塊 3: 每週上課進行節奏介紹 (100 分鐘標準配比) -->
+          <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                <i data-lucide="hourglass" class="w-4 h-4 text-indigo-600"></i>
+                每週上課教學節奏 (100 分鐘標準配比)
+              </h3>
+              
+              <div class="space-y-3 text-xs">
+                <!-- 第一節 -->
+                <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                  <div class="font-bold text-blue-900 flex items-center justify-between">
+                    <span>【前半段】第一節 (50 分鐘)</span>
+                    <span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded">核心觀念精講</span>
+                  </div>
+                  <ul class="text-slate-600 space-y-0.5 text-[11px] list-disc list-inside">
+                    <li>00~10 分鐘：破冰引言、企業營運痛點案例導入</li>
+                    <li>10~40 分鐘：單元流程、模組架構圖解與資料流向</li>
+                    <li>40~50 分鐘：高頻精選考題實戰演練與解題盲點破解</li>
+                  </ul>
+                </div>
+
+                <!-- 第二節 -->
+                <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                  <div class="font-bold text-purple-900 flex items-center justify-between">
+                    <span>【後半段】第二節 (50 分鐘)</span>
+                    <span class="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded">流程實戰與 AI</span>
+                  </div>
+                  <ul class="text-slate-600 space-y-0.5 text-[11px] list-disc list-inside">
+                    <li>00~35 分鐘：企業情境模擬題演練、AI Agent 實務展示</li>
+                    <li>35~45 分鐘：操作易錯防呆提醒與觀念統整檢核</li>
+                    <li>45~50 分鐘：線上隨堂快測 (5題) 檢測與指派課後複習</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-2.5 bg-slate-100 rounded-lg text-[11px] text-slate-600 text-center font-medium">
+              授課教室：電腦教室 ｜ 一人一機實機操作與流程模擬
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 18 週課程進度選單 -->
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4 text-blue-600"></i>
+            18 週課程教學進度與課堂指引（點選週次切換）：
+          </h2>
+          <span class="text-xs text-slate-500">每週 2 小時 (共 36 小時) ｜ 考取 AI 賦能 ERP 或相關證照直接加分！</span>
+        </div>
+        <div id="week-selector-container" class="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-18 gap-1.5 sm:gap-2">
+          <!-- Dynamically populated by JS -->
+      </div>
+
+      <!-- Current Selected Week Detail Card -->
+      <div id="week-detail-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <!-- Week header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span id="week-badge" class="bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">第 1 週</span>
+              <span id="week-chapter" class="text-xs font-semibold text-slate-500">CH01 資訊技術與競爭優勢</span>
+            </div>
+            <h2 id="week-title" class="text-xl font-bold text-slate-900">課程導論、ERP 概念演進與企業數位轉型</h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <a id="week-pptx-btn" href="#" target="_blank" download class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>下載教學簡報 (PPTX 大字版)</span>
+            </a>
+            <a id="week-project-zip-btn" href="#" target="_blank" download class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="folder-down" class="w-4 h-4"></i>
+              <span>📥 下載本週 Antigravity 實作專案包 (ZIP)</span>
+            </a>
+            <button id="week-quiz-btn" onclick="startWeeklyQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>啟動當週 5 題快測</span>
+            </button>
+            <button id="week-sim-shortcut-btn" onclick="goToWeekSimulator()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>流程成果驗證沙盒</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Pillars Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Pillar 1: 觀念提點 -->
+          <div class="bg-blue-50/60 rounded-xl p-4 border border-blue-100 space-y-2">
+            <div class="flex items-center gap-2 text-blue-900 font-bold text-sm">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-blue-600"></i>
+              <span>課堂破冰痛點與核心觀念</span>
+            </div>
+            <p id="week-hook-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              載入中...
+            </p>
+          </div>
+
+          <!-- Pillar 2: Agentic AI 賦能 -->
+          <div class="bg-purple-50/60 rounded-xl p-4 border border-purple-100 space-y-2">
+            <div class="flex items-center gap-2 text-purple-900 font-bold text-sm">
+              <i data-lucide="bot" class="w-4 h-4 text-purple-600"></i>
+              <span>傳統 ERP vs Agentic AI 升級</span>
+            </div>
+            <p id="week-ai-upgrade-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              載入中...
+            </p>
+          </div>
+
+          <!-- Pillar 3: 證照重點 -->
+          <div class="bg-amber-50/60 rounded-xl p-4 border border-amber-100 space-y-2">
+            <div class="flex items-center gap-2 text-amber-900 font-bold text-sm">
+              <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+              <span>專業證照高頻考點提點</span>
+            </div>
+            <p id="week-cerps-focus-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              載入中...
+            </p>
+          </div>
+        </div>
+
+        <!-- Antigravity Hands-On Mission Card (電腦教室實機動手做) -->
+        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-md space-y-4 border border-purple-800">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/80 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md shadow">💻 電腦教室動手做</span>
+              <h3 id="week-ag-title" class="font-bold text-base text-white">本週 Antigravity 實作任務：載入中...</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <a id="week-ag-zip-link" href="#" download class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>下載本週專案包 (.zip)</span>
+              </a>
+              <button onclick="switchTab('antigravity')" class="bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
+                <span>前往專案工作坊 ➔</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="space-y-2.5 bg-purple-950/60 p-4 rounded-xl border border-purple-800/50 flex flex-col justify-between">
+              <div>
+                <div class="font-bold text-amber-300 flex items-center gap-1.5 mb-1">
+                  <i data-lucide="building-2" class="w-4 h-4"></i> 企業真實業務情境：
+                </div>
+                <p id="week-ag-scenario" class="text-slate-200 leading-relaxed">
+                  載入中...
+                </p>
+              </div>
+              <div class="pt-2 border-t border-purple-800/60 flex items-center justify-between">
+                <span class="text-slate-400 font-medium">📦 預期產出成果檔案：</span>
+                <span id="week-ag-deliverable" class="font-mono text-amber-300 font-bold">載入中...</span>
+              </div>
+            </div>
+
+            <div class="space-y-2.5 bg-purple-950/60 p-4 rounded-xl border border-purple-800/50 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-purple-200 flex items-center gap-1.5">
+                    <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Antigravity 指引 Prompt：
+                  </span>
+                  <button id="week-ag-copy-btn" onclick="copyCurrentWeekPrompt()" class="bg-purple-800 hover:bg-purple-700 text-purple-100 px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1 transition shadow-sm">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                    <span id="week-ag-copy-btn-text">一鍵複製 Prompt</span>
+                  </button>
+                </div>
+                <div id="week-ag-prompt" class="font-mono text-[11px] text-purple-100 bg-black/40 p-2.5 rounded border border-purple-800/40 line-clamp-3 leading-relaxed">
+                  載入中...
+                </div>
+              </div>
+              <div class="text-[11px] text-amber-200/90 font-medium">
+                💡 實作 SOP：解壓縮 ➔ 開啟 Antigravity 貼上 Prompt ➔ 執行 `python starter.py` 產出檔案 ➔ `python verify.py`
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Content Body (Evolution stages or flow breakdown) -->
+        <div id="week-dynamic-body" class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: ANTIGRAVITY 實戰專案工作坊 ==================== -->
+    <section id="tab-antigravity" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="bg-purple-700 text-white text-xs px-3 py-1 rounded-full font-bold">電腦教室一人一機實作</span>
+              <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-bold">每週動手做出實體成果</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <i data-lucide="terminal" class="w-6 h-6 text-purple-600"></i>
+              Antigravity 企業流程實戰專案工作坊 (18 週專案包)
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+              每週提供真實企業資料（`sample_data.json`）與程式骨架（`starter.py`），使用 Antigravity 開發、除錯並執行，產出真實報表與系統紀錄！
+            </p>
+          </div>
+          <div class="text-xs text-right text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div><strong>授課班級：</strong>進企四系4甲</div>
+            <div><strong>授課時間：</strong>週四 16:20 ~ 17:50 (電腦教室)</div>
+          </div>
+        </div>
+
+        <!-- 週次快速切換鈕 (1~18) -->
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="folder-code" class="w-4 h-4 text-purple-600"></i>
+            選擇專案週次（點選切換）：
+          </div>
+          <div id="ag-week-selector" class="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-18 gap-1.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- 當前選定專案詳情卡片 -->
+        <div id="ag-mission-detail-card" class="bg-slate-50 rounded-xl p-6 border border-slate-200 space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span id="ag-detail-badge" class="bg-purple-700 text-white text-xs font-bold px-2.5 py-0.5 rounded">第 1 週專案</span>
+                <span id="ag-detail-tag" class="text-xs font-semibold text-purple-900 bg-purple-100 px-2 py-0.5 rounded">主檔資料建模</span>
+              </div>
+              <h2 id="ag-detail-title" class="text-xl font-bold text-slate-900">ERP 核心主檔資料結構與防呆驗證器</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <a id="ag-detail-download-zip" href="#" download class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow transition">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>下載本週專案包 (ZIP)</span>
+              </a>
+              <button onclick="copyDetailPrompt()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow transition">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                <span id="ag-detail-copy-text">複製 Antigravity Prompt</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 左欄：情境與任務規範 -->
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="building-2" class="w-4 h-4 text-blue-600"></i> 企業真實業務情境與痛點：
+                </h4>
+                <p id="ag-detail-scenario" class="text-xs text-slate-600 leading-relaxed">
+                  載入中...
+                </p>
+              </div>
+
+              <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="package-check" class="w-4 h-4 text-emerald-600"></i> 交付產出檔案 (Deliverables)：
+                </h4>
+                <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 font-mono text-xs text-emerald-900 font-bold" id="ag-detail-deliverable">
+                  master_data_clean.json 與 error_log.txt
+                </div>
+              </div>
+
+              <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i> 電腦教室實作步驟：
+                </h4>
+                <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
+                  <li>下載上方專案包並解壓縮至電腦桌面。</li>
+                  <li>開啟終端機或 Antigravity，進入該專案目錄。</li>
+                  <li>複製右側 Prompt 貼給 Antigravity，引導 AI 補齊或擴充 `starter.py`。</li>
+                  <li>執行 `python starter.py` 產生交付檔案。</li>
+                  <li>執行 `python verify.py` 驗收成果是否通過！</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- 右欄：Antigravity Prompt 與程式碼預覽 -->
+            <div class="space-y-4">
+              <div class="bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-xs text-amber-400 flex items-center gap-1.5">
+                    <i data-lucide="bot" class="w-4 h-4"></i> Antigravity 指引 Prompt：
+                  </span>
+                  <button onclick="copyDetailPrompt()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-[11px] px-2.5 py-1 rounded font-bold transition">
+                    一鍵複製
+                  </button>
+                </div>
+                <pre id="ag-detail-prompt" class="text-xs font-mono bg-black/50 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap text-slate-200 leading-relaxed border border-slate-800 max-h-48">載入中...</pre>
+              </div>
+
+              <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="code-2" class="w-4 h-4 text-indigo-600"></i> 起始程式碼架構預覽 (`starter.py`)：
+                </h4>
+                <pre id="ag-detail-code-preview" class="text-xs font-mono bg-slate-100 p-3 rounded-lg overflow-x-auto text-slate-800 leading-relaxed border border-slate-200 max-h-56">載入中...</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: 流程成果驗證沙盒 ==================== -->
+    <section id="tab-simulators" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-5 h-5 text-emerald-600"></i>
+            ERP 核心流程成果驗證沙盒
+          </h1>
+          <p class="text-xs text-slate-500">輔助驗證與原理視覺化沙盒：檢驗在 Antigravity 所撰寫演算法之計算邏輯與流程推導！</p>
+        </div>
+
+        <!-- Simulator Sub-tabs -->
+        <div class="flex items-center space-x-2 overflow-x-auto bg-slate-200/70 p-1 rounded-xl">
+          <button onclick="switchSimulator('atp')" id="sim-btn-atp" class="simulator-btn active px-3 py-1.5 rounded-lg text-xs font-bold transition">
+            [銷配 SD] ATP 試算
+          </button>
+          <button onclick="switchSimulator('matching')" id="sim-btn-matching" class="simulator-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900 transition">
+            [採購 MM] 三向比對除錯
+          </button>
+          <button onclick="switchSimulator('mrp')" id="sim-btn-mrp" class="simulator-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900 transition">
+            [生管 PP] BOM 與 MRP 展開
+          </button>
+          <button onclick="switchSimulator('bullwhip')" id="sim-btn-bullwhip" class="simulator-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900 transition">
+            [供鏈 SCM] 長鞭效應體驗
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 1: ATP (Available to Promise) Calculator -->
+      <div id="sim-view-atp" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-semibold">Week 3-4 銷售與配銷模組 SD</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-1">ATP (Available-to-Promise，可承諾量) 即時試算沙盒</h2>
+            <p class="text-xs text-slate-500">公式：<strong>ATP ＝ 現有庫存 ＋ 預計到貨 － 現有已保留訂單 － 安全存量</strong></p>
+          </div>
+          <button onclick="resetAtpDefaults()" class="text-xs text-blue-600 hover:underline">重設預設數值</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Inputs Column -->
+          <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <h3 class="font-bold text-sm text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
+              ERP 系統當前庫存與排程主檔
+            </h3>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">現有庫存 (On-hand Inventory)：<span id="atp-lbl-onhand" class="text-blue-700 font-bold">100</span> 台</label>
+              <input type="range" id="atp-in-onhand" min="0" max="300" value="100" class="w-full" oninput="calcATP()">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">預計在途到貨 (Scheduled Receipts)：<span id="atp-lbl-scheduled" class="text-blue-700 font-bold">50</span> 台</label>
+              <input type="range" id="atp-in-scheduled" min="0" max="200" value="50" class="w-full" oninput="calcATP()">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">現有已承諾客戶訂單 (Committed Orders)：<span id="atp-lbl-committed" class="text-blue-700 font-bold">40</span> 台</label>
+              <input type="range" id="atp-in-committed" min="0" max="300" value="40" class="w-full" oninput="calcATP()">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">安全存量底線 (Safety Stock)：<span id="atp-lbl-safety" class="text-blue-700 font-bold">20</span> 台</label>
+              <input type="range" id="atp-in-safety" min="0" max="100" value="20" class="w-full" oninput="calcATP()">
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2">
+              <h4 class="font-bold text-xs text-purple-800 flex items-center gap-1">
+                <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-purple-600"></i>
+                新客戶急單進線模擬：
+              </h4>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-600 shrink-0">顧客急單欲訂購：</span>
+                <input type="number" id="atp-in-order" value="70" min="1" max="500" class="border border-slate-300 rounded px-2 py-1 text-sm w-24 text-center font-bold" oninput="calcATP()">
+                <span class="text-xs text-slate-600">台</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculation Result & Decision Column -->
+          <div class="space-y-4 flex flex-col justify-between">
+            <div class="bg-blue-900 text-white p-6 rounded-2xl shadow space-y-4">
+              <span class="text-xs uppercase tracking-wider text-blue-200 font-semibold">即時 ERP ATP 運算結果</span>
+              <div class="flex items-baseline justify-between">
+                <div>
+                  <div class="text-4xl font-extrabold text-white" id="atp-val-display">90</div>
+                  <div class="text-xs text-blue-200 mt-1">目前系統剩餘可承諾量 (台)</div>
+                </div>
+                <div id="atp-status-badge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white flex items-center gap-1">
+                  <i data-lucide="check" class="w-4 h-4"></i> 可全數承諾接單
+                </div>
+              </div>
+
+              <!-- Mathematical breakdown -->
+              <div class="bg-blue-950/60 p-3 rounded-lg text-xs font-mono space-y-1 text-blue-100 border border-blue-800">
+                <div>現有庫存 (100) + 預計到貨 (50) = 總可用毛量 (150)</div>
+                <div>減去：已承諾訂單 (40) - 安全存量 (20) = 總扣除量 (60)</div>
+                <div class="text-amber-300 font-bold">目前最大 ATP ＝ 150 - 60 ＝ 90 台</div>
+              </div>
+            </div>
+
+            <!-- AI Agent Recommendation -->
+            <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2">
+              <div class="flex items-center gap-2 text-purple-900 font-bold text-xs">
+                <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i>
+                <span>智慧銷售 Agent (Sales Order Agent) 即時決策建議</span>
+              </div>
+              <p id="atp-agent-decision-text" class="text-xs text-slate-700 leading-relaxed">
+                分析完畢：客戶要求 70 台，系統目前 ATP 為 90 台，庫存充裕！Agent 建議：立即確認訂單並產生 ERP 銷貨訂單 (SO)，鎖定 70 台庫存，預估 100% 準時達交。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 2: Three-Way Matching Audit Game -->
+      <div id="sim-view-matching" class="hidden bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded font-semibold">Week 6 採購與庫存管理 MM ✕ 財會 FI</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-1">採購發票三向比對 (Three-Way Matching) 稽核除錯挑戰</h2>
+            <p class="text-xs text-slate-500">稽核金三角：核對 <strong>採購單 (PO) ✕ 驗收單 (GR) ✕ 供應商發票 (Invoice)</strong>，杜絕浮報與幽靈採購！</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500">選擇稽核情境：</span>
+            <select id="matching-scenario-select" onchange="loadMatchingScenario()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-white">
+              <option value="1">情境 1：正常完美吻合（零誤差）</option>
+              <option value="2">情境 2：單價浮報陷阱（發票單價高於 PO）</option>
+              <option value="3">情境 3：短裝溢開陷阱（實收少於發票開立）</option>
+              <option value="4">情境 4：微額稅差（在容差範圍內）</option>
+              <option value="5">情境 5：虛構採購單詐騙（查無此 PO 號碼）</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3 Documents Side by Side -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Document 1: Purchase Order (PO) -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="font-bold text-sm text-blue-900 flex items-center gap-1.5">
+                <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+                1. 採購單 (PO)
+              </span>
+              <span id="match-po-status" class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">ERP 正式簽核</span>
+            </div>
+            <div class="text-xs space-y-1.5 text-slate-600">
+              <div>單號：<strong id="match-po-no" class="text-slate-800 font-mono">PO-2026-0815</strong></div>
+              <div>供應商：<span id="match-po-vendor" class="text-slate-800">捷安精密工業</span></div>
+              <div>品項：<span id="match-po-item" class="text-slate-800">高碳鋼車架 (FRAME-C01)</span></div>
+              <div>約定數量：<strong id="match-po-qty" class="text-blue-700 font-bold">100</strong> 件</div>
+              <div>核定單價：<strong id="match-po-price" class="text-blue-700 font-bold">$3,200</strong></div>
+              <div>合約總額：<strong id="match-po-total" class="text-slate-900 font-bold">$320,000</strong> (未稅)</div>
+            </div>
+          </div>
+
+          <!-- Document 2: Goods Receipt (GR) -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="font-bold text-sm text-emerald-900 flex items-center gap-1.5">
+                <i data-lucide="package-check" class="w-4 h-4 text-emerald-600"></i>
+                2. 倉庫收料驗收單 (GR)
+              </span>
+              <span id="match-gr-status" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">品檢已過帳</span>
+            </div>
+            <div class="text-xs space-y-1.5 text-slate-600">
+              <div>單號：<strong id="match-gr-no" class="text-slate-800 font-mono">GR-2026-0822</strong></div>
+              <div>關聯 PO：<span id="match-gr-po" class="text-slate-800 font-mono">PO-2026-0815</span></div>
+              <div>送達品項：<span id="match-gr-item" class="text-slate-800">高碳鋼車架</span></div>
+              <div>實收數量：<strong id="match-gr-qty" class="text-emerald-700 font-bold">100</strong> 件</div>
+              <div>良品合格數：<strong id="match-gr-pass" class="text-emerald-700 font-bold">100</strong> 件</div>
+              <div>不良退回數：<span id="match-gr-reject" class="text-slate-800">0 件</span></div>
+            </div>
+          </div>
+
+          <!-- Document 3: Vendor Invoice -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="font-bold text-sm text-purple-900 flex items-center gap-1.5">
+                <i data-lucide="receipt" class="w-4 h-4 text-purple-600"></i>
+                3. 廠商請款發票 (Invoice)
+              </span>
+              <span id="match-inv-status" class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded">待審核</span>
+            </div>
+            <div class="text-xs space-y-1.5 text-slate-600">
+              <div>發票號碼：<strong id="match-inv-no" class="text-slate-800 font-mono">AB-98765432</strong></div>
+              <div>申報 PO：<span id="match-inv-po" class="text-slate-800 font-mono">PO-2026-0815</span></div>
+              <div>請款品項：<span id="match-inv-item" class="text-slate-800">高碳鋼車架</span></div>
+              <div>請款數量：<strong id="match-inv-qty" class="text-purple-700 font-bold">100</strong> 件</div>
+              <div>發票單價：<strong id="match-inv-price" class="text-purple-700 font-bold">$3,200</strong></div>
+              <div>請款總額：<strong id="match-inv-total" class="text-slate-900 font-bold">$336,000</strong> (含稅)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discrepancy Analysis & Student Action -->
+        <div class="bg-slate-100 p-4 rounded-xl border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="scale" class="w-4 h-4 text-blue-600"></i>
+              請以會計稽核員身分進行審核決策：
+            </h4>
+            <span class="text-xs text-slate-500">容差門檻：單價誤差 ±0.5% 內、小額稅差 ±$5 內可放行</span>
+          </div>
+
+          <!-- 3 Decision Buttons -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button onclick="auditMatchingDecision('approve')" class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>【✅ 自動放行過帳】</span>
+            </button>
+            <button onclick="auditMatchingDecision('review')" class="bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span>【⚠️ 價差超額 呈報主管】</span>
+            </button>
+            <button onclick="auditMatchingDecision('reject')" class="bg-rose-600 hover:bg-rose-700 text-white p-3 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span>【❌ 短少或查無PO 退回】</span>
+            </button>
+          </div>
+
+          <!-- Audit Feedback Box -->
+          <div id="matching-feedback-box" class="hidden p-4 rounded-lg text-xs leading-relaxed space-y-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 3: BOM and MRP Engine -->
+      <div id="sim-view-mrp" class="hidden bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <div>
+          <span class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded font-semibold">Week 7-8 生產規劃與控制 PP</span>
+          <h2 class="text-lg font-bold text-slate-900 mt-1">自行車多階層 BOM 展開與九宮格 MRP 淨需求推導</h2>
+          <p class="text-xs text-slate-500">
+            物料需求規劃三大輸入：<strong>主排程 MPS ✕ 物料清單 BOM ✕ 庫存主檔</strong>。淨需求 ＝ 毛需求 － 現有量 － 在途量 ＋ 安全存量。
+          </p>
+        </div>
+
+        <!-- BOM Tree Visual Card -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <h3 class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+            <i data-lucide="git-merge" class="w-4 h-4 text-indigo-600"></i>
+            產品結構樹 (Bill of Materials, BOM 表)：
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+              <div class="font-bold text-blue-900 mb-1">【Level 0】母件成品</div>
+              <div class="font-mono text-slate-800 font-semibold">BIKE-001 登山自行車 (1台)</div>
+              <div class="text-[11px] text-slate-500 mt-1">前置時間 (LT) = 1 週</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+              <div class="font-bold text-indigo-900 mb-1">【Level 1】半成品 / 總成件</div>
+              <div class="space-y-1 font-mono text-slate-700">
+                <div>• FRAME-01 車架總成 x 1 (LT=1週)</div>
+                <div>• WHEEL-02 輪組總成 x <strong class="text-indigo-600 font-bold">2 組</strong> (LT=1週)</div>
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+              <div class="font-bold text-emerald-900 mb-1">【Level 2】輪組所需原物料</div>
+              <div class="space-y-1 font-mono text-slate-700">
+                <div>• RIM-26 輪圈 x 1 (LT=1週)</div>
+                <div>• TYRE-26 輪胎 x 1 (LT=1週)</div>
+                <div>• SPOKE 輻條 x <strong class="text-emerald-600 font-bold">36 根</strong> (LT=2週)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9-Cell MRP Matrix Table -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="table" class="w-4 h-4 text-blue-600"></i>
+              輪組總成 (WHEEL-02) 淨需求推導推算表（安全存量 = 20，批量 = L4L 實需批量）：
+            </h3>
+            <button onclick="autoSolveMRP()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>AI 自動推導解答</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">MRP 項目</th>
+                  <th class="py-2.5 px-3">期初</th>
+                  <th class="py-2.5 px-3">第 1 週</th>
+                  <th class="py-2.5 px-3">第 2 週</th>
+                  <th class="py-2.5 px-3">第 3 週</th>
+                  <th class="py-2.5 px-3">第 4 週</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 font-mono">
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-slate-800">毛需求 (Gross Req.)</td>
+                  <td class="py-2.5 px-3 text-slate-400">-</td>
+                  <td class="py-2.5 px-3 font-bold text-blue-700">60</td>
+                  <td class="py-2.5 px-3 font-bold text-blue-700">80</td>
+                  <td class="py-2.5 px-3 font-bold text-blue-700">100</td>
+                  <td class="py-2.5 px-3 font-bold text-blue-700">40</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-slate-800">預計在途到貨 (Scheduled Receipts)</td>
+                  <td class="py-2.5 px-3 text-slate-400">-</td>
+                  <td class="py-2.5 px-3 text-emerald-700 font-bold">50</td>
+                  <td class="py-2.5 px-3 text-slate-400">0</td>
+                  <td class="py-2.5 px-3 text-slate-400">0</td>
+                  <td class="py-2.5 px-3 text-slate-400">0</td>
+                </tr>
+                <tr class="bg-slate-50/50">
+                  <td class="py-2.5 px-3 font-semibold text-slate-800">預期可用庫存 (Projected On-hand)</td>
+                  <td class="py-2.5 px-3 font-bold text-purple-700">40</td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-oh-1" class="border rounded p-1 w-16 text-center" value="30"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-oh-2" class="border rounded p-1 w-16 text-center" value="20"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-oh-3" class="border rounded p-1 w-16 text-center" value="20"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-oh-4" class="border rounded p-1 w-16 text-center" value="20"></td>
+                </tr>
+                <tr class="bg-amber-50/30">
+                  <td class="py-2.5 px-3 font-bold text-amber-900">淨需求 (Net Requirements)</td>
+                  <td class="py-2.5 px-3 text-slate-400">-</td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-net-1" class="border border-amber-300 rounded p-1 w-16 text-center font-bold text-amber-800" value="0"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-net-2" class="border border-amber-300 rounded p-1 w-16 text-center font-bold text-amber-800" value="70"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-net-3" class="border border-amber-300 rounded p-1 w-16 text-center font-bold text-amber-800" value="100"></td>
+                  <td class="py-2.5 px-3"><input type="number" id="mrp-net-4" class="border border-amber-300 rounded p-1 w-16 text-center font-bold text-amber-800" value="40"></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-slate-800">計畫產出訂單 (Planned Order Receipts)</td>
+                  <td class="py-2.5 px-3 text-slate-400">-</td>
+                  <td class="py-2.5 px-3 text-slate-500 font-bold" id="mrp-por-1">0</td>
+                  <td class="py-2.5 px-3 text-indigo-700 font-bold" id="mrp-por-2">70</td>
+                  <td class="py-2.5 px-3 text-indigo-700 font-bold" id="mrp-por-3">100</td>
+                  <td class="py-2.5 px-3 text-indigo-700 font-bold" id="mrp-por-4">40</td>
+                </tr>
+                <tr class="bg-indigo-50/50 font-bold">
+                  <td class="py-2.5 px-3 text-indigo-900">計畫發出訂單 (Planned Order Releases, LT=1)</td>
+                  <td class="py-2.5 px-3 text-slate-400">-</td>
+                  <td class="py-2.5 px-3 text-indigo-700" id="mrp-rel-1">70 (發出)</td>
+                  <td class="py-2.5 px-3 text-indigo-700" id="mrp-rel-2">100 (發出)</td>
+                  <td class="py-2.5 px-3 text-indigo-700" id="mrp-rel-3">40 (發出)</td>
+                  <td class="py-2.5 px-3 text-slate-400" id="mrp-rel-4">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="mrp-explanation-box" class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
+            <span class="font-bold text-indigo-900">💡 邱老師考點解題公式：</span>
+            第 2 週淨需求 ＝ 第 2 週毛需求 (80) － 上期預期庫存 (30) ＋ 安全存量 (20) ＝ <strong>70 件</strong>。因前置時間為 1 週，故必須在<strong>第 1 週提前發出製造工令 (Planned Order Release)</strong>！
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 4: Bullwhip Effect Simulation -->
+      <div id="sim-view-bullwhip" class="hidden bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <div>
+          <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded font-semibold">Week 12 供應鏈管理 SCM</span>
+          <h2 class="text-lg font-bold text-slate-900 mt-1">長鞭效應 (Bullwhip Effect) 供應鏈震撼模擬</h2>
+          <p class="text-xs text-slate-500">
+            消費者需求僅僅發生 10%~15% 的小幅波動，但在資訊不透明的層層預期下，上游製造商與原料商的訂單卻像甩鞭子一樣被<strong>放大了數倍</strong>！
+          </p>
+        </div>
+
+        <!-- Controls & Toggle VMI -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="flex items-center space-x-3">
+            <button onclick="triggerDemandShock(1.15)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>顧客需求增加 +15%</span>
+            </button>
+            <button onclick="triggerDemandShock(0.85)" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-3 py-2 rounded-lg font-bold transition flex items-center gap-1">
+              <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
+              <span>顧客需求減少 -15%</span>
+            </button>
+          </div>
+
+          <!-- Toggle VMI / AI Shared Info -->
+          <div class="flex items-center space-x-2">
+            <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="vmi-toggle" onchange="toggleVMI()" class="w-4 h-4 text-emerald-600 rounded">
+              <span>啟用 AI 驅動 VMI (供應商管理庫存 ✕ 資訊透明協同)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4 Tiers Comparison Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="bg-slate-100 p-4 rounded-xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-bold block mb-1">1. 終端消費者需求</span>
+            <div id="bullwhip-tier1" class="text-2xl font-extrabold text-slate-800">115</div>
+            <span class="text-[10px] text-slate-500">波幅: ±15%</span>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+            <span class="text-xs text-blue-700 font-bold block mb-1">2. 零售商向批發商訂單</span>
+            <div id="bullwhip-tier2" class="text-2xl font-extrabold text-blue-800">135</div>
+            <span id="bullwhip-tier2-amp" class="text-[10px] text-blue-600 font-semibold">放大至 1.3 倍</span>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+            <span class="text-xs text-indigo-700 font-bold block mb-1">3. 批發商向工廠訂單</span>
+            <div id="bullwhip-tier3" class="text-2xl font-extrabold text-indigo-800">170</div>
+            <span id="bullwhip-tier3-amp" class="text-[10px] text-indigo-600 font-semibold">放大至 1.8 倍</span>
+          </div>
+          <div class="bg-rose-50 p-4 rounded-xl border border-rose-200">
+            <span class="text-xs text-rose-700 font-bold block mb-1">4. 工廠向原物料商訂單</span>
+            <div id="bullwhip-tier4" class="text-2xl font-extrabold text-rose-800">225</div>
+            <span id="bullwhip-tier4-amp" class="text-[10px] text-rose-600 font-bold">甩鞭放大至 2.3 倍！</span>
+          </div>
+        </div>
+
+        <div id="bullwhip-insight" class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 leading-relaxed">
+          <strong>⚠️ 長鞭效應診斷：</strong>目前處於【傳統資訊孤島模式】，各節點因為缺乏透明需求、堆疊各自的安全庫存防備，導致上游原物料商產能過度擴充造成嚴重存貨呆滯！勾選上方【啟用 AI 驅動 VMI】體驗資訊透明如何撫平波幅！
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: AGENTIC AI 規劃實驗室 ==================== -->
+    <section id="tab-agentic" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+        <div class="max-w-3xl space-y-2">
+          <div class="inline-flex items-center gap-1.5 bg-purple-500/30 text-purple-200 border border-purple-400/30 text-xs font-semibold px-3 py-1 rounded-full">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 現代前瞻技術 ✕ AI 賦能 ERP CH13
+          </div>
+          <h1 class="text-2xl font-bold tracking-tight">Agentic AI 企業流程規劃實驗室 (AI Studio)</h1>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            在這裡，學生將學會<strong>如何為企業規劃 Agentic AI 代理人工作流</strong>：從觸發條件、LLM 思考規劃、ERP API 工具調用、到防呆安全門檻與人機協同 (Human-in-the-Loop)。完成規劃後，可直接匯出期末專題提案企劃書！
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Pre-built Templates Selector -->
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+        <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <i data-lucide="layout-template" class="w-4 h-4 text-purple-600"></i>
+          選擇企業實務 Agentic AI 經典情境範本：
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5" id="agent-template-buttons">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Main Agent Builder & ReAct Simulator Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Visual Agent Configuration Panel (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-purple-600"></i>
+              視覺化 Agent 規劃配置畫布 (Workflow Planner)
+            </h3>
+            <span class="text-xs bg-purple-100 text-purple-800 font-semibold px-2 py-0.5 rounded" id="builder-module-badge">銷售與配銷 SD</span>
+          </div>
+
+          <!-- Step 1: Trigger -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 flex items-center gap-1">
+              <span class="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] inline-flex items-center justify-center">1</span>
+              業務觸發來源 (Trigger Event)：
+            </label>
+            <input type="text" id="builder-trigger" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 font-medium bg-slate-50 focus:bg-white focus:border-purple-500 focus:outline-none" value="接收客戶採購 Email">
+          </div>
+
+          <!-- Step 2: Agent Role & Instruction -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 flex items-center gap-1">
+              <span class="w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] inline-flex items-center justify-center">2</span>
+              Agent 角色與核心 Prompt 指令：
+            </label>
+            <textarea id="builder-prompt" rows="3" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 font-mono text-slate-700 bg-slate-50 focus:bg-white focus:border-purple-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- Step 3: ERP Tools / APIs -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 flex items-center gap-1">
+              <span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] inline-flex items-center justify-center">3</span>
+              掛載 ERP 工具與 API 函式 (Tool Calling)：
+            </label>
+            <div id="builder-tools-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <!-- Dynamically populated checkboxes -->
+            </div>
+          </div>
+
+          <!-- Step 4: Guardrails & Human-in-the-Loop -->
+          <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-2">
+            <label class="block text-xs font-bold text-amber-900 flex items-center gap-1">
+              <span class="w-4 h-4 rounded-full bg-amber-600 text-white text-[10px] inline-flex items-center justify-center">4</span>
+              安全防呆邊界與人機協同 (Guardrails & Human Gate)：
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <span class="text-slate-600 block mb-1">自動放行金額門檻 (NT$)：</span>
+                <input type="number" id="builder-guardrail-amount" value="500000" class="border border-amber-300 rounded px-2 py-1 w-full bg-white font-bold text-amber-900">
+              </div>
+              <div>
+                <span class="text-slate-600 block mb-1">人工審核觸發條件：</span>
+                <input type="text" id="builder-guardrail-condition" value="金額大於 50 萬 或 庫存不足" class="border border-amber-300 rounded px-2 py-1 w-full bg-white font-medium text-slate-800">
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button onclick="runAgentSimulation()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>🚀 啟動 ReAct 思考與執行模擬</span>
+            </button>
+            <button onclick="openProposalModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition">
+              <i data-lucide="file-down" class="w-4 h-4 text-purple-400"></i>
+              <span>產出學生專題企劃書 (期末專題10%)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: ReAct Execution Sandbox Terminal (5 cols) -->
+        <div class="lg:col-span-5 bg-slate-900 rounded-xl p-5 shadow-lg border border-slate-800 text-slate-100 flex flex-col space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+              <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+              <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+              <span class="text-xs font-mono text-slate-400 ml-2">ReAct Execution Engine</span>
+            </div>
+            <span id="react-status-badge" class="text-[10px] bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded">IDLE</span>
+          </div>
+
+          <!-- Dynamic ReAct Trace Output Box -->
+          <div id="react-trace-terminal" class="flex-1 min-h-[420px] max-h-[520px] overflow-y-auto space-y-3 font-mono text-xs pr-1">
+            <div class="text-slate-500 italic p-4 text-center">
+              👈 請點擊左側「啟動 ReAct 思考與執行模擬」觀察 Agent 自主思考、調用 ERP API 與人機審核歷程！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: ERP 實務題庫測驗中心 ==================== -->
+    <section id="tab-exam" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full mb-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ★ 特別加分：考取 AI 賦能 ERP 或 ERP 相關證照直接加分！
+          </div>
+          <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="award" class="w-6 h-6 text-amber-500"></i>
+            ERP 實務檢定與全真題庫測驗中心
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-500">
+            收錄 15 章教材題庫 (180 題) ＋ 最新 20+ 題 AI-ERP 專屬考點，平時隨堂練習，考取相關證照享學期總成績特別加分！
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="startFullExam('midterm_50')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span>期中全真模考 (50題)</span>
+          </button>
+          <button onclick="startFullExam('final_100')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="trophy" class="w-4 h-4"></i>
+            <span>期末全真衝刺 (100題)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam Mode Selector & Chapter Filter -->
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-bold text-slate-700">章節自主練習：</span>
+          <select id="exam-chapter-select" onchange="filterQuestionsByChapter()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-white">
+            <option value="all">全章節綜合練習 (隨機 10 題)</option>
+            <option value="1">第 1 章 資訊技術與競爭優勢</option>
+            <option value="2">第 2 章 企業資源規劃概說 (BPR)</option>
+            <option value="3">第 3 章 導入方法與程序</option>
+            <option value="4">第 4 章 系統評選</option>
+            <option value="5">第 5 章 系統建置</option>
+            <option value="6">第 6 章 存貨管理 (MM)</option>
+            <option value="7">第 7 章 銷售與收帳管理 (SD)</option>
+            <option value="8">第 8 章 生產規劃 (PP)</option>
+            <option value="9">第 9 章 採購與付款管理 (MM)</option>
+            <option value="10">第 10 章 在製品管理</option>
+            <option value="11">第 11 章 人力資源管理 (HR)</option>
+            <option value="12">第 12 章 財務會計 (FI)</option>
+            <option value="13">第 13 章 管理會計 (CO)</option>
+            <option value="14">第 14 章 企業變革管理</option>
+            <option value="15">第 15 章 未來展望與新興技術</option>
+            <option value="16">★ AI ERP 與 Agentic AI 前瞻考點</option>
+          </select>
+          <button onclick="startFilteredQuiz()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">
+            開始練題
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-500 font-mono">
+          題庫總量：<strong class="text-blue-700 font-bold" id="total-questions-stat">200</strong> 題 ｜ 及格門檻：70 分
+        </div>
+      </div>
+
+      <!-- ACTIVE EXAM CONTAINER -->
+      <div id="active-exam-container" class="space-y-6">
+        <!-- Exam Top Bar (Timer & Progress) -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="font-bold text-sm text-slate-800" id="exam-mode-title">每週隨堂測驗</span>
+            <span class="text-xs text-slate-500" id="exam-progress-text">題號：1 / 5</span>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <div id="exam-timer-box" class="flex items-center gap-1.5 font-mono text-sm font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200">
+              <i data-lucide="hourglass" class="w-4 h-4"></i>
+              <span id="exam-timer-display">倒數計時：--:--</span>
+            </div>
+            <button onclick="submitExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition">
+              交卷評分
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Cards List -->
+        <div id="exam-questions-list" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Bottom Submit Button -->
+        <div class="text-center pt-4">
+          <button onclick="submitExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-8 py-3 rounded-xl shadow-md transition">
+            完成作答，立即交卷評分！
+          </button>
+        </div>
+      </div>
+
+      <!-- EXAM RESULT REPORT MODAL / CONTAINER -->
+      <div id="exam-result-container" class="hidden bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <!-- Populated on submit -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: 學習成就與錯題筆記 ==================== -->
+    <section id="tab-achievements" class="hidden space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-6">
+          <div class="flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow">
+              <span id="achieve-avatar-char">學</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-900" id="achieve-name-display">萬能科大學生</h2>
+              <p class="text-xs text-slate-500" id="achieve-id-display">學號：未設定 ｜ 累計答題次數：0</p>
+            </div>
+          </div>
+
+          <button onclick="openStudentModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-200">
+            修改座號與姓名
+          </button>
+        </div>
+
+        <!-- Badges Grid -->
+        <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-1.5">
+          <i data-lucide="medal" class="w-4 h-4 text-amber-500"></i>
+          ERP ✕ Agentic AI 學習歷程勳章牆：
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" id="badges-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Mistake Review Notebook -->
+        <div class="border-t border-slate-100 pt-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                <i data-lucide="bookmark-x" class="w-5 h-5 text-rose-500"></i>
+                個人專屬「錯題複習筆記本」
+              </h3>
+              <p class="text-xs text-slate-500">系統自動記錄所有平時練習與模擬考答錯之題目，考前精準重練！</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="retryMistakeQuestions()" id="retry-mistakes-btn" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
+                重練所有錯題 (<span id="mistake-count-span">0</span>)
+              </button>
+              <button onclick="clearMistakes()" class="text-xs text-slate-400 hover:text-slate-600">清空錯題紀錄</button>
+            </div>
+          </div>
+
+          <div id="mistakes-list-container" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STUDENT PROFILE MODAL -->
+  <div id="student-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i>
+          設定學生個人身分
+        </h3>
+        <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">萬能科大學號 (Student ID)：</label>
+          <input type="text" id="input-student-id" placeholder="例如：11308888" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">學生姓名 (Name)：</label>
+          <input type="text" id="input-student-name" placeholder="例如：王小明" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+        </div>
+        <p class="text-slate-400 text-[11px]">※ 資料保存在本機瀏覽器，作答成績與勳章進度將自動綁定此姓名。</p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeStudentModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">取消</button>
+        <button onclick="saveStudentProfile()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-sm">儲存身分</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERM PROJECT PROPOSAL MODAL (FOR EXPORTING REPORT) -->
+  <div id="proposal-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">期末專題 10% 評分標準</span>
+          <h3 class="font-bold text-lg text-slate-900 mt-1 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-5 h-5 text-purple-600"></i>
+            企業 Agentic AI 流程優化專題提案企劃書
+          </h3>
+        </div>
+        <button onclick="closeProposalModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Proposal Form -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">專案主題名稱：</label>
+          <input type="text" id="prop-title" value="基於 Agentic AI 之 O2C 智慧訂單自動化與庫存 ATP 調度提案" class="w-full border border-slate-300 rounded p-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">分組組別與組員姓名：</label>
+          <input type="text" id="prop-members" value="第 3 組：王小明、李大華、張雅婷" class="w-full border border-slate-300 rounded p-2">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-bold text-slate-700 mb-1">企業現況與營運痛點描述：</label>
+          <textarea id="prop-pain" rows="2" class="w-full border border-slate-300 rounded p-2">目前業務助理每日需花費 3~4 小時手動核對客戶非結構化採購 Email，再手動登入 ERP 查庫存打單，常發生打錯品號與超賣交期延誤之問題。</textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-bold text-slate-700 mb-1">所規劃之 Agentic AI 工作流與人機協同機制：</label>
+          <textarea id="prop-workflow" rows="3" class="w-full border border-slate-300 rounded p-2">1. 透過 Email Webhook 接收非結構化訂單文字。
+2. Sales Agent 呼叫 LLM 進行實體萃取，取得客戶代號、品號、數量。
+3. 呼叫 ERP API (erp_check_atp 與 erp_check_credit) 進行庫存可用量與信用核驗。
+4. 設定防呆門檻：訂單金額 > 50 萬元或 ATP 不足時，啟動 Human-in-the-Loop 主管審批。
+5. 核准後自動生成正式 ERP 銷售訂單 (SO)，並回傳確認函給客戶。</textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block font-bold text-slate-700 mb-1">預期效益評估 (量化 KPI)：</label>
+          <textarea id="prop-benefits" rows="2" class="w-full border border-slate-300 rounded p-2">• 訂單登打作業時間由 20 分鐘縮減至 1.5 秒 (效率提升 99%)
+• 消除手動鍵入之人為疏失 (錯誤率降至 0.05% 以下)
+• ATP 自動預警排產，交期達交率預估提升 15%</textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+        <span class="text-xs text-slate-400">指導教授：邱俊維 博士 ｜ 萬能科技大學 企業資源規劃</span>
+        <div class="flex gap-2">
+          <button onclick="downloadProposalMarkdown()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-4 h-4"></i> 下載 Markdown 企劃書
+          </button>
+          <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="printer" class="w-4 h-4"></i> 列印 / 另存 PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 space-y-1">
+      <p class="font-semibold text-slate-700">萬能科技大學 企業資源規劃 (ERP) ✕ Agentic AI 互動教學平台</p>
+      <p>18 週實務教學進度 ✕ 每週 Antigravity 實作專案 ｜ ERP 實務題庫練習 ｜ 授課教師：邱俊維 博士</p>
+      <p class="text-slate-400 text-[11px]">本教學系統專為電腦教室每週實作設計，支援局域網即時互動與單機離線運作。</p>
+    </div>
+  </footer>
+
+  <!-- Application Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "test_order_id": "SO-2026-001",
+  "actions": [
+    "QUOTE",
+    "DELIVERED",
+    "ORDER_APPROVED",
+    "DELIVERED",
+    "INVOICED"
+  ]
+}

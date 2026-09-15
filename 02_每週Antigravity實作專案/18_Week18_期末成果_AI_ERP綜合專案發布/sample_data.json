@@ -1,0 +1,7 @@
+{
+  "project_title": "基於 Agentic AI 之 O2C 智慧訂單自動化與庫存 ATP 調度系統",
+  "group_name": "第 3 組",
+  "team_members": "王小明 (1150101)、李大華 (1150102)、張雅婷 (1150103)",
+  "pain_points": "傳統業務助理每日需耗費 3 小時手工處理非結構化訂單，打錯品號與超賣頻傳。",
+  "agent_architecture": "採用 ReAct 模式，包含 Email 監聽 ➔ LLM 實體抽取 ➔ ERP API 查庫存與信用 ➔ 10 萬元審批 Guardrail ➔ 自動建單過帳。"
+}

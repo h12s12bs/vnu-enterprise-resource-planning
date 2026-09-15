@@ -1,0 +1,28 @@
+[
+  {
+    "log_id": "LOG-01",
+    "tx_type": "PO_UPDATE",
+    "operator": "USER_DEV",
+    "amount": 45000,
+    "timestamp": "2026-06-01 14:20:00",
+    "flags": []
+  },
+  {
+    "log_id": "LOG-02",
+    "tx_type": "PRICE_OVERRIDE",
+    "operator": "USER_SALES_03",
+    "amount": 80000,
+    "timestamp": "2026-06-01 02:15:30",
+    "flags": []
+  },
+  {
+    "log_id": "LOG-03",
+    "tx_type": "SO_CREATE",
+    "operator": "USER_SALES_05",
+    "amount": 99500,
+    "timestamp": "2026-06-01 16:45:00",
+    "flags": [
+      "UNAPPROVED"
+    ]
+  }
+]

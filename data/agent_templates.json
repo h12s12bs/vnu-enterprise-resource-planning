@@ -1,0 +1,379 @@
+[
+  {
+    "id": "o2c_sales_agent",
+    "name": "O2C 智慧訂單處理代理 (Sales Order Agent)",
+    "module": "銷售與配銷 (SD)",
+    "description": "自動解析來自客戶之非結構化採購 Email 或 LINE 訊息，呼叫 ERP API 驗證客戶信用與 ATP 庫存，並在合規下自動生成正式銷售訂單 (SO)。",
+    "pain_point": "傳統業務助理每天需耗費 3~4 小時手動核對客戶傳真/Email，再肉眼查詢庫存手動打單，常發生打錯品號或超賣交期延誤。",
+    "trigger": {
+      "type": "Email / Webhook 接收顧客訂單",
+      "source": "採購經理 陳大文 <david@techcorp.tw>",
+      "content": "邱老師您好！我們急需向貴公司訂購 50 台『專業級登山自行車 (BIKE-001)』與 100 組『前輪反光燈 (LIGHT-002)』。希望能於下週五 (9/18) 前送達桃園廠。如單價照舊每台 $12,000 與 $350，請盡快確認並回傳訂單，謝謝！"
+    },
+    "agent_role": "企業智慧銷售訂單處理專家 (Sales Order Agent)",
+    "system_instruction": "你是一個資深 ERP 銷售業務代理人。你的任務是：\n1. 從客戶來信中精確萃取訂購產品、數量、單價及交期。\n2. 呼叫 ERP ATP API 檢查產品現有庫存與可承諾交期。\n3. 呼叫 ERP 信用檢查 API，確認該客戶未超額。\n4. 若金額 > $500,000 或庫存不足，必須標註風險並觸發【主管審批】；若符合規則，則直接自動建立 ERP 銷售訂單 (SO)。",
+    "tools": [
+      {
+        "name": "erp_check_atp",
+        "desc": "查詢 ERP 庫存可承諾量 (ATP) 與最快交期",
+        "params": "item_code, requested_qty"
+      },
+      {
+        "name": "erp_check_credit",
+        "desc": "查詢客戶剩餘信用額度與付款條件",
+        "params": "customer_id, order_total_amount"
+      },
+      {
+        "name": "erp_create_sales_order",
+        "desc": "在 ERP 系統中正式建立銷售訂單 (SO)",
+        "params": "customer_id, items, delivery_date, status"
+      },
+      {
+        "name": "notify_human_supervisor",
+        "desc": "觸發主管 Human-in-the-Loop 審批通知",
+        "params": "reason, draft_order_id, risk_level"
+      }
+    ],
+    "guardrails": {
+      "auto_approve_limit": 500000,
+      "require_credit_check": true,
+      "require_atp_check": true,
+      "human_approval_trigger": "總金額超過 50 萬 或 ATP 庫存不足"
+    },
+    "simulated_trace": [
+      {
+        "step": 1,
+        "type": "thought",
+        "content": "收到來自 techcorp.tw 的非結構化採購需求。首先進行語意剖析，萃取結構化實體：\n- 客戶：TechCorp (客戶代號 CUST-882)\n- 品項 1：BIKE-001 x 50 台，報價 $12,000（小計 $600,000）\n- 品項 2：LIGHT-002 x 100 組，報價 $350（小計 $35,000）\n- 訂單總額：$635,000\n- 要求交期：2026-09-18"
+      },
+      {
+        "step": 2,
+        "type": "action",
+        "tool": "erp_check_atp",
+        "input": {"items": [{"code": "BIKE-001", "qty": 50}, {"code": "LIGHT-002", "qty": 100}]}
+      },
+      {
+        "step": 3,
+        "type": "observation",
+        "result": "ERP API 回傳：BIKE-001 目前現有庫存 65 台，已保留 5 台，ATP 可用量為 60 台（充足）；LIGHT-002 現有庫存 300 組，ATP 充足。可滿足 9/18 交期。"
+      },
+      {
+        "step": 4,
+        "type": "thought",
+        "content": "庫存 ATP 充足！接著檢查 TechCorp 企業客戶信用額度餘額。"
+      },
+      {
+        "step": 5,
+        "type": "action",
+        "tool": "erp_check_credit",
+        "input": {"customer_id": "CUST-882", "order_total": 635000}
+      },
+      {
+        "step": 6,
+        "type": "observation",
+        "result": "ERP API 回傳：CUST-882 信用額度總計 $2,000,000，現有未收帳款 $800,000，可用額度 $1,200,000。本筆訂單 $635,000 符合信用限制。"
+      },
+      {
+        "step": 7,
+        "type": "guardrail",
+        "content": "【安全邊界防呆檢核】本訂單總額 $635,000 已超過系統自動放行上限 ($500,000)！依據企業內控規範，轉呈業務主管人工審批 (Human-in-the-Loop)。"
+      },
+      {
+        "step": 8,
+        "type": "human_approval",
+        "prompt": "業務主管審核中... 【審批通過：同意此老客戶大額訂單，附款條件月結 30 天】"
+      },
+      {
+        "step": 9,
+        "type": "action",
+        "tool": "erp_create_sales_order",
+        "input": {
+          "so_no": "SO-20260909-088",
+          "customer_id": "CUST-882",
+          "total_amount": 635000,
+          "status": "APPROVED_LOCKED",
+          "delivery_date": "2026-09-18"
+        }
+      },
+      {
+        "step": 10,
+        "type": "final_output",
+        "content": "【執行成功】已於 ERP 系統產生正式銷售訂單 #SO-20260909-088，已自動鎖定庫存 50 台 BIKE-001，並自動發送確認 Email 與 PDF 訂單確認函給客戶。"
+      }
+    ]
+  },
+  {
+    "id": "p2p_matching_agent",
+    "name": "P2P 智慧採購發票三向核帳代理 (3-Way Matching Agent)",
+    "module": "採購與庫存 (MM) / 財會 (FI)",
+    "description": "自動讀取供應商電子發票，連動 ERP 呼叫採購單 (PO) 與驗收單 (GR)，進行單價、數量、總額之三向智慧勾稽，實現零接觸自動報支。",
+    "pain_point": "月底會計人員面臨數千張紙本與電子發票，人工比對採購單與驗收單極易疲憊出錯，造成付款延遲或溢付款項給供應商。",
+    "trigger": {
+      "type": "供應商發送電子發票 (XML / PDF OCR)",
+      "source": "捷安精密工業 (供應商編號 VEND-201)",
+      "content": "發票號碼：AB-98765432\n採購單號：PO-2026-0815\n請款品項：自行車高碳鋼車架 (FRAME-C01)\n數量：100 件\n發票單價：$3,200\n銷售額：$320,000\n營業稅：$16,000\n總計請款：$336,000"
+    },
+    "agent_role": "企業智慧應付帳款核帳專家 (Accounts Payable Agent)",
+    "system_instruction": "你是一個 ERP 會計與採購自動化代理人。請嚴格執行三向比對 (Three-Way Matching)：\n1. 讀取發票品號、數量、單價。\n2. 呼叫 ERP API 查詢原始採購單 (PO) 核定之單價與條款。\n3. 呼叫 ERP API 查詢品檢入庫單 (GR) 倉庫實際簽收合格數量。\n4. 若數量完全相符且價差在 ±0.5% 容許範圍內，自動建立會計應付憑單；若數量不足或單價超額，立即阻擋並警示！",
+    "tools": [
+      {
+        "name": "erp_query_po",
+        "desc": "根據採購單號查詢原始採購約定明細與核准價格",
+        "params": "po_number"
+      },
+      {
+        "name": "erp_query_gr",
+        "desc": "根據採購單號查詢倉庫實際品檢合格入庫量 (Goods Receipt)",
+        "params": "po_number"
+      },
+      {
+        "name": "erp_post_ap_voucher",
+        "desc": "在 ERP 會計總帳自動拋轉應付帳款傳票",
+        "params": "vendor_id, invoice_no, amount, debit_credit_entries"
+      }
+    ],
+    "guardrails": {
+      "price_tolerance_pct": 0.5,
+      "quantity_tolerance_pct": 0,
+      "max_auto_post_amount": 500000
+    },
+    "simulated_trace": [
+      {
+        "step": 1,
+        "type": "thought",
+        "content": "收到供應商 VEND-201 請款發票 AB-98765432，聲稱對應採購單 PO-2026-0815，請款 100 件車架，單價 $3,200，總計 $336,000。"
+      },
+      {
+        "step": 2,
+        "type": "action",
+        "tool": "erp_query_po",
+        "input": {"po_number": "PO-2026-0815"}
+      },
+      {
+        "step": 3,
+        "type": "observation",
+        "result": "ERP PO 記錄：品號 FRAME-C01，採購數量 100 件，合約核定單價 $3,200 (未稅)，付款條件月結 60 天。狀態：已發行。"
+      },
+      {
+        "step": 4,
+        "type": "thought",
+        "content": "發票單價 $3,200 與採購單 PO 完全一致！接下來核對倉庫實際收料驗收單 (GR)。"
+      },
+      {
+        "step": 5,
+        "type": "action",
+        "tool": "erp_query_gr",
+        "input": {"po_number": "PO-2026-0815"}
+      },
+      {
+        "step": 6,
+        "type": "observation",
+        "result": "ERP GR 記錄：單號 GR-2026-0822，倉庫驗收良品 100 件，無不良品退貨，已完成入庫過帳。"
+      },
+      {
+        "step": 7,
+        "type": "guardrail",
+        "content": "【三向比對驗證】\n1. 數量核對：PO(100) ＝ GR(100) ＝ Invoice(100) ➔ 吻合！\n2. 單價核對：PO($3,200) ＝ Invoice($3,200) ➔ 價差 0% ➔ 吻合！\n3. 稅額計算：$320,000 x 5% = $16,000，總計 $336,000 ➔ 正確！\n符合自動過帳標準，無任何異常！"
+      },
+      {
+        "step": 8,
+        "type": "action",
+        "tool": "erp_post_ap_voucher",
+        "input": {
+          "invoice_no": "AB-98765432",
+          "vendor_id": "VEND-201",
+          "journal_entry": [
+            {"account": "2141 應付帳款", "credit": 336000},
+            {"account": "1201 在途存貨/暫估應付", "debit": 320000},
+            {"account": "1261 進項稅額", "debit": 16000}
+          ]
+        }
+      },
+      {
+        "step": 9,
+        "type": "final_output",
+        "content": "【過帳成功】三向比對零誤差！已在 ERP 生成應付傳票 #AP-20260909-012，排入 2026-10-31 批次電匯付款清冊，耗時 1.2 秒完成全流程。"
+      }
+    ]
+  },
+  {
+    "id": "mrp_inventory_agent",
+    "name": "MRP 預測性庫存與智慧補貨代理 (Inventory Replenishment Agent)",
+    "module": "生產規劃 (PP) / 存貨 (MM)",
+    "description": "每日定時監控各倉庫關鍵物料庫存，結合預測銷售速率與供應商交期波動，自主預算淨需求並自動起草請購單 (PR)。",
+    "pain_point": "生管與倉管常因為突發急單或原物料交期延誤，導致生產線缺料停工，造成嚴重違約金與產能浪費。",
+    "trigger": {
+      "type": "ERP 每日排程掃描 (Cron: 00:00 AM)",
+      "source": "ERP 庫存狀態監視器",
+      "content": "掃描觸發：物料品號 'TYRE-26 (26吋自行車防刺輪胎)' 當前現有庫存降至 45 件，已低於設定之安全存量 (60 件)。"
+    },
+    "agent_role": "智慧供應鏈與物料需求規劃專員 (MRP Replenishment Agent)",
+    "system_instruction": "你是一個專精於 MRP 運算的供應鏈智慧代理人：\n1. 讀取低於安全存量之物料品號。\n2. 查詢未來 3 週之主生產排程 (MPS) 與毛需求。\n3. 計算精確淨需求，並考慮供應商最小訂購量 (MOQ) 與採購前置時間 (Lead Time)。\n4. 生成請購單 (PR) 草案並發送預警至採購主管 Slack/Teams。",
+    "tools": [
+      {
+        "name": "erp_get_mps_demand",
+        "desc": "查詢未來期間該物料因組裝成品產生之毛需求",
+        "params": "item_code, horizon_days"
+      },
+      {
+        "name": "erp_query_supplier_info",
+        "desc": "查詢該物料合格供應商、MOQ、合約價格與平均前置時間",
+        "params": "item_code"
+      },
+      {
+        "name": "erp_create_pr",
+        "desc": "在 ERP 系統建立正式請購單 (Purchase Requisition)",
+        "params": "item_code, qty, required_date, preferred_vendor"
+      }
+    ],
+    "guardrails": {
+      "auto_pr_limit": 200000,
+      "moq_compliance": true
+    },
+    "simulated_trace": [
+      {
+        "step": 1,
+        "type": "thought",
+        "content": "檢測到 TYRE-26 現有量 45 < 安全存量 60！進入預測性物料需求分析。"
+      },
+      {
+        "step": 2,
+        "type": "action",
+        "tool": "erp_get_mps_demand",
+        "input": {"item_code": "TYRE-26", "horizon_days": 21}
+      },
+      {
+        "step": 3,
+        "type": "observation",
+        "result": "ERP MPS 回傳：未來第 1 週組裝需 40 件，第 2 週需 60 件，第 3 週需 50 件。合計未來毛需求 150 件。目前在途已訂購 0 件。"
+      },
+      {
+        "step": 4,
+        "type": "thought",
+        "content": "【MRP 淨需求推導】\n- 毛需求 = 150\n- 現有庫存 = 45\n- 在途量 = 0\n- 安全庫存 = 60\n淨需求 ＝ 150 － 45 － 0 ＋ 60 ＝ 165 件！若不立即請購，第 2 週中旬即將斷料！"
+      },
+      {
+        "step": 5,
+        "type": "action",
+        "tool": "erp_query_supplier_info",
+        "input": {"item_code": "TYRE-26"}
+      },
+      {
+        "step": 6,
+        "type": "observation",
+        "result": "供應商主檔回傳：正新橡膠 (VEND-308)，MOQ 為 100 件（整箱包裝），單價 $180，前置時間 Lead Time ＝ 5 天。"
+      },
+      {
+        "step": 7,
+        "type": "thought",
+        "content": "淨需求 165 件，因供應商 MOQ 限制為 100 且需整箱，採用批量法則向上取整為 200 件（採購金額 $36,000）。今天 (9/9) 下單，9/14 到貨，可及時趕上第 2 週生產！"
+      },
+      {
+        "step": 8,
+        "type": "action",
+        "tool": "erp_create_pr",
+        "input": {
+          "item_code": "TYRE-26",
+          "quantity": 200,
+          "estimated_amount": 36000,
+          "required_date": "2026-09-14",
+          "suggested_vendor": "VEND-308"
+        }
+      },
+      {
+        "step": 9,
+        "type": "final_output",
+        "content": "【自動請購完成】已在 ERP 產生請購單 #PR-20260909-005（數量 200 件，金額 $36,000），成功避免斷料危機！"
+      }
+    ]
+  },
+  {
+    "id": "crm_support_agent",
+    "name": "CRM 智慧客訴與退換貨代理 (RMA Customer Agent)",
+    "module": "顧客關係管理 (CRM) / 銷售 (SD)",
+    "description": "7x24 小時自主受理客戶退換貨與報修請求，自動查詢 ERP 出貨日期與保固條款，精確判斷 RMA 資格並自動開立退貨工單。",
+    "pain_point": "客服人員常常需要打電話向倉庫與會計確認退貨政策與原始發票號碼，客戶在電話線上苦等 15 分鐘引起極大不滿。",
+    "trigger": {
+      "type": "官網或 LINE 客服進線對話",
+      "source": "VIP 客戶 林小姐",
+      "content": "你好，我在 8 月 20 號買了一輛公路車 (訂單編號 SO-20260820-032)，昨天騎乘時後變速器異常卡死。請問可以申請換貨或維修嗎？"
+    },
+    "agent_role": "企業智慧售後服務與退換貨專員 (CRM RMA Specialist)",
+    "system_instruction": "你是一個專業、親切且嚴謹的售後服務 AI 代理人：\n1. 讀取客戶提供之訂單號碼與故障描述。\n2. 呼叫 ERP 查詢歷史訂單出貨日與保固期間。\n3. 比對企業保固規章：非人為自然故障在 30 天內提供免費到府換新，1 年內免費原廠維修。\n4. 自動生成 RMA 退換貨授權碼，安排黑貓宅配逆向物流收件，並安撫客戶情緒。",
+    "tools": [
+      {
+        "name": "erp_query_so_history",
+        "desc": "根據訂單編號查詢商品出貨日期、保固狀態與購買人身分",
+        "params": "so_number"
+      },
+      {
+        "name": "erp_create_rma",
+        "desc": "在 ERP 建立退換貨工單 (Return Merchandise Authorization)",
+        "params": "so_number, item_code, return_type, reason"
+      },
+      {
+        "name": "call_logistics_api",
+        "desc": "向合作物流業者預約逆向物流上門取件",
+        "params": "pickup_address, contact_name, phone"
+      }
+    ],
+    "guardrails": {
+      "warranty_check_required": true,
+      "max_compensation_limit": 5000
+    },
+    "simulated_trace": [
+      {
+        "step": 1,
+        "type": "thought",
+        "content": "客戶林小姐詢問訂單 SO-20260820-032 之變速器故障售後服務。首先調用 ERP 銷售訂單歷程確認購買細節與保固權益。"
+      },
+      {
+        "step": 2,
+        "type": "action",
+        "tool": "erp_query_so_history",
+        "input": {"so_number": "SO-20260820-032"}
+      },
+      {
+        "step": 3,
+        "type": "observation",
+        "result": "ERP 回傳：客戶姓名林美玲 (VIP金卡會員)，出貨日期 2026-08-21 (距今 19 天)，購買品項 BIKE-PRO-X1，整車享 1 年保固且處於 30 天無條件新品故障換新期！"
+      },
+      {
+        "step": 4,
+        "type": "thought",
+        "content": "確認符合『30天內新品瑕疵免費換新』條款，且客戶為 VIP 金卡會員。應主動提供最尊榮之到府收送服務。"
+      },
+      {
+        "step": 5,
+        "type": "action",
+        "tool": "erp_create_rma",
+        "input": {
+          "so_number": "SO-20260820-032",
+          "rma_type": "REPLACE_NEW",
+          "reason": "後變速器機械卡死",
+          "warranty_status": "VALID_FREE"
+        }
+      },
+      {
+        "step": 6,
+        "type": "observation",
+        "result": "ERP 系統回傳：成功建立 RMA 單號 #RMA-20260909-003，倉庫已預約新品出庫保留。"
+      },
+      {
+        "step": 7,
+        "type": "action",
+        "tool": "call_logistics_api",
+        "input": {
+          "service": "REVERSE_LOGISTICS",
+          "reference": "RMA-20260909-003",
+          "pickup_time": "明日上午 (2026-09-10 09:00~12:00)"
+        }
+      },
+      {
+        "step": 8,
+        "type": "final_output",
+        "content": "【客服回覆完成】\n『林小姐您好，非常抱歉造成您的不便！經系統查詢，您的愛車在 30 天尊榮保固期內，我們已為您啟動【免費整組變速器新品換新服務】。RMA 單號為 #RMA-20260909-003，黑貓宅急便將於明日上午前往您當初留存之地址收回檢測品，新良品將於驗退完成後隔日送達！』"
+      }
+    ]
+  }
+]

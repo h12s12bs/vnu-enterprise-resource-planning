@@ -1,0 +1,34 @@
+[
+  {
+    "tx_id": "TX-01",
+    "desc": "現金銷貨",
+    "entries": [
+      {
+        "account": "1101 銀行存款",
+        "debit": 150000,
+        "credit": 0
+      },
+      {
+        "account": "4111 銷貨收入",
+        "debit": 0,
+        "credit": 150000
+      }
+    ]
+  },
+  {
+    "tx_id": "TX-02",
+    "desc": "賒購原物料",
+    "entries": [
+      {
+        "account": "1210 原物料存貨",
+        "debit": 80000,
+        "credit": 0
+      },
+      {
+        "account": "2141 應付帳款",
+        "debit": 0,
+        "credit": 80000
+      }
+    ]
+  }
+]

@@ -1,0 +1,63 @@
+{
+  "BIKE-EXPERT": {
+    "name": "高階碳纖登山車",
+    "components": [
+      {
+        "sku": "FRAME-CARBON",
+        "qty_per": 1,
+        "scrap_rate": 0.02
+      },
+      {
+        "sku": "WHEEL-SET",
+        "qty_per": 2,
+        "scrap_rate": 0.05
+      }
+    ]
+  },
+  "FRAME-CARBON": {
+    "name": "碳纖車架主體",
+    "components": [
+      {
+        "sku": "RAW-CARBON-FIBER",
+        "qty_per": 3.5,
+        "scrap_rate": 0.1
+      },
+      {
+        "sku": "EPOXY-RESIN",
+        "qty_per": 1.2,
+        "scrap_rate": 0.05
+      }
+    ]
+  },
+  "WHEEL-SET": {
+    "name": "26吋輪圈組",
+    "components": [
+      {
+        "sku": "RIM-ALU",
+        "qty_per": 1,
+        "scrap_rate": 0.01
+      },
+      {
+        "sku": "SPOKE-STEEL",
+        "qty_per": 32,
+        "scrap_rate": 0.03
+      }
+    ]
+  },
+  "RAW-CARBON-FIBER": {
+    "name": "高模數碳紗",
+    "cost": 1200
+  },
+  "EPOXY-RESIN": {
+    "name": "航太級環氧樹脂",
+    "cost": 350
+  },
+  "RIM-ALU": {
+    "name": "陽極雙層鋁輪圈",
+    "cost": 850
+  },
+  "SPOKE-STEEL": {
+    "name": "不銹鋼高拉力輻條",
+    "cost": 15
+  }
+}

@@ -1,0 +1,269 @@
+[
+  {
+    "week": 1,
+    "title": "課程導論、ERP 概念演進與企業數位轉型",
+    "chapter": "CH01 資訊技術與競爭優勢 / AI CH13",
+    "hours": 2,
+    "objective": "理解 ERP 歷史演進（MRP ➔ MRPII ➔ ERP ➔ AI-ERP）與消除企業資訊孤島的核心價值",
+    "concept_card": {
+      "hook": "企業若無整合系統，業務接單後不知庫存、採購不知生產排程，造成『資訊孤島』與嚴重交期延誤。",
+      "evolution": [
+        {"stage": "1960s 材料需求規劃 (MRP)", "focus": "解決生產所需零組件與原物料『何時需要？需要多少？』的庫存問題"},
+        {"stage": "1980s 製造資源規劃 (MRPII)", "focus": "將物料需求擴展至產能規劃、機台工時與財務成本控制"},
+        {"stage": "1990s 企業資源規劃 (ERP)", "focus": "跨越生產範疇，橫向打通銷售、採購、庫存、財務、人資端到端流程"},
+        {"stage": "2020s AI 賦能 ERP (Agentic ERP)", "focus": "從流程數位化躍升為自主智慧化，AI Agent 自主感知、調用工具與人機協同"}
+      ],
+      "ai_upgrade": "傳統 ERP 需要大量人工鍵入單據；現代 Agentic AI 可自動讀取非結構化訂單並調用 ERP API 自主建單。"
+    },
+    "cerps_focus": "ERP 演進四階段、ERP 核心效益、企業資訊孤島定義、Gartner 與 APICS 定義",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 2,
+    "title": "企業模式與企業流程管理 (BPR)",
+    "chapter": "CH02 企業資源規劃概說",
+    "hours": 2,
+    "objective": "掌握職能導向與流程導向之差異，體會企業流程再造 (BPR) 原則與三大商業循環",
+    "concept_card": {
+      "hook": "傳統企業以部門為中心（穀倉效應），各自為政；BPR 強調以『顧客價值』為起點重構端到端流程。",
+      "core_cycles": [
+        {"name": "銷售循環 (Order-to-Cash, O2C)", "flow": "報價 ➔ 訂單 ➔ 庫存檢查 ➔ 揀貨出庫 ➔ 開立發票 ➔ 應收收款"},
+        {"name": "採購循環 (Procure-to-Pay, P2P)", "flow": "請購 ➔ 詢比議價 ➔ 採購訂單 ➔ 收料檢驗 ➔ 發票比對 ➔ 應付付款"},
+        {"name": "生產循環 (Plan-to-Produce, P2P)", "flow": "主排程 (MPS) ➔ MRP 展開 ➔ 製令工單 ➔ 領料生產 ➔ 完工入庫"}
+      ],
+      "ai_upgrade": "傳統 BPR 藉由流程圖優化減少人工關卡；Agentic AI 則將跨部門的例行核對指派給 AI Agent 自主協同。"
+    },
+    "cerps_focus": "BPR 核心定義、核心流程 O2C/P2P、組織穀倉打破、水平整合思維",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 3,
+    "title": "銷售與配銷模組 (SD) - 訂單管理與客戶主檔",
+    "chapter": "CH07 銷售與收帳管理 (Part 1)",
+    "hours": 2,
+    "objective": "掌握客戶主檔、報價轉訂單機制，深入實作 ATP (Available-to-Promise) 可承諾量計算",
+    "concept_card": {
+      "hook": "客戶詢問『我下週要 100 件，能準時交貨嗎？』業務不能憑感覺答應，必須靠系統 ATP 精確計算！",
+      "atp_logic": "ATP ＝ 現有庫存 ＋ 預計到貨量 － 已承諾現有訂單 － 安全存量。唯有 ATP > 0 方能向客戶承諾交期。",
+      "ai_upgrade": "Sales Agent 在接單當下即時調用 ERP ATP API，若不足則自動向排產 Agent 詢問最快可能插單交期。"
+    },
+    "cerps_focus": "報價單轉訂單流程、ATP 檢核機制、客戶主檔欄位（信用額度、送貨條件、定價群組）",
+    "simulator": "atp_simulator",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 4,
+    "title": "銷售與配銷模組 (SD) - 出貨、開立發票與應收",
+    "chapter": "CH07 銷售與收帳管理 (Part 2)",
+    "hours": 2,
+    "objective": "理解撿貨出庫過帳對庫存與會計科目的即時影響，掌握 Order-to-Cash 單據勾稽",
+    "concept_card": {
+      "hook": "倉庫出貨刷條碼的瞬間，ERP 後台立即自動產生借貸會計傳票，落實資訊一次登錄、全面同步！",
+      "accounting_effect": "出貨發料：【借：銷貨成本 ｜ 貸：存貨】；開立發票：【借：應收帳款 ｜ 貸：銷貨收入】",
+      "ai_upgrade": "AI 配送 Agent 最佳化倉庫揀貨路徑與物流裝箱，並在出貨完成後自動將發票 PDF 與物流追蹤號發給客戶。"
+    },
+    "cerps_focus": "出貨發料之會計分錄影響、應收帳款 (AR) 沖銷、交貨文件與發票勾稽",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 5,
+    "title": "採購與庫存管理 (MM) - 採購流程與供應商管理",
+    "chapter": "CH09 採購與付款管理 (Part 1) / CH06 存貨",
+    "hours": 2,
+    "objective": "理解請購單 (PR) 與採購單 (PO) 之區隔、供應商主檔與詢比議價管理",
+    "concept_card": {
+      "hook": "工廠生產線缺料，為何現場領班不能直接打電話給廠商叫貨？請購與採購的分權是內部控制的底線！",
+      "procurement_flow": "各部門開立請購單 (PR) ➔ 採購部門依額度進行供應商詢比議價 ➔ 主管簽核 ➔ 正式採購單 (PO) 發給廠商",
+      "ai_upgrade": "智慧採購 Agent 能根據合約價格與廠商歷史達交率自動推薦最優供應商，並自動起草詢價 Email。"
+    },
+    "cerps_focus": "請購與採購之本質差異、核准簽核階層、供應商評估準則、採購前置時間 (Lead Time)",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 6,
+    "title": "採購與庫存管理 (MM) - 收料檢驗與三向比對",
+    "chapter": "CH09 採購與付款管理 (Part 2)",
+    "hours": 2,
+    "objective": "掌握收料驗收入庫 (GR) 與發票驗證的三向比對 (Three-Way Matching) 稽核防呆",
+    "concept_card": {
+      "hook": "廠商請款 10 萬元，會計敢不敢直接開支票？必須核對當初採購單與倉庫驗收單，杜絕浮報與幽靈採購！",
+      "matching_triangle": "PO (當初約定品項、數量、單價) ✕ GR (倉庫實際驗收良品數量) ✕ Invoice (廠商請款金額與稅額)",
+      "ai_upgrade": "財務 AP Agent 自動 OCR 辨識發票，1 秒完成三向比對；若價差超過 2% 自動攔截並通知主管審批。"
+    },
+    "cerps_focus": "三向比對 (Three-Way Matching) 原則、驗收入庫會計分錄、採購容差率 (Tolerance) 設定",
+    "simulator": "three_way_matching",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 7,
+    "title": "生產規劃與控制 (PP) - 主生產排程與 BOM 表",
+    "chapter": "CH08 生產規劃 (Part 1) / CH10",
+    "hours": 2,
+    "objective": "掌握三大生產型態 (MTS, MTO, ATO) 與多階層物料清單 (BOM) 的架構與展開",
+    "concept_card": {
+      "hook": "做一台自行車需要 1 個車架、2 個輪組，1 個輪組又需要輪圈與 36 根輻條。BOM 就是產品的『基因圖譜』！",
+      "production_types": [
+        {"type": "MTS (存貨生產)", "desc": "預測需求預先生產，如飲料、衛生紙，交期最短但承擔庫存風險"},
+        {"type": "MTO (訂單生產)", "desc": "收到客戶明確訂單才投產，如訂製模具、重型機械，零庫存但交期長"},
+        {"type": "ATO (組裝生產)", "desc": "事先備妥模組零組件，收到訂單快速組裝，如戴爾電腦客製規格"}
+      ],
+      "ai_upgrade": "AI 設計 Agent 能從 CAD 圖紙自動萃取產生工程 BOM (EBOM)，並自動轉譯為生產製造 BOM (MBOM)。"
+    },
+    "cerps_focus": "BOM 表單階與多階展開、MTS/MTO/ATO 適用情境、製程路線 (Routing) 與工時",
+    "simulator": "bom_simulator",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 8,
+    "title": "生產規劃與控制 (PP) - 物料需求規劃 (MRP)",
+    "chapter": "CH08 生產規劃 (Part 2)",
+    "hours": 2,
+    "objective": "熟練九宮格 MRP 淨需求推導公式與批量法則 (Lot Sizing: L4L, FOQ)",
+    "concept_card": {
+      "hook": "物料太早買會積壓資金，太晚買會讓工廠停工待料！MRP 的終極使命就是在『對的時間』準備好『對的數量』！",
+      "formula": "淨需求 ＝ 毛需求 － 現有庫存 － 預計在途到貨 ＋ 安全庫存。再依據前置時間 (Lead Time) 往前推算發出日！",
+      "ai_upgrade": "MRP Agent 結合天氣、港口塞港即時數據，動態預測前置時間變動，自主提前調整安全庫存與補貨下單。"
+    },
+    "cerps_focus": "MRP 三大輸入主檔 (MPS, BOM, 庫存檔)、淨需求計算公式、L4L 與固定批量法則",
+    "simulator": "mrp_simulator",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 9,
+    "title": "期中學習評量與證照模擬檢定 (Part I)",
+    "chapter": "CH01~CH07 核心考點全真模擬",
+    "hours": 2,
+    "objective": "進行前半學期 50 題全真計時檢定測驗，檢驗 O2C、P2P、BOM、MRP 與 BPR 觀念掌握度",
+    "concept_card": {
+      "hook": "期中全真模擬測驗檢視學習成效，提供落點診斷分析，鎖定前半學期盲點即時補強！",
+      "exam_tips": "特別注意名詞英文縮寫 (O2C, P2P, ATP, BOM, MPS, MRP, GR, PO) 與各模組資料流向勾稽！"
+    },
+    "cerps_focus": "CH01~CH07 歷屆精選 50 題實戰測驗，及格門檻 70 分",
+    "exam_mode": "midterm_50"
+  },
+  {
+    "week": 10,
+    "title": "會計與財務管理模組 (FI/CO)",
+    "chapter": "CH12 財務會計 / CH13 管理會計",
+    "hours": 2,
+    "objective": "釐清 FI (對外報表、借貸平衡) 與 CO (對內成本分攤、利潤中心) 差異與自動拋轉機制",
+    "concept_card": {
+      "hook": "業務出了一批貨、倉庫收了一批料，會計不用手動貼憑證，ERP 已經自動完成借貸分錄過帳！",
+      "fi_vs_co": "FI 依循會計準則產出三大財務報表供外部查閱；CO 則按部門/產品拆解責任中心成本以利決策。",
+      "ai_upgrade": "財務分析 Agent 每日自動生成損益波動摘要，自動標註異常費用支出並預警現金流風險。"
+    },
+    "cerps_focus": "FI 與 CO 核心差異、借貸自動拋轉原理、成本中心與利潤中心劃分",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 11,
+    "title": "人力資源管理模組 (HR)",
+    "chapter": "CH11 人力資源管理",
+    "hours": 2,
+    "objective": "掌握組織架構主檔、差勤打卡、薪資結構結算及與財務總帳科目的勾稽整合",
+    "concept_card": {
+      "hook": "薪資不只是人資的事！加班費計算連動考勤打卡，薪資結轉後立即在會計模組產生應付薪資與費用扣繳傳票。",
+      "hr_flow": "人事資料建立 ➔ 班表與差勤刷卡 ➔ 津貼與勞健保扣繳 ➔ 薪資批次結算 ➔ 拋轉總帳會計分錄",
+      "ai_upgrade": "HR Agent 自動彙總考勤異常、智慧回覆員工福利規章問答，並預警異常加班工時以符合勞基法。"
+    },
+    "cerps_focus": "HR 組織樹狀架構、薪資結算拋轉借貸分錄、考勤與休假勾稽",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 12,
+    "title": "供應鏈管理 (SCM) 與跨企業協同運作",
+    "chapter": "CH06 存貨進階 / SCM 供應鏈",
+    "hours": 2,
+    "objective": "深入體驗長鞭效應 (Bullwhip Effect) 成因，掌握 VMI (供應商管理庫存) 協同運作機制",
+    "concept_card": {
+      "hook": "消費者只多買了 1 包洋芋片，上游原料商卻決定多種 10 畝馬鈴薯！這就是供應鏈著名的長鞭效應震撼！",
+      "bullwhip_causes": "需求預測失真、批量採購、價格促銷波動、訂單配額短缺博弈。唯有資訊共享方能撫平波浪！",
+      "ai_upgrade": "Supply Chain Agent 群跨企業即時共享 POS 端銷售訊號，利用 VMI 自主計算最優配送量。"
+    },
+    "cerps_focus": "長鞭效應四大成因、VMI 運作模式、供應鏈能見度 (Visibility) 與及時制 (JIT)",
+    "simulator": "bullwhip_simulator",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 13,
+    "title": "客戶關係管理 (CRM) 與全通路行銷",
+    "chapter": "CRM 顧客管理 / AI CH13",
+    "hours": 2,
+    "objective": "掌握 CRM 三大構面 (分析型、操作型、協同型) 與顧客終身價值 (CLV)，體會 AI 客服 Agent",
+    "concept_card": {
+      "hook": "開發一個新客戶的成本是留住老客戶的 5 倍！CRM 幫助企業把顧客當成一輩子的資產來經營。",
+      "crm_types": "操作型 (前線業務客服行銷自動化)、分析型 (顧客購買行為與分群)、協同型 (跨通路多管道溝通)。",
+      "ai_upgrade": "CRM Agent 運用 RAG 檢索企業退換貨條款，即時解答客戶疑難，並預警潛在流失客戶進行專屬優惠挽回。"
+    },
+    "cerps_focus": "CRM 三大構面、顧客終身價值 (CLV) 計算、銷售漏斗 (Pipeline) 管理",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 14,
+    "title": "商業智慧 (BI) 與企業營運大數據分析",
+    "chapter": "CH15 未來展望 / BI 商業智慧",
+    "hours": 2,
+    "objective": "理解資料倉儲 (Data Warehouse)、ETL 資料清洗及 OLAP 多維度分析切片切塊",
+    "concept_card": {
+      "hook": "ERP 每天產生上百萬筆交易明細，高階主管看不了明細！BI 負責將巨量雜訊提煉為決策儀表板！",
+      "olap_operations": "切片 (Slice)、切塊 (Dice)、向下鑽取 (Drill-Down)、向上彙總 (Roll-Up)、樞紐旋轉 (Pivot)。",
+      "ai_upgrade": "AI-driven BI 讓主管直接以自然語言詢問：『上月哪款產品毛利下滑最嚴重？』AI 立即生成視覺化圖表與歸因分析。"
+    },
+    "cerps_focus": "資料倉儲 vs 資料庫差異、ETL 流程 (Extract-Transform-Load)、OLAP 核心操作",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 15,
+    "title": "ERP 系統導入方法論與系統評選",
+    "chapter": "CH03 導入程序 / CH04 評選 / CH05 建置 / CH14 變革管理",
+    "hours": 2,
+    "objective": "掌握系統導入五大生命週期、關鍵成功因素 (CSF) 與組織變革管理 (Change Management)",
+    "concept_card": {
+      "hook": "三分技術，七分管理，十二分資料！許多企業導入 ERP 失敗不是因為軟體爛，而是員工抗拒改變！",
+      "csf_factors": "高階主管支持 (首要因素)、專案團隊跨部門能力、適度變革管理教育訓練、主檔資料純淨度。",
+      "ai_upgrade": "導入顧問 Agent 自動比對企業現有流程與 ERP 標準流程最佳實踐 (Best Practices)，自動產出 GAP 分析報告。"
+    },
+    "cerps_focus": "ERP 導入生命週期五階段、CSF 關鍵成功因素、標準化 vs 客製化權衡、大爆炸 vs 階段切換",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 16,
+    "title": "AI 時代的 ERP：AI Agent 與流程自動化實務",
+    "chapter": "AI 賦能 ERP CH13 / Agentic AI 前瞻教材",
+    "hours": 2,
+    "objective": "深入掌握 Agentic AI 架構、ReAct 推理框架、工具呼叫 (Tool Calling) 與人機協同 (Human-in-the-Loop) 規劃",
+    "concept_card": {
+      "hook": "未來的 ERP 不再是人類打字的軟體，而是由 AI Agents 自主監控、互相對話、調用 API 協同運作的數位大腦！",
+      "agentic_workflow": "感知輸入 ➔ 目標拆解與思考 (Thought) ➔ 呼叫 ERP 工具 (Action) ➔ 觀察反饋 (Observation) ➔ 門檻防呆與人工審批 ➔ 自動拋轉過帳",
+      "ai_upgrade": "學生在本週親手規劃專屬的企業 Agentic AI 流程，並完成期末 10% 專題提案企劃書！"
+    },
+    "cerps_focus": "AI ERP 四層架構、Agentic AI vs RPA 核心區隔、ReAct 框架原理、人機協同安全閾值",
+    "simulator": "agentic_studio",
+    "suggested_quiz_count": 5
+  },
+  {
+    "week": 17,
+    "title": "ERP 專業考前總衝刺與全真模擬測驗",
+    "chapter": "全冊 15 章 + AI 賦能 ERP 題庫總複習",
+    "hours": 2,
+    "objective": "實施 100 題全真計時模擬考試，掌握考題慣性、盲點破解與易錯題目全解析",
+    "concept_card": {
+      "hook": "考前全真模擬考！考題隨機抽取自 200+ 完整題庫，完整模擬官方檢定考試環境，70 分合格領取模擬合格證書！",
+      "exam_tips": "注意銷配 O2C 單據順序、採購三向比對勾稽、MRP 淨需求運算、會計科目借貸自動拋轉方向！"
+    },
+    "cerps_focus": "全冊 100 題綜合考照衝刺，倒數計時與及格合格判定",
+    "exam_mode": "final_100"
+  },
+  {
+    "week": 18,
+    "title": "期末成果驗收 ／ 企業資源規劃專業證照檢定",
+    "chapter": "成果總結與校園證照檢定",
+    "hours": 2,
+    "objective": "學期成果驗收、評選優秀 AI 賦能 ERP 專案提案，鼓勵報考專業證照檢定",
+    "concept_card": {
+      "hook": "恭喜完成 18 週學習！兼具『企業流程實務整合力』、『ERP 專業證照』與『前瞻 Agentic AI 規劃力』，成為智慧企業搶手人才！",
+      "career_path": "ERP 導入顧問、企業流程分析師 (BPA)、供應鏈規劃師、智慧企業 AI Agent 架構師。"
+    },
+    "cerps_focus": "考取 AI 賦能 ERP 或相關專業證照，銜接職場競爭力"
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "customer_id": "VIP-01",
+    "name": "台北極限單車行",
+    "recency_days": 12,
+    "frequency_count": 18,
+    "monetary_amount": 250000
+  },
+  {
+    "customer_id": "POT-02",
+    "name": "台中捷輪單車精品",
+    "recency_days": 45,
+    "frequency_count": 8,
+    "monetary_amount": 88000
+  },
+  {
+    "customer_id": "RISK-03",
+    "name": "高雄休閒單車俱樂部",
+    "recency_days": 120,
+    "frequency_count": 12,
+    "monetary_amount": 180000
+  },
+  {
+    "customer_id": "NORM-04",
+    "name": "花蓮漫遊租車行",
+    "recency_days": 150,
+    "frequency_count": 2,
+    "monetary_amount": 15000
+  }
+]

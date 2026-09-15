@@ -1,0 +1,23 @@
+[
+  {
+    "id": "EMP01",
+    "name": "陳建宏",
+    "base_salary": 45000,
+    "overtime_hours": 12,
+    "late_minutes": 0
+  },
+  {
+    "id": "EMP02",
+    "name": "林雅筑",
+    "base_salary": 52000,
+    "overtime_hours": 4,
+    "late_minutes": 30
+  },
+  {
+    "id": "EMP03",
+    "name": "張志強",
+    "base_salary": 38000,
+    "overtime_hours": 0,
+    "late_minutes": 60
+  }
+]

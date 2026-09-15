@@ -1,0 +1,20 @@
+{
+  "order_id": "DN-2026-088",
+  "customer": "捷安特旗艦經銷",
+  "items": [
+    {
+      "sku": "BIKE-001",
+      "name": "碳纖維登山車",
+      "qty": 10,
+      "unit_price": 28000,
+      "unit_cost": 18500
+    },
+    {
+      "sku": "HELMET-05",
+      "name": "極輕流線安全帽",
+      "qty": 20,
+      "unit_price": 1800,
+      "unit_cost": 750
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "sku": "FRAME-CARBON",
+  "initial_stock": 25,
+  "lead_time_periods": 2,
+  "lot_size": 50,
+  "periods": [
+    {
+      "gross_requirements": 30,
+      "scheduled_receipts": 0
+    },
+    {
+      "gross_requirements": 40,
+      "scheduled_receipts": 50
+    },
+    {
+      "gross_requirements": 60,
+      "scheduled_receipts": 0
+    },
+    {
+      "gross_requirements": 20,
+      "scheduled_receipts": 0
+    }
+  ]
+}

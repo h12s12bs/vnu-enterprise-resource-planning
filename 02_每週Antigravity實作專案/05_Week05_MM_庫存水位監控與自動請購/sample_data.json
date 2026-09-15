@@ -1,0 +1,29 @@
+[
+  {
+    "sku": "TIRE-01",
+    "name": "26吋外胎",
+    "current_stock": 45,
+    "daily_usage": 10,
+    "lead_time_days": 5,
+    "safety_stock": 20,
+    "economic_order_qty": 100
+  },
+  {
+    "sku": "BRAKE-02",
+    "name": "油壓碟煞組",
+    "current_stock": 80,
+    "daily_usage": 8,
+    "lead_time_days": 4,
+    "safety_stock": 15,
+    "economic_order_qty": 50
+  },
+  {
+    "sku": "CHAIN-09",
+    "name": "11速高耐磨鏈條",
+    "current_stock": 15,
+    "daily_usage": 5,
+    "lead_time_days": 7,
+    "safety_stock": 10,
+    "economic_order_qty": 60
+  }
+]

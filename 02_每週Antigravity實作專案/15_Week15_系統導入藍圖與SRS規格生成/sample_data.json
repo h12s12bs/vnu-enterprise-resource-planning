@@ -1,0 +1,22 @@
+{
+  "departments": [
+    {
+      "name": "業務部",
+      "as_is_pain": "手動以 LINE/Email 接單，庫存不準經常發生超賣客訴",
+      "to_be_solution": "導入 SD ATP 可承諾量即時試算，並串接 AI 訂單解析",
+      "erp_module": "SD 銷售配銷"
+    },
+    {
+      "name": "採購部",
+      "as_is_pain": "發票常與收料單數量不符，財務人工核對費時且常發生溢付款",
+      "to_be_solution": "啟用 MM 三向比對稽核引擎，自動勾稽 PO ✕ GR ✕ Invoice",
+      "erp_module": "MM 採購庫存"
+    },
+    {
+      "name": "生管部",
+      "as_is_pain": "手動 Excel 算料耗時兩天，經常算錯造成現場停工待料",
+      "to_be_solution": "導入 PP 多階 BOM 展開與九宮格 MRP 自動排程",
+      "erp_module": "PP 生產規劃"
+    }
+  ]
+}
