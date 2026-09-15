@@ -153,21 +153,29 @@ body {
 
 /* ==================== Fullscreen Slide Presentation Player ==================== */
 #slide-deck-modal {
-  backdrop-filter: blur(12px);
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #020617; /* slate-950 */
 }
 
 #slide-stage {
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.15);
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  box-sizing: border-box;
 }
 
 .slide-anim {
-  animation: slideFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.985) translateY(4px);
+    transform: scale(0.992) translateY(3px);
   }
   to {
     opacity: 1;
@@ -177,33 +185,33 @@ body {
 
 /* Big readable typography for presentations (>= 28pt on standard displays) */
 .slide-title-large {
-  font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+  font-size: clamp(2rem, 3.2vw, 3.4rem);
   line-height: 1.25;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .slide-bullet-text {
-  font-size: clamp(1.15rem, 1.85vw, 1.65rem); /* Equivalent to 26pt~32pt in presentations */
+  font-size: clamp(1.35rem, 2.1vw, 2.15rem); /* Equivalent to 28pt~34pt in presentations */
   line-height: 1.55;
   font-weight: 500;
 }
 
 .slide-cover-title {
-  font-size: clamp(2rem, 3.8vw, 3.4rem);
-  line-height: 1.2;
+  font-size: clamp(2.4rem, 4.4vw, 4.6rem);
+  line-height: 1.18;
   font-weight: 900;
   letter-spacing: -0.025em;
 }
 
 .slide-cover-subtitle {
-  font-size: clamp(1.2rem, 2vw, 1.85rem);
+  font-size: clamp(1.35rem, 2.3vw, 2.3rem);
   line-height: 1.4;
   font-weight: 600;
 }
 
 .slide-footer-text {
-  font-size: clamp(0.85rem, 1.15vw, 1.1rem);
+  font-size: clamp(1.05rem, 1.45vw, 1.45rem);
   line-height: 1.4;
 }
 
@@ -1874,89 +1882,93 @@ body {
   </div>
 
   <!-- ==================== FULLSCREEN SLIDE PRESENTATION PLAYER MODAL ==================== -->
-  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col select-none hidden">
-    <!-- Top Toolbar -->
-    <div class="h-14 bg-slate-900/90 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
+  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white w-screen h-screen overflow-hidden select-none hidden">
+    <!-- Top Floating Toolbar (Auto-hides on idle) -->
+    <div id="slide-deck-topbar" class="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-slate-950/95 via-slate-900/80 to-transparent backdrop-blur-sm px-4 sm:px-8 flex items-center justify-between z-30 transition-opacity duration-300">
       <!-- Left: Course Tag & Week Select -->
       <div class="flex items-center gap-3">
-        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded shadow">11501 ERP</span>
+        <span class="bg-blue-600 text-white text-xs font-black px-2.5 py-1 rounded shadow">11501 ERP</span>
         <span class="font-bold text-sm text-slate-200 hidden md:inline">邱俊維 博士 課堂簡報投影</span>
-        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer">
+        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer shadow">
           <!-- Filled by JS: Week 1 ~ 18 -->
         </select>
       </div>
 
       <!-- Center: Slide Progress Indicator -->
-      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300">
+      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300 bg-slate-900/80 px-4 py-1.5 rounded-full border border-slate-700/80 shadow">
         <span>第</span>
         <span id="slide-deck-current-num" class="text-amber-400 text-base font-black">1</span>
         <span>/</span>
-        <span id="slide-deck-total-num" class="text-slate-400">10</span>
+        <span id="slide-deck-total-num" class="text-slate-400">59</span>
         <span>頁</span>
       </div>
 
       <!-- Right: Action Buttons -->
       <div class="flex items-center gap-2">
-        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700" title="投影片目錄總覽">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700 shadow" title="投影片目錄總覽">
           <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">目錄</span>
         </button>
-        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換全螢幕 (快速鍵 F)">
-          <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">全螢幕 (F)</span>
+        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換真實全螢幕 (快速鍵 F)">
+          <i data-lucide="maximize" class="w-3.5 h-3.5" id="fs-icon"></i>
+          <span class="hidden sm:inline" id="fs-text">全螢幕 (F)</span>
         </button>
-        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700" title="下載本週 PPTX 檔案">
+        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700 shadow" title="下載本週 PPTX 檔案">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">PPTX</span>
         </a>
-        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/40 hover:bg-rose-800 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800" title="關閉播放 (Esc)">
+        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/50 hover:bg-rose-800 text-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800 shadow" title="關閉播放 (Esc)">
           <i data-lucide="x" class="w-4 h-4"></i>
           <span class="hidden sm:inline">關閉</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Slide Stage Area -->
-    <div class="flex-1 flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden relative">
+    <!-- Main Slide Stage Area (100% Full Viewport, Edge-to-Edge, Zero Black Borders) -->
+    <div id="slide-stage" class="w-full h-full min-h-screen flex flex-col justify-between overflow-hidden relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 sm:p-12 md:p-16 lg:p-20 pt-16 pb-16 sm:pt-20 sm:pb-20">
       <!-- Floating Navigation Arrows -->
-      <button type="button" onclick="prevSlide()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="上一頁 (←)">
+      <button type="button" onclick="prevSlide()" class="slide-nav-btn absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition-all shadow-2xl z-20" title="上一頁 (←)">
         <i data-lucide="chevron-left" class="w-7 h-7"></i>
       </button>
-      <button type="button" onclick="nextSlide()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
+      <button type="button" onclick="nextSlide()" class="slide-nav-btn absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition-all shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
         <i data-lucide="chevron-right" class="w-7 h-7"></i>
       </button>
 
-      <!-- 16:9 Presentation Canvas Container -->
-      <div id="slide-stage" class="w-full max-w-6xl aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl shadow-2xl border border-slate-700/80 p-6 sm:p-10 md:p-14 flex flex-col justify-between relative overflow-hidden">
-        <!-- Rendered dynamically by renderSlide() in app.js -->
-        <div id="slide-content-container" class="h-full flex flex-col justify-between">
-          <!-- Slide Header, Body & Footer dynamically injected -->
-        </div>
+      <!-- Rendered dynamically by renderSlide() in app.js -->
+      <div id="slide-content-container" class="w-full h-full flex flex-col justify-between max-w-[1750px] mx-auto">
+        <!-- Slide Header, Body & Footer dynamically injected -->
       </div>
     </div>
 
-    <!-- Bottom Control & Quick Progress Dots -->
-    <div class="h-12 bg-slate-900/90 border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-30 text-xs text-slate-400">
-      <div class="flex items-center gap-1" id="slide-dots-container">
+    <!-- Bottom Floating Control & Quick Progress Dots (Auto-hides on idle) -->
+    <div id="slide-deck-bottombar" class="absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-slate-950/95 via-slate-900/80 to-transparent backdrop-blur-sm px-6 sm:px-10 flex items-center justify-between z-30 transition-opacity duration-300 text-xs text-slate-400">
+      <div class="flex items-center gap-1.5 max-w-2xl overflow-x-auto no-scrollbar py-1" id="slide-dots-container">
         <!-- Progress dots generated by JS -->
       </div>
-      <div class="text-[11px] text-slate-400 hidden sm:block">
-        💡 鍵盤快速鍵：<kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">←</kbd> 上一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Space</kbd> 下一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">F</kbd> 全螢幕 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Esc</kbd> 關閉
+      <div class="text-xs text-slate-300 hidden sm:flex items-center gap-2">
+        <span class="text-amber-400 font-bold">💡 快捷操作：</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">←</kbd> 上一頁</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">Space</kbd> 下一頁</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">F</kbd> 全螢幕</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">Esc</kbd> 關閉</span>
       </div>
     </div>
 
     <!-- Slide Thumbnails Drawer (Overlay inside modal) -->
-    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-12 max-h-72 bg-slate-900/98 border-t border-slate-700 p-4 overflow-y-auto hidden z-40 shadow-2xl transition-all">
-      <div class="flex items-center justify-between mb-3">
+    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-14 max-h-80 bg-slate-900/98 border-t border-slate-700 p-4 sm:p-6 overflow-y-auto hidden z-40 shadow-2xl transition-all">
+      <div class="flex items-center justify-between mb-3 max-w-[1750px] mx-auto">
         <h4 class="font-bold text-sm text-slate-200 flex items-center gap-2">
           <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
           本週投影片目錄總覽（點擊快速跳轉）
         </h4>
-        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">
           ✕ 隱藏目錄
         </button>
       </div>
-      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-[1750px] mx-auto">
         <!-- Filled by JS -->
       </div>
     </div>
@@ -20350,6 +20362,13 @@ function openSlideDeck(weekNum = null, slideIdx = 0) {
 
   renderCurrentSlide();
   document.body.style.overflow = 'hidden';
+
+  // Request browser true fullscreen on user gesture if not already
+  if (!document.fullscreenElement && modal.requestFullscreen) {
+    modal.requestFullscreen().catch(() => {});
+  }
+
+  resetSlideIdleTimer();
 }
 
 function openCurrentWeekSlideDeck() {
@@ -20364,6 +20383,7 @@ function closeSlideDeck() {
     document.exitFullscreen().catch(() => {});
   }
   toggleSlideThumbnailsDrawer(false);
+  clearTimeout(slideIdleTimer);
 }
 
 function onSlideDeckWeekChange(val) {
@@ -20418,40 +20438,40 @@ function renderCurrentSlide() {
     `).join('');
   }
 
-  // Render slide content in #slide-content-container
+  // Render slide content in #slide-content-container (Edge-to-Edge Responsive Layout)
   const container = document.getElementById('slide-content-container');
   if (!container) return;
-  container.className = 'h-full flex flex-col justify-between slide-anim';
+  container.className = 'w-full h-full flex flex-col justify-between max-w-[1750px] mx-auto slide-anim';
 
   if (slide.type === 'cover') {
     container.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
-          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs font-bold px-3 py-1 rounded-full">進企四系4甲</span>
-          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs font-bold px-3 py-1 rounded-full">週四 16:20~17:50</span>
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 sm:pb-4">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span class="bg-blue-600 text-white text-xs sm:text-sm font-black px-3 py-1 sm:py-1.5 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
+          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs sm:text-sm font-bold px-3 py-1 sm:py-1.5 rounded-full">進企四系4甲</span>
+          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs sm:text-sm font-bold px-3 py-1 sm:py-1.5 rounded-full">週四 16:20~17:50</span>
         </div>
-        <span class="text-amber-400 text-xs font-bold font-mono">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
+        <span class="text-amber-400 text-xs sm:text-sm font-bold font-mono bg-slate-900/80 px-3 py-1 rounded border border-slate-700">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
       </div>
 
-      <div class="my-auto text-center space-y-5 px-4">
-        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-1">
+      <div class="my-auto text-center space-y-6 sm:space-y-8 px-4 max-w-6xl mx-auto">
+        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-sm sm:text-base font-bold px-5 py-2 rounded-full mb-1 shadow">
           企業資源規劃 (ERP) ✕ Agentic AI 前瞻應用
         </div>
         <h1 class="slide-cover-title text-white tracking-tight leading-tight">
           ${slide.title}
         </h1>
-        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-4xl mx-auto">
+        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-5xl mx-auto">
           ${slide.subtitle || weekObj.subtitle || ''}
         </p>
       </div>
 
-      <div class="border-t border-slate-700/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-slate-200 text-sm">授課教師：邱俊維 博士</span>
+      <div class="border-t border-slate-700/60 pt-3 sm:pt-4 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-300 gap-2">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-white text-base">授課教師：邱俊維 博士</span>
           <span>｜ 研究室：J801-1 ｜ 信箱：jimchiu@vnu.edu.tw</span>
         </div>
-        <div class="text-amber-400 font-bold">
+        <div class="text-amber-400 font-bold text-sm sm:text-base">
           ★ 考取 AI 賦能 ERP 或相關證照直接加分！
         </div>
       </div>
@@ -20459,8 +20479,8 @@ function renderCurrentSlide() {
   } else {
     // Standard Content Slide
     const bulletsHtml = (slide.bullets || []).map((b, idx) => `
-      <li class="flex items-start gap-3.5 group">
-        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600/30 text-amber-400 border border-blue-500/40 text-sm font-bold shrink-0 mt-0.5 shadow">
+      <li class="flex items-start gap-4 sm:gap-6 group">
+        <span class="inline-flex items-center justify-center w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-600/30 text-amber-400 border border-blue-500/40 text-base sm:text-xl font-black shrink-0 mt-0.5 shadow-md">
           ${idx + 1}
         </span>
         <span class="slide-bullet-text text-slate-100 font-normal leading-relaxed">
@@ -20470,36 +20490,36 @@ function renderCurrentSlide() {
     `).join('');
 
     container.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
-        <div class="flex items-center gap-2.5">
-          <span class="bg-amber-500 text-slate-950 font-black text-xs px-2.5 py-1 rounded shadow">
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 sm:pb-4">
+        <div class="flex items-center gap-3">
+          <span class="bg-amber-500 text-slate-950 font-black text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow">
             第 ${currentSlideWeek} 週
           </span>
-          <span class="bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-md shadow">
+          <span class="bg-blue-600 text-white font-bold text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow">
             ${slide.badge || '實務精講'}
           </span>
-          <span class="text-xs text-slate-400 hidden sm:inline">${weekObj.title}</span>
+          <span class="text-xs sm:text-sm text-slate-300 hidden md:inline font-semibold">${weekObj.title}</span>
         </div>
-        <div class="text-xs font-mono text-slate-400 font-bold">
+        <div class="text-xs sm:text-sm font-mono text-slate-300 font-bold bg-slate-900/80 px-3 py-1 rounded border border-slate-700">
           ${currentSlideIndex + 1} / ${total}
         </div>
       </div>
 
-      <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
+      <div class="my-auto py-4 sm:py-8 space-y-6 sm:space-y-8 w-full max-w-6xl mx-auto">
         <h2 class="slide-title-large text-amber-300 font-extrabold tracking-tight">
           ${slide.title}
         </h2>
-        <ul class="space-y-3 sm:space-y-4 max-w-5xl">
+        <ul class="space-y-4 sm:space-y-6 w-full">
           ${bulletsHtml}
         </ul>
       </div>
 
-      <div class="border-t border-slate-700/60 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div class="flex items-center gap-2 text-slate-300 slide-footer-text">
-          <span class="text-amber-400 font-bold">💡 重點摘要：</span>
-          <span>${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
+      <div class="border-t border-slate-700/60 pt-3 sm:pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 text-slate-200 slide-footer-text">
+          <span class="text-amber-400 font-bold shrink-0 text-base sm:text-lg">💡 重點摘要：</span>
+          <span class="font-medium">${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
         </div>
-        <div class="text-[11px] text-slate-400 shrink-0 font-medium">
+        <div class="text-xs sm:text-sm text-slate-400 shrink-0 font-medium">
           萬能科大企管系 ｜ 邱俊維 博士
         </div>
       </div>
@@ -20507,6 +20527,7 @@ function renderCurrentSlide() {
   }
 
   if (window.lucide) window.lucide.createIcons();
+  resetSlideIdleTimer();
 }
 
 function nextSlide() {
@@ -20546,8 +20567,7 @@ function goToSlide(idx) {
 }
 
 function toggleSlideFullscreen() {
-  const elem = document.getElementById('slide-deck-modal');
-  if (!elem) return;
+  const elem = document.getElementById('slide-deck-modal') || document.documentElement;
   if (!document.fullscreenElement) {
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch(err => {
@@ -20556,9 +20576,52 @@ function toggleSlideFullscreen() {
     }
   } else {
     if (document.exitFullscreen) {
-      document.exitFullscreen();
+      document.exitFullscreen().catch(() => {});
     }
   }
+}
+
+// Listen to fullscreen changes to update button icon and label
+document.addEventListener('fullscreenchange', () => {
+  const isFs = !!document.fullscreenElement;
+  const fsText = document.getElementById('fs-text');
+  const fsIcon = document.getElementById('fs-icon');
+  if (fsText) fsText.textContent = isFs ? '退出全螢幕 (F)' : '全螢幕 (F)';
+  if (fsIcon) {
+    fsIcon.setAttribute('data-lucide', isFs ? 'minimize' : 'maximize');
+  }
+  if (window.lucide) window.lucide.createIcons();
+  resetSlideIdleTimer();
+});
+
+// Auto-hide controls when idle in slide presentation mode
+let slideIdleTimer = null;
+function resetSlideIdleTimer() {
+  const topbar = document.getElementById('slide-deck-topbar');
+  const bottombar = document.getElementById('slide-deck-bottombar');
+  const navBtns = document.querySelectorAll('.slide-nav-btn');
+  if (topbar) topbar.classList.remove('opacity-0', 'pointer-events-none');
+  if (bottombar) bottombar.classList.remove('opacity-0', 'pointer-events-none');
+  navBtns.forEach(btn => btn.classList.remove('opacity-0', 'pointer-events-none'));
+
+  clearTimeout(slideIdleTimer);
+  slideIdleTimer = setTimeout(() => {
+    const modal = document.getElementById('slide-deck-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      const drawer = document.getElementById('slide-thumbnails-drawer');
+      if (!drawer || drawer.classList.contains('hidden')) {
+        if (topbar) topbar.classList.add('opacity-0', 'pointer-events-none');
+        if (bottombar) bottombar.classList.add('opacity-0', 'pointer-events-none');
+        navBtns.forEach(btn => btn.classList.add('opacity-0', 'pointer-events-none'));
+      }
+    }
+  }, 3500);
+}
+
+const slideModalElem = document.getElementById('slide-deck-modal');
+if (slideModalElem) {
+  slideModalElem.addEventListener('mousemove', resetSlideIdleTimer);
+  slideModalElem.addEventListener('touchstart', resetSlideIdleTimer);
 }
 
 function toggleSlideThumbnailsDrawer(forceState) {
@@ -20583,6 +20646,7 @@ function toggleSlideThumbnailsDrawer(forceState) {
       `).join('');
     }
     drawer.classList.remove('hidden');
+    resetSlideIdleTimer();
   } else {
     drawer.classList.add('hidden');
   }
@@ -20592,6 +20656,8 @@ function toggleSlideThumbnailsDrawer(forceState) {
 window.addEventListener('keydown', (e) => {
   const modal = document.getElementById('slide-deck-modal');
   if (!modal || modal.classList.contains('hidden')) return;
+
+  resetSlideIdleTimer();
 
   if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
     e.preventDefault();

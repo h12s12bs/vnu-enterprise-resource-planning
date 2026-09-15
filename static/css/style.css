@@ -139,21 +139,29 @@ body {
 
 /* ==================== Fullscreen Slide Presentation Player ==================== */
 #slide-deck-modal {
-  backdrop-filter: blur(12px);
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #020617; /* slate-950 */
 }
 
 #slide-stage {
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.15);
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  box-sizing: border-box;
 }
 
 .slide-anim {
-  animation: slideFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.985) translateY(4px);
+    transform: scale(0.992) translateY(3px);
   }
   to {
     opacity: 1;
@@ -163,33 +171,33 @@ body {
 
 /* Big readable typography for presentations (>= 28pt on standard displays) */
 .slide-title-large {
-  font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+  font-size: clamp(2rem, 3.2vw, 3.4rem);
   line-height: 1.25;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .slide-bullet-text {
-  font-size: clamp(1.15rem, 1.85vw, 1.65rem); /* Equivalent to 26pt~32pt in presentations */
+  font-size: clamp(1.35rem, 2.1vw, 2.15rem); /* Equivalent to 28pt~34pt in presentations */
   line-height: 1.55;
   font-weight: 500;
 }
 
 .slide-cover-title {
-  font-size: clamp(2rem, 3.8vw, 3.4rem);
-  line-height: 1.2;
+  font-size: clamp(2.4rem, 4.4vw, 4.6rem);
+  line-height: 1.18;
   font-weight: 900;
   letter-spacing: -0.025em;
 }
 
 .slide-cover-subtitle {
-  font-size: clamp(1.2rem, 2vw, 1.85rem);
+  font-size: clamp(1.35rem, 2.3vw, 2.3rem);
   line-height: 1.4;
   font-weight: 600;
 }
 
 .slide-footer-text {
-  font-size: clamp(0.85rem, 1.15vw, 1.1rem);
+  font-size: clamp(1.05rem, 1.45vw, 1.45rem);
   line-height: 1.4;
 }
 

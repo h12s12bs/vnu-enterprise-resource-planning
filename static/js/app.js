@@ -1588,6 +1588,13 @@ function openSlideDeck(weekNum = null, slideIdx = 0) {
 
   renderCurrentSlide();
   document.body.style.overflow = 'hidden';
+
+  // Request browser true fullscreen on user gesture if not already
+  if (!document.fullscreenElement && modal.requestFullscreen) {
+    modal.requestFullscreen().catch(() => {});
+  }
+
+  resetSlideIdleTimer();
 }
 
 function openCurrentWeekSlideDeck() {
@@ -1602,6 +1609,7 @@ function closeSlideDeck() {
     document.exitFullscreen().catch(() => {});
   }
   toggleSlideThumbnailsDrawer(false);
+  clearTimeout(slideIdleTimer);
 }
 
 function onSlideDeckWeekChange(val) {
@@ -1656,40 +1664,40 @@ function renderCurrentSlide() {
     `).join('');
   }
 
-  // Render slide content in #slide-content-container
+  // Render slide content in #slide-content-container (Edge-to-Edge Responsive Layout)
   const container = document.getElementById('slide-content-container');
   if (!container) return;
-  container.className = 'h-full flex flex-col justify-between slide-anim';
+  container.className = 'w-full h-full flex flex-col justify-between max-w-[1750px] mx-auto slide-anim';
 
   if (slide.type === 'cover') {
     container.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
-          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs font-bold px-3 py-1 rounded-full">進企四系4甲</span>
-          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs font-bold px-3 py-1 rounded-full">週四 16:20~17:50</span>
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 sm:pb-4">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span class="bg-blue-600 text-white text-xs sm:text-sm font-black px-3 py-1 sm:py-1.5 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
+          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs sm:text-sm font-bold px-3 py-1 sm:py-1.5 rounded-full">進企四系4甲</span>
+          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs sm:text-sm font-bold px-3 py-1 sm:py-1.5 rounded-full">週四 16:20~17:50</span>
         </div>
-        <span class="text-amber-400 text-xs font-bold font-mono">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
+        <span class="text-amber-400 text-xs sm:text-sm font-bold font-mono bg-slate-900/80 px-3 py-1 rounded border border-slate-700">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
       </div>
 
-      <div class="my-auto text-center space-y-5 px-4">
-        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-1">
+      <div class="my-auto text-center space-y-6 sm:space-y-8 px-4 max-w-6xl mx-auto">
+        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-sm sm:text-base font-bold px-5 py-2 rounded-full mb-1 shadow">
           企業資源規劃 (ERP) ✕ Agentic AI 前瞻應用
         </div>
         <h1 class="slide-cover-title text-white tracking-tight leading-tight">
           ${slide.title}
         </h1>
-        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-4xl mx-auto">
+        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-5xl mx-auto">
           ${slide.subtitle || weekObj.subtitle || ''}
         </p>
       </div>
 
-      <div class="border-t border-slate-700/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-slate-200 text-sm">授課教師：邱俊維 博士</span>
+      <div class="border-t border-slate-700/60 pt-3 sm:pt-4 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-300 gap-2">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-white text-base">授課教師：邱俊維 博士</span>
           <span>｜ 研究室：J801-1 ｜ 信箱：jimchiu@vnu.edu.tw</span>
         </div>
-        <div class="text-amber-400 font-bold">
+        <div class="text-amber-400 font-bold text-sm sm:text-base">
           ★ 考取 AI 賦能 ERP 或相關證照直接加分！
         </div>
       </div>
@@ -1697,8 +1705,8 @@ function renderCurrentSlide() {
   } else {
     // Standard Content Slide
     const bulletsHtml = (slide.bullets || []).map((b, idx) => `
-      <li class="flex items-start gap-3.5 group">
-        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600/30 text-amber-400 border border-blue-500/40 text-sm font-bold shrink-0 mt-0.5 shadow">
+      <li class="flex items-start gap-4 sm:gap-6 group">
+        <span class="inline-flex items-center justify-center w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-600/30 text-amber-400 border border-blue-500/40 text-base sm:text-xl font-black shrink-0 mt-0.5 shadow-md">
           ${idx + 1}
         </span>
         <span class="slide-bullet-text text-slate-100 font-normal leading-relaxed">
@@ -1708,36 +1716,36 @@ function renderCurrentSlide() {
     `).join('');
 
     container.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
-        <div class="flex items-center gap-2.5">
-          <span class="bg-amber-500 text-slate-950 font-black text-xs px-2.5 py-1 rounded shadow">
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 sm:pb-4">
+        <div class="flex items-center gap-3">
+          <span class="bg-amber-500 text-slate-950 font-black text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow">
             第 ${currentSlideWeek} 週
           </span>
-          <span class="bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-md shadow">
+          <span class="bg-blue-600 text-white font-bold text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow">
             ${slide.badge || '實務精講'}
           </span>
-          <span class="text-xs text-slate-400 hidden sm:inline">${weekObj.title}</span>
+          <span class="text-xs sm:text-sm text-slate-300 hidden md:inline font-semibold">${weekObj.title}</span>
         </div>
-        <div class="text-xs font-mono text-slate-400 font-bold">
+        <div class="text-xs sm:text-sm font-mono text-slate-300 font-bold bg-slate-900/80 px-3 py-1 rounded border border-slate-700">
           ${currentSlideIndex + 1} / ${total}
         </div>
       </div>
 
-      <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
+      <div class="my-auto py-4 sm:py-8 space-y-6 sm:space-y-8 w-full max-w-6xl mx-auto">
         <h2 class="slide-title-large text-amber-300 font-extrabold tracking-tight">
           ${slide.title}
         </h2>
-        <ul class="space-y-3 sm:space-y-4 max-w-5xl">
+        <ul class="space-y-4 sm:space-y-6 w-full">
           ${bulletsHtml}
         </ul>
       </div>
 
-      <div class="border-t border-slate-700/60 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div class="flex items-center gap-2 text-slate-300 slide-footer-text">
-          <span class="text-amber-400 font-bold">💡 重點摘要：</span>
-          <span>${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
+      <div class="border-t border-slate-700/60 pt-3 sm:pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 text-slate-200 slide-footer-text">
+          <span class="text-amber-400 font-bold shrink-0 text-base sm:text-lg">💡 重點摘要：</span>
+          <span class="font-medium">${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
         </div>
-        <div class="text-[11px] text-slate-400 shrink-0 font-medium">
+        <div class="text-xs sm:text-sm text-slate-400 shrink-0 font-medium">
           萬能科大企管系 ｜ 邱俊維 博士
         </div>
       </div>
@@ -1745,6 +1753,7 @@ function renderCurrentSlide() {
   }
 
   if (window.lucide) window.lucide.createIcons();
+  resetSlideIdleTimer();
 }
 
 function nextSlide() {
@@ -1784,8 +1793,7 @@ function goToSlide(idx) {
 }
 
 function toggleSlideFullscreen() {
-  const elem = document.getElementById('slide-deck-modal');
-  if (!elem) return;
+  const elem = document.getElementById('slide-deck-modal') || document.documentElement;
   if (!document.fullscreenElement) {
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch(err => {
@@ -1794,9 +1802,52 @@ function toggleSlideFullscreen() {
     }
   } else {
     if (document.exitFullscreen) {
-      document.exitFullscreen();
+      document.exitFullscreen().catch(() => {});
     }
   }
+}
+
+// Listen to fullscreen changes to update button icon and label
+document.addEventListener('fullscreenchange', () => {
+  const isFs = !!document.fullscreenElement;
+  const fsText = document.getElementById('fs-text');
+  const fsIcon = document.getElementById('fs-icon');
+  if (fsText) fsText.textContent = isFs ? '退出全螢幕 (F)' : '全螢幕 (F)';
+  if (fsIcon) {
+    fsIcon.setAttribute('data-lucide', isFs ? 'minimize' : 'maximize');
+  }
+  if (window.lucide) window.lucide.createIcons();
+  resetSlideIdleTimer();
+});
+
+// Auto-hide controls when idle in slide presentation mode
+let slideIdleTimer = null;
+function resetSlideIdleTimer() {
+  const topbar = document.getElementById('slide-deck-topbar');
+  const bottombar = document.getElementById('slide-deck-bottombar');
+  const navBtns = document.querySelectorAll('.slide-nav-btn');
+  if (topbar) topbar.classList.remove('opacity-0', 'pointer-events-none');
+  if (bottombar) bottombar.classList.remove('opacity-0', 'pointer-events-none');
+  navBtns.forEach(btn => btn.classList.remove('opacity-0', 'pointer-events-none'));
+
+  clearTimeout(slideIdleTimer);
+  slideIdleTimer = setTimeout(() => {
+    const modal = document.getElementById('slide-deck-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      const drawer = document.getElementById('slide-thumbnails-drawer');
+      if (!drawer || drawer.classList.contains('hidden')) {
+        if (topbar) topbar.classList.add('opacity-0', 'pointer-events-none');
+        if (bottombar) bottombar.classList.add('opacity-0', 'pointer-events-none');
+        navBtns.forEach(btn => btn.classList.add('opacity-0', 'pointer-events-none'));
+      }
+    }
+  }, 3500);
+}
+
+const slideModalElem = document.getElementById('slide-deck-modal');
+if (slideModalElem) {
+  slideModalElem.addEventListener('mousemove', resetSlideIdleTimer);
+  slideModalElem.addEventListener('touchstart', resetSlideIdleTimer);
 }
 
 function toggleSlideThumbnailsDrawer(forceState) {
@@ -1821,6 +1872,7 @@ function toggleSlideThumbnailsDrawer(forceState) {
       `).join('');
     }
     drawer.classList.remove('hidden');
+    resetSlideIdleTimer();
   } else {
     drawer.classList.add('hidden');
   }
@@ -1830,6 +1882,8 @@ function toggleSlideThumbnailsDrawer(forceState) {
 window.addEventListener('keydown', (e) => {
   const modal = document.getElementById('slide-deck-modal');
   if (!modal || modal.classList.contains('hidden')) return;
+
+  resetSlideIdleTimer();
 
   if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
     e.preventDefault();

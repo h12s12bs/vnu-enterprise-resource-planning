@@ -1662,89 +1662,93 @@
   </div>
 
   <!-- ==================== FULLSCREEN SLIDE PRESENTATION PLAYER MODAL ==================== -->
-  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col select-none hidden">
-    <!-- Top Toolbar -->
-    <div class="h-14 bg-slate-900/90 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
+  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white w-screen h-screen overflow-hidden select-none hidden">
+    <!-- Top Floating Toolbar (Auto-hides on idle) -->
+    <div id="slide-deck-topbar" class="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-slate-950/95 via-slate-900/80 to-transparent backdrop-blur-sm px-4 sm:px-8 flex items-center justify-between z-30 transition-opacity duration-300">
       <!-- Left: Course Tag & Week Select -->
       <div class="flex items-center gap-3">
-        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded shadow">11501 ERP</span>
+        <span class="bg-blue-600 text-white text-xs font-black px-2.5 py-1 rounded shadow">11501 ERP</span>
         <span class="font-bold text-sm text-slate-200 hidden md:inline">邱俊維 博士 課堂簡報投影</span>
-        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer">
+        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer shadow">
           <!-- Filled by JS: Week 1 ~ 18 -->
         </select>
       </div>
 
       <!-- Center: Slide Progress Indicator -->
-      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300">
+      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300 bg-slate-900/80 px-4 py-1.5 rounded-full border border-slate-700/80 shadow">
         <span>第</span>
         <span id="slide-deck-current-num" class="text-amber-400 text-base font-black">1</span>
         <span>/</span>
-        <span id="slide-deck-total-num" class="text-slate-400">10</span>
+        <span id="slide-deck-total-num" class="text-slate-400">59</span>
         <span>頁</span>
       </div>
 
       <!-- Right: Action Buttons -->
       <div class="flex items-center gap-2">
-        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700" title="投影片目錄總覽">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700 shadow" title="投影片目錄總覽">
           <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">目錄</span>
         </button>
-        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換全螢幕 (快速鍵 F)">
-          <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">全螢幕 (F)</span>
+        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換真實全螢幕 (快速鍵 F)">
+          <i data-lucide="maximize" class="w-3.5 h-3.5" id="fs-icon"></i>
+          <span class="hidden sm:inline" id="fs-text">全螢幕 (F)</span>
         </button>
-        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700" title="下載本週 PPTX 檔案">
+        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700 shadow" title="下載本週 PPTX 檔案">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">PPTX</span>
         </a>
-        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/40 hover:bg-rose-800 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800" title="關閉播放 (Esc)">
+        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/50 hover:bg-rose-800 text-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800 shadow" title="關閉播放 (Esc)">
           <i data-lucide="x" class="w-4 h-4"></i>
           <span class="hidden sm:inline">關閉</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Slide Stage Area -->
-    <div class="flex-1 flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden relative">
+    <!-- Main Slide Stage Area (100% Full Viewport, Edge-to-Edge, Zero Black Borders) -->
+    <div id="slide-stage" class="w-full h-full min-h-screen flex flex-col justify-between overflow-hidden relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 sm:p-12 md:p-16 lg:p-20 pt-16 pb-16 sm:pt-20 sm:pb-20">
       <!-- Floating Navigation Arrows -->
-      <button type="button" onclick="prevSlide()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="上一頁 (←)">
+      <button type="button" onclick="prevSlide()" class="slide-nav-btn absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition-all shadow-2xl z-20" title="上一頁 (←)">
         <i data-lucide="chevron-left" class="w-7 h-7"></i>
       </button>
-      <button type="button" onclick="nextSlide()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
+      <button type="button" onclick="nextSlide()" class="slide-nav-btn absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition-all shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
         <i data-lucide="chevron-right" class="w-7 h-7"></i>
       </button>
 
-      <!-- 16:9 Presentation Canvas Container -->
-      <div id="slide-stage" class="w-full max-w-6xl aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl shadow-2xl border border-slate-700/80 p-6 sm:p-10 md:p-14 flex flex-col justify-between relative overflow-hidden">
-        <!-- Rendered dynamically by renderSlide() in app.js -->
-        <div id="slide-content-container" class="h-full flex flex-col justify-between">
-          <!-- Slide Header, Body & Footer dynamically injected -->
-        </div>
+      <!-- Rendered dynamically by renderSlide() in app.js -->
+      <div id="slide-content-container" class="w-full h-full flex flex-col justify-between max-w-[1750px] mx-auto">
+        <!-- Slide Header, Body & Footer dynamically injected -->
       </div>
     </div>
 
-    <!-- Bottom Control & Quick Progress Dots -->
-    <div class="h-12 bg-slate-900/90 border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-30 text-xs text-slate-400">
-      <div class="flex items-center gap-1" id="slide-dots-container">
+    <!-- Bottom Floating Control & Quick Progress Dots (Auto-hides on idle) -->
+    <div id="slide-deck-bottombar" class="absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-slate-950/95 via-slate-900/80 to-transparent backdrop-blur-sm px-6 sm:px-10 flex items-center justify-between z-30 transition-opacity duration-300 text-xs text-slate-400">
+      <div class="flex items-center gap-1.5 max-w-2xl overflow-x-auto no-scrollbar py-1" id="slide-dots-container">
         <!-- Progress dots generated by JS -->
       </div>
-      <div class="text-[11px] text-slate-400 hidden sm:block">
-        💡 鍵盤快速鍵：<kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">←</kbd> 上一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Space</kbd> 下一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">F</kbd> 全螢幕 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Esc</kbd> 關閉
+      <div class="text-xs text-slate-300 hidden sm:flex items-center gap-2">
+        <span class="text-amber-400 font-bold">💡 快捷操作：</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">←</kbd> 上一頁</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">Space</kbd> 下一頁</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">F</kbd> 全螢幕</span>
+        <span>｜</span>
+        <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300 font-mono">Esc</kbd> 關閉</span>
       </div>
     </div>
 
     <!-- Slide Thumbnails Drawer (Overlay inside modal) -->
-    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-12 max-h-72 bg-slate-900/98 border-t border-slate-700 p-4 overflow-y-auto hidden z-40 shadow-2xl transition-all">
-      <div class="flex items-center justify-between mb-3">
+    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-14 max-h-80 bg-slate-900/98 border-t border-slate-700 p-4 sm:p-6 overflow-y-auto hidden z-40 shadow-2xl transition-all">
+      <div class="flex items-center justify-between mb-3 max-w-[1750px] mx-auto">
         <h4 class="font-bold text-sm text-slate-200 flex items-center gap-2">
           <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
           本週投影片目錄總覽（點擊快速跳轉）
         </h4>
-        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">
           ✕ 隱藏目錄
         </button>
       </div>
-      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-[1750px] mx-auto">
         <!-- Filled by JS -->
       </div>
     </div>
