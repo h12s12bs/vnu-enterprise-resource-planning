@@ -75,6 +75,10 @@
                 <i data-lucide="id-card" class="w-4 h-4 text-amber-500"></i>
                 <span>修改學號與姓名</span>
               </button>
+              <button type="button" id="teacher-grade-menu-item" onclick="switchTab('teacher'); toggleUserDropdown(false);" class="w-full text-left px-3 py-2 hover:bg-amber-50 text-amber-900 font-bold flex items-center space-x-2 hidden">
+                <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
+                <span>📊 教師專屬線上成績管理</span>
+              </button>
               <button type="button" id="teacher-export-menu-item" onclick="exportStudentRecordsToExcel(); toggleUserDropdown(false);" class="w-full text-left px-3 py-2 hover:bg-emerald-50 text-emerald-700 font-semibold flex items-center space-x-2 hidden">
                 <i data-lucide="sheet" class="w-4 h-4 text-emerald-600"></i>
                 <span>匯出全班學習記錄 (CSV/Excel)</span>
@@ -99,6 +103,11 @@
           <i data-lucide="presentation" class="w-4 h-4"></i>
           <span>🖥️ 全螢幕簡報播放</span>
         </button>
+        <button onclick="switchTab('submission')" id="nav-submission" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 flex items-center space-x-1.5 transition border border-emerald-200">
+          <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
+          <span>📤 學生報告繳交</span>
+          <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded-full font-bold">期中/期末</span>
+        </button>
         <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2">
           <i data-lucide="terminal" class="w-4 h-4 text-purple-600"></i>
           <span>💻 Antigravity 實戰專案包</span>
@@ -120,6 +129,11 @@
         <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="bookmark-check" class="w-4 h-4"></i>
           <span>學習成就與錯題</span>
+        </button>
+        <!-- Teacher Only Tab Button (Only revealed after teacher Google login) -->
+        <button onclick="switchTab('teacher')" id="nav-teacher" class="tab-btn px-3.5 sm:px-4 py-2 rounded-lg text-sm font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 hidden flex items-center space-x-1.5 transition shadow-sm border border-amber-300">
+          <i data-lucide="shield-check" class="w-4 h-4 text-slate-950"></i>
+          <span>📊 教師成績管理</span>
         </button>
       </nav>
     </div>
@@ -1227,7 +1241,333 @@
       </div>
     </section>
 
+    <!-- ==================== TAB: 學生期中期末報告線上繳交 ==================== -->
+    <section id="tab-submission" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <!-- Section Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="bg-emerald-600 text-white text-xs px-3 py-1 rounded-full font-bold">學期評分標準核心依據</span>
+              <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">期中40% ＋ 期末40%</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <i data-lucide="upload-cloud" class="w-6 h-6 text-emerald-600"></i>
+              學生期中／期末作業成果線上繳交專區
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+              依本課程評分標準，請同學登入 Google 帳號後選擇繳交「期中報告」或「期末報告」。繳交後成果即時存檔於 Firebase 雲端，老師將於線上親自審閱給分與提供回饋評語。
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openStudentModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-200 flex items-center gap-1.5">
+              <i data-lucide="id-card" class="w-4 h-4 text-amber-500"></i>
+              <span>核對學號姓名</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 左側：作業繳交表單 (占 7 欄) -->
+          <div class="lg:col-span-7">
+            <!-- 未登入提示區塊 -->
+            <div id="submission-login-prompt" class="p-8 text-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 space-y-4">
+              <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-2xl shadow-sm">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+              </div>
+              <div class="max-w-md mx-auto space-y-1">
+                <h3 class="font-bold text-base text-slate-900">請先登入 Google 帳號以開啟繳交表單</h3>
+                <p class="text-xs text-slate-500">
+                  為確保成績登錄正確，進企四系4甲同學請使用 Google 帳號登入並填妥「學號」與「姓名」，即可線上傳送期中與期末報告。
+                </p>
+              </div>
+              <button type="button" onclick="loginWithGoogle()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>立即使用 Google 登入</span>
+              </button>
+            </div>
+
+            <!-- 已登入繳交表單 -->
+            <div id="submission-form-box" class="hidden p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                  <i data-lucide="file-plus-2" class="w-5 h-5 text-emerald-600"></i>
+                  填寫報告資訊並送出
+                </h3>
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Firebase 雲端即時儲存
+                </span>
+              </div>
+
+              <form id="report-submit-form" onsubmit="handleStudentReportSubmit(event)" class="space-y-4 text-xs">
+                <!-- 繳交類別 -->
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">📌 繳交報告類別 *</label>
+                  <select id="report-type-select" class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-sm text-emerald-800 bg-white focus:outline-none focus:border-emerald-500" required>
+                    <option value="期中報告">📌 期中報告 (佔比 40%)：企業核心流程分析與 ERP 導入規劃</option>
+                    <option value="期末報告">🏆 期末報告 (佔比 40%)：企業 ERP ✕ Agentic AI 智慧流程整合專案成果</option>
+                  </select>
+                </div>
+
+                <!-- 報告主題 -->
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">專案主題 / 報告標題 *</label>
+                  <input type="text" id="report-title-input" placeholder="例：自行車業 O2C 訂單到收款流程優化與 ATP 試算報告" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500" required>
+                </div>
+
+                <!-- 內容摘要與流程架構說明 -->
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">核心內容摘要與成果說明 (200~500字) *</label>
+                  <textarea id="report-summary-input" rows="4" placeholder="簡要說明：&#10;1. 探討之企業營運痛點 (AS-IS)&#10;2. ERP 模組與資料流程設計 (TO-BE)&#10;3. 所運用之 Agentic AI 或 Python 工具成果&#10;4. 預期效益與實作心得..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500 leading-relaxed" required></textarea>
+                </div>
+
+                <!-- 雙軌上傳方式：線上連結與附件上傳 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-slate-200">
+                  <div>
+                    <label class="block font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                      <i data-lucide="link" class="w-4 h-4 text-blue-600"></i> 線上成果網址 (選填)
+                    </label>
+                    <input type="url" id="report-url-input" placeholder="https://drive.google.com/... 或 GitHub 網址" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:border-blue-500">
+                    <p class="text-[11px] text-slate-400 mt-1">可提供 Google 雲端硬碟共用、GitHub Pages 等公開連結</p>
+                  </div>
+                  <div>
+                    <label class="block font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                      <i data-lucide="paperclip" class="w-4 h-4 text-purple-600"></i> 附件檔案上傳 (選填)
+                    </label>
+                    <input type="file" id="report-file-input" accept=".pdf,.docx,.doc,.pptx,.ppt,.zip,.rar,.md" class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer">
+                    <p class="text-[11px] text-slate-400 mt-1">支援 PDF / Word / PPTX / ZIP / Markdown (限 10MB 內)</p>
+                  </div>
+                </div>
+
+                <!-- 證照加分申請勾選 -->
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2.5">
+                  <input type="checkbox" id="report-cert-checkbox" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+                  <label for="report-cert-checkbox" class="cursor-pointer text-xs text-amber-900 leading-relaxed">
+                    <strong>🌟 申請專業證照特別加分：</strong>我已考取或本學期正在報考「AI 賦能 ERP 規劃師」或「ERP 相關檢定證照」，請老師予以學期總成績特別加分！
+                  </label>
+                </div>
+
+                <button type="submit" id="btn-submit-report" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm">
+                  <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                  <span>確認送出繳交報告</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- 右側：個人繳交歷程與成績反饋 (占 5 欄，僅本人與老師可看) -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <i data-lucide="history" class="w-4 h-4 text-blue-600"></i>
+                  我的報告繳交歷程與成績
+                </h3>
+                <span class="text-[11px] text-slate-400">🔒 僅本人與授課教師可見</span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                每次繳交與更新紀錄皆會安全存檔，老師線上批改後評分與指導評語將即時顯示於此。
+              </p>
+
+              <!-- 個人報告清單容器 -->
+              <div id="student-personal-reports-container" class="space-y-3">
+                <div class="p-6 text-center text-slate-400 text-xs">
+                  <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+                  尚未繳交任何報告。請於左側選擇期中或期末報告進行繳交！
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: 教師專屬線上成績管理與評分後台 (僅授課教師可見) ==================== -->
+    <section id="tab-teacher" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+        <!-- Teacher Dashboard Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded shadow">👑 授課教師專屬管理後台</span>
+              <span class="text-xs text-indigo-300">進修部 企業管理系 四系 4 甲 (進企四系4甲)</span>
+            </div>
+            <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-6 h-6 text-amber-400"></i>
+              11501 企業資源規劃 ✕ 全班成績線上評定與管理系統
+            </h1>
+            <p class="text-xs text-slate-300">
+              授課教師：邱俊維 博士 ｜ 成績權重配置：平時出席 (20%) ＋ 期中報告 (40%) ＋ 期末報告 (40%) ＋ 證照加分 ｜ 系統自動即時核算學期總成績
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button type="button" onclick="exportAllGradesToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
+              <i data-lucide="sheet" class="w-4 h-4"></i>
+              <span>📥 匯出全班成績總表 (Excel)</span>
+            </button>
+            <button type="button" onclick="loadTeacherGradeDashboard()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700">
+              <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+              <span>重新整理雲端紀錄</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 全班數據概覽看板 -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+            <span class="text-xs text-slate-500 font-medium">全班修課人數</span>
+            <div id="stat-teacher-total-students" class="text-2xl font-black text-slate-900 mt-1">0</div>
+          </div>
+          <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 text-center">
+            <span class="text-xs text-blue-800 font-bold">期中報告繳交</span>
+            <div id="stat-teacher-midterm-count" class="text-2xl font-black text-blue-700 mt-1">0</div>
+          </div>
+          <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-200 text-center">
+            <span class="text-xs text-purple-800 font-bold">期末報告繳交</span>
+            <div id="stat-teacher-final-count" class="text-2xl font-black text-purple-700 mt-1">0</div>
+          </div>
+          <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200 text-center">
+            <span class="text-xs text-amber-800 font-bold">待批改報告</span>
+            <div id="stat-teacher-pending-count" class="text-2xl font-black text-amber-600 mt-1">0</div>
+          </div>
+          <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-200 text-center">
+            <span class="text-xs text-emerald-800 font-bold">已完成評分</span>
+            <div id="stat-teacher-graded-count" class="text-2xl font-black text-emerald-700 mt-1">0</div>
+          </div>
+          <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 text-center">
+            <span class="text-xs text-indigo-800 font-bold">全班平均總成績</span>
+            <div id="stat-teacher-avg-score" class="text-2xl font-black text-indigo-700 mt-1">--</div>
+          </div>
+        </div>
+
+        <!-- 搜尋與篩選列 -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+          <div class="flex items-center gap-2 w-full sm:w-72">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+            <input type="text" id="teacher-search-box" oninput="filterTeacherGradesTable()" placeholder="搜尋學號、姓名或報告標題..." class="w-full bg-white border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+            <select id="teacher-filter-status-select" onchange="filterTeacherGradesTable()" class="bg-white border border-slate-300 rounded-lg p-2 font-medium">
+              <option value="all">所有學生 (全部)</option>
+              <option value="midterm_submitted">僅看已繳期中報告</option>
+              <option value="final_submitted">僅看已繳期末報告</option>
+              <option value="needs_grading">僅看有待批改報告</option>
+            </select>
+            <span id="teacher-table-count-label" class="text-slate-500 font-medium">顯示 0 位學生</span>
+          </div>
+        </div>
+
+        <!-- 全班成績計算總表 -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+          <table class="min-w-full divide-y divide-slate-200 text-xs text-left" id="teacher-grades-table">
+            <thead class="bg-slate-100 font-bold text-slate-700 uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-3">學號</th>
+                <th class="py-3 px-3">姓名</th>
+                <th class="py-3 px-3">Email</th>
+                <th class="py-3 px-2 text-center w-24">平時出席<br><span class="text-blue-600 font-bold">(20%)</span></th>
+                <th class="py-3 px-3 text-center min-w-[130px]">期中報告<br><span class="text-indigo-600 font-bold">(40%)</span></th>
+                <th class="py-3 px-3 text-center min-w-[130px]">期末報告<br><span class="text-purple-600 font-bold">(40%)</span></th>
+                <th class="py-3 px-2 text-center w-20">證照加分<br><span class="text-amber-600 font-bold">(+加分)</span></th>
+                <th class="py-3 px-3 text-center w-28 bg-amber-50/80">學期總成績<br><span class="text-amber-900 font-bold">(系統自動算)</span></th>
+                <th class="py-3 px-3 min-w-[180px]">教師指導評語</th>
+                <th class="py-3 px-3 text-center w-20">操作</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-grades-tbody" class="bg-white divide-y divide-slate-100">
+              <!-- Dynamically rendered by renderTeacherGradeDashboard() in app.js -->
+              <tr>
+                <td colspan="10" class="text-center py-8 text-slate-400">
+                  <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300"></i>
+                  載入全班學生資料中...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- ==================== REPORT DETAIL & PREVIEW MODAL ==================== -->
+  <div id="report-preview-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span id="preview-report-badge" class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded">期中報告</span>
+          <h3 id="preview-report-title" class="font-bold text-base text-slate-900">報告標題</h3>
+        </div>
+        <button onclick="closeReportPreviewModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div><span class="text-slate-500 font-medium">繳交學生：</span><strong id="preview-report-student" class="text-slate-900">載入中...</strong></div>
+          <div><span class="text-slate-500 font-medium">學號：</span><strong id="preview-report-id" class="font-mono text-blue-700">載入中...</strong></div>
+          <div><span class="text-slate-500 font-medium">繳交時間：</span><span id="preview-report-time" class="text-slate-600 font-mono">--</span></div>
+          <div><span class="text-slate-500 font-medium">證照加分申請：</span><span id="preview-report-cert" class="font-bold text-amber-700">無</span></div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">報告核心摘要與流程說明：</label>
+          <div id="preview-report-summary" class="p-3 bg-slate-50 rounded-xl border border-slate-200 whitespace-pre-wrap leading-relaxed text-slate-800 max-h-56 overflow-y-auto">
+            載入中...
+          </div>
+        </div>
+
+        <div id="preview-report-link-container" class="hidden">
+          <label class="block font-bold text-slate-700 mb-1">線上成果連結：</label>
+          <a id="preview-report-link" href="#" target="_blank" class="text-blue-600 hover:underline inline-flex items-center gap-1 font-semibold">
+            <span>開啟公開網址</span> <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+
+        <div id="preview-report-file-container" class="hidden">
+          <label class="block font-bold text-slate-700 mb-1">附件檔案：</label>
+          <a id="preview-report-file" href="#" download class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span id="preview-report-filename">下載附件</span>
+          </a>
+        </div>
+
+        <!-- 教師評分區塊 (若為教師顯示打分欄位) -->
+        <div id="preview-teacher-grading-box" class="pt-3 border-t border-slate-200 space-y-2 hidden">
+          <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="edit-3" class="w-4 h-4 text-emerald-600"></i> 教師線上批閱打分
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-slate-600 mb-0.5 font-semibold">評定分數 (0~100)：</label>
+              <input type="number" id="preview-score-input" min="0" max="100" class="w-full border border-slate-300 rounded-lg p-2 font-bold text-emerald-800 text-sm">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-slate-600 mb-0.5 font-semibold">指導評語：</label>
+              <input type="text" id="preview-comment-input" placeholder="輸入回饋與建議..." class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            </div>
+          </div>
+          <div class="flex justify-end pt-1">
+            <button type="button" onclick="savePreviewModalGrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition">
+              儲存評分與評語
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end border-t border-slate-100 pt-3">
+        <button type="button" onclick="closeReportPreviewModal()" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- STUDENT PROFILE MODAL -->
   <div id="student-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">

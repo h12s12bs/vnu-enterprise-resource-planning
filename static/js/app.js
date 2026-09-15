@@ -32,13 +32,13 @@ let studentProfile = {
 
 // ==================== Firebase 雲端驗證與身分整合 ====================
 const firebaseConfig = {
-  apiKey: "AIzaSyCSQ1SfZ67UYZ_4F4JazSC5QptA1ZY1UdU",
-  authDomain: "vnu-creative-11501.firebaseapp.com",
-  projectId: "vnu-creative-11501",
-  storageBucket: "vnu-creative-11501.firebasestorage.app",
-  messagingSenderId: "192871776919",
-  appId: "1:192871776919:web:47aea414ec5af5774b5fd2",
-  measurementId: "G-X90WGR0GV2"
+  apiKey: "AIzaSyCRrII3d9pY-uv2ndEMy2uy-rJshlB8gGM",
+  authDomain: "vnu-erp-11501.firebaseapp.com",
+  projectId: "vnu-erp-11501",
+  storageBucket: "vnu-erp-11501.firebasestorage.app",
+  messagingSenderId: "177461034784",
+  appId: "1:177461034784:web:388fab8e5138c8fe1ea145",
+  measurementId: "G-9BH9E6VCRW"
 };
 
 let firebaseApp = null;
@@ -82,7 +82,11 @@ function initFirebase() {
         const avatarIcon = document.getElementById('user-avatar-icon');
         const dropdownEmail = document.getElementById('dropdown-user-email');
         const dropdownRole = document.getElementById('dropdown-user-role');
-        const teacherMenu = document.getElementById('teacher-export-menu-item');
+        const teacherExportMenu = document.getElementById('teacher-export-menu-item');
+        const teacherGradeMenu = document.getElementById('teacher-grade-menu-item');
+        const navTeacherBtn = document.getElementById('nav-teacher');
+        const subLoginPrompt = document.getElementById('submission-login-prompt');
+        const subFormBox = document.getElementById('submission-form-box');
 
         if (user) {
           console.log('👤 Google 使用者已登入:', user.email, user.uid);
@@ -101,12 +105,18 @@ function initFirebase() {
 
           if (dropdownEmail) dropdownEmail.textContent = user.email || '';
 
+          // 報告繳交表單：已登入則解除鎖定
+          if (subLoginPrompt) subLoginPrompt.classList.add('hidden');
+          if (subFormBox) subFormBox.classList.remove('hidden');
+
           if (isTeacherUser) {
             studentProfile.id = 'TEACHER';
             studentProfile.name = '邱俊維 博士';
             studentProfile.role = 'teacher';
             if (dropdownRole) dropdownRole.textContent = '👑 授課教師 (邱俊維 博士)';
-            if (teacherMenu) teacherMenu.classList.remove('hidden');
+            if (teacherExportMenu) teacherExportMenu.classList.remove('hidden');
+            if (teacherGradeMenu) teacherGradeMenu.classList.remove('hidden');
+            if (navTeacherBtn) navTeacherBtn.classList.remove('hidden');
             updateStudentHeader();
 
             if (firestoreDb) {
@@ -121,9 +131,15 @@ function initFirebase() {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
               }, { merge: true }).catch(() => {});
             }
+
+            if (currentTab === 'teacher') {
+              loadTeacherGradeDashboard();
+            }
           } else {
             if (dropdownRole) dropdownRole.textContent = '萬能 ERP 學員';
-            if (teacherMenu) teacherMenu.classList.add('hidden');
+            if (teacherExportMenu) teacherExportMenu.classList.add('hidden');
+            if (teacherGradeMenu) teacherGradeMenu.classList.add('hidden');
+            if (navTeacherBtn) navTeacherBtn.classList.add('hidden');
 
             if (firestoreDb) {
               try {
@@ -143,11 +159,28 @@ function initFirebase() {
               }
             }
           }
+
+          // 載入當前學生報告繳交歷程
+          loadStudentPersonalReports();
+
         } else {
           // 未登入
+          isTeacherUser = false;
           if (loginBtn) loginBtn.classList.remove('hidden');
           if (authBox) authBox.classList.add('hidden');
+          if (teacherExportMenu) teacherExportMenu.classList.add('hidden');
+          if (teacherGradeMenu) teacherGradeMenu.classList.add('hidden');
+          if (navTeacherBtn) navTeacherBtn.classList.add('hidden');
+
+          if (subLoginPrompt) subLoginPrompt.classList.remove('hidden');
+          if (subFormBox) subFormBox.classList.add('hidden');
+
           loadStudentProfile();
+          loadStudentPersonalReports();
+
+          if (currentTab === 'teacher') {
+            switchTab('curriculum');
+          }
         }
         if (window.lucide) window.lucide.createIcons();
       });
@@ -195,7 +228,13 @@ function loginWithGoogle() {
 function logoutUser() {
   if (firebaseAuth) {
     firebaseAuth.signOut().then(() => {
+      isTeacherUser = false;
+      const navTeacherBtn = document.getElementById('nav-teacher');
+      if (navTeacherBtn) navTeacherBtn.classList.add('hidden');
       alert('您已安全登出 Google 帳號。');
+      if (currentTab === 'teacher') {
+        switchTab('curriculum');
+      }
     });
   } else {
     alert('已清除登入狀態。');
@@ -421,14 +460,23 @@ function copyClassroomUrl() {
 
 // ==================== TAB 切換 ====================
 function switchTab(tabId) {
+  if (tabId === 'teacher' && !isTeacherUser) {
+    alert('🔒 成績管理區為授課教師專屬空間。\n\n請點擊右上角「Google 登入」使用授課教師帳號 (邱俊維 博士) 登入後即可查閱與計算全班成績。');
+    tabId = 'curriculum';
+  }
   currentTab = tabId;
-  const tabs = ['curriculum', 'antigravity', 'simulators', 'agentic', 'exam', 'achievements'];
+  const tabs = ['curriculum', 'submission', 'antigravity', 'simulators', 'agentic', 'exam', 'achievements', 'teacher'];
   tabs.forEach(t => {
     const sec = document.getElementById(`tab-${t}`);
     const navBtn = document.getElementById(`nav-${t}`);
     if (sec) sec.classList.toggle('hidden', t !== tabId);
     if (navBtn) navBtn.classList.toggle('active', t === tabId);
   });
+  if (tabId === 'submission') {
+    loadStudentPersonalReports();
+  } else if (tabId === 'teacher') {
+    loadTeacherGradeDashboard();
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (window.lucide) window.lucide.createIcons();
 }
@@ -1799,4 +1847,927 @@ window.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// ==========================================================================
+// 學生期中期末報告線上繳交 ✕ 教師專屬成績評定與管理系統
+// 萬能科技大學 企業資源規劃 ｜ 授課教師：邱俊維 博士 (jimchiu@vnu.edu.tw)
+// ==========================================================================
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+let allClassStudents = [];
+let allClassReports = [];
+let allClassGradesMap = {};
+let currentPreviewReport = null;
+
+/**
+ * 處理學生提交期中／期末報告
+ */
+async function handleStudentReportSubmit(e) {
+  e.preventDefault();
+
+  if (!currentFirebaseUser) {
+    alert('⚠️ 請先使用右上角 Google 登入後再進行作業繳交！');
+    loginWithGoogle();
+    return;
+  }
+
+  const sId = (studentProfile.id || '').trim();
+  const sName = (studentProfile.name || '').trim();
+  if (!sId || !sName || sId === '未設定' || sName === '設定座號姓名') {
+    alert('⚠️ 繳交前請先填妥「萬能科大學號」與「姓名」，以便老師登記成績！');
+    openStudentModal();
+    return;
+  }
+
+  const typeSelect = document.getElementById('report-type-select');
+  const reportType = typeSelect ? typeSelect.value : '期中報告';
+  const titleInput = document.getElementById('report-title-input');
+  const summaryInput = document.getElementById('report-summary-input');
+  const urlInput = document.getElementById('report-url-input');
+  const fileInput = document.getElementById('report-file-input');
+  const certCheckbox = document.getElementById('report-cert-checkbox');
+
+  const title = titleInput ? titleInput.value.trim() : '';
+  const summary = summaryInput ? summaryInput.value.trim() : '';
+  const liveUrl = urlInput ? urlInput.value.trim() : '';
+  const certApplied = certCheckbox ? certCheckbox.checked : false;
+
+  if (!title) {
+    alert('請填寫專案報告標題！');
+    if (titleInput) titleInput.focus();
+    return;
+  }
+  if (!summary) {
+    alert('請填寫核心內容摘要說明！');
+    if (summaryInput) summaryInput.focus();
+    return;
+  }
+
+  const submitBtn = document.getElementById('btn-submit-report');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span>報告上傳雲端存檔中...</span>`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+  let fileBase64 = '';
+  let fileName = '';
+  let fileSize = 0;
+
+  if (file) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert('⚠️ 附件檔案大小超過 10MB 限制！建議先上傳至 Google 雲端硬碟並貼入「線上成果網址」即可。');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span>確認送出繳交報告</span>`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+      return;
+    }
+    fileName = file.name;
+    fileSize = file.size;
+    try {
+      fileBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    } catch (err) {
+      console.warn('檔案讀取失敗:', err);
+    }
+  }
+
+  const reportId = 'ERP-' + Date.now();
+  const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
+
+  const reportDoc = {
+    id: reportId,
+    uid: currentFirebaseUser.uid,
+    email: currentFirebaseUser.email || '',
+    student_id: sId,
+    student_name: sName,
+    course: '11501企業資源規劃',
+    class: '進企四系4甲',
+    report_type: reportType,
+    title: title,
+    summary: summary,
+    url: liveUrl,
+    file_name: fileName,
+    file_size: fileSize,
+    file_data: fileBase64,
+    cert_applied: certApplied,
+    submitted_at: nowStr,
+    score: null,
+    teacher_comment: '',
+    graded_at: null
+  };
+
+  // 1. 同步存入 Firebase Firestore (erp_reports)
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('erp_reports').doc(reportId).set({
+        ...reportDoc,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log('✅ 學生報告已成功儲存至 Firebase 雲端資料庫');
+    } catch (err) {
+      console.warn('Firebase 寫入警告 (改用本機儲存):', err);
+    }
+  }
+
+  // 2. 本地儲存備份
+  try {
+    const local = JSON.parse(localStorage.getItem('vnu_erp_reports') || '[]');
+    local.unshift(reportDoc);
+    localStorage.setItem('vnu_erp_reports', JSON.stringify(local));
+  } catch (err) {
+    console.warn('LocalStorage error:', err);
+  }
+
+  // 3. 解鎖學生專題成果勳章
+  unlockBadge('report_submitted', '📑 報告繳交達人', `已繳交 ${reportType}：《${title}》`);
+
+  alert(`🎉 恭喜【進企四系4甲】${sName} 同學！\n\n您的《${title}》(${reportType}) 已成功上傳儲存！\n授課教師邱俊維博士將於線上評閱給分與提供回饋。`);
+
+  const form = document.getElementById('report-submit-form');
+  if (form) form.reset();
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span>確認送出繳交報告</span>`;
+  }
+  loadStudentPersonalReports();
+}
+
+/**
+ * 載入並渲染當前登入學生的個人報告繳交紀錄
+ */
+async function loadStudentPersonalReports() {
+  const container = document.getElementById('student-personal-reports-container');
+  if (!container) return;
+
+  let myReports = [];
+
+  if (firestoreDb && currentFirebaseUser) {
+    try {
+      const snap = await firestoreDb.collection('erp_reports')
+        .where('uid', '==', currentFirebaseUser.uid)
+        .get();
+      snap.forEach(doc => myReports.push(doc.data()));
+    } catch (err) {
+      console.warn('Firestore load personal reports warning:', err);
+    }
+  }
+
+  // 備用本機快取比對
+  try {
+    const local = JSON.parse(localStorage.getItem('vnu_erp_reports') || '[]');
+    local.forEach(lr => {
+      const isMine = (currentFirebaseUser && lr.uid === currentFirebaseUser.uid) ||
+                     (studentProfile.id && lr.student_id === studentProfile.id);
+      if (isMine && !myReports.find(r => r.id === lr.id)) {
+        myReports.push(lr);
+      }
+    });
+  } catch(e) {}
+
+  // 排序：最新在上
+  myReports.sort((a, b) => (b.id > a.id ? 1 : -1));
+
+  if (myReports.length === 0) {
+    container.innerHTML = `
+      <div class="p-6 text-center text-slate-400 text-xs">
+        <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+        尚未繳交任何報告。請於左側選擇期中或期末報告進行繳交！
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = myReports.map(r => {
+    const isMidterm = r.report_type === '期中報告';
+    const typeBadge = isMidterm
+      ? `<span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded">期中報告 (40%)</span>`
+      : `<span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2 py-0.5 rounded">期末報告 (40%)</span>`;
+    
+    const isGraded = (r.score !== null && r.score !== undefined && r.score !== '');
+    const gradeBadge = isGraded
+      ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-black px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1">
+           <i data-lucide="award" class="w-3.5 h-3.5 text-emerald-600"></i> 評定得分：${r.score} 分
+         </span>`
+      : `<span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+           <i data-lucide="clock" class="w-3 h-3"></i> 待老師批改中
+         </span>`;
+
+    return `
+      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white transition space-y-2.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            ${typeBadge}
+            ${r.cert_applied ? `<span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded">已申請證照加分</span>` : ''}
+          </div>
+          ${gradeBadge}
+        </div>
+        <h4 class="font-bold text-sm text-slate-900">${escapeHtml(r.title || '無標題')}</h4>
+        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">
+          ${escapeHtml(r.summary || '')}
+        </p>
+        ${r.teacher_comment ? `
+          <div class="p-2.5 bg-emerald-50/80 border border-emerald-200 rounded-lg text-xs space-y-1">
+            <span class="font-bold text-emerald-900 flex items-center gap-1">
+              <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-700"></i> 邱俊維 老師回饋評語：
+            </span>
+            <p class="text-emerald-800 font-medium">${escapeHtml(r.teacher_comment)}</p>
+          </div>
+        ` : ''}
+        <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-200/60">
+          <span>繳交時間：${escapeHtml(r.submitted_at || '')}</span>
+          <button type="button" onclick="previewStudentReport('${escapeHtml(r.id)}')" class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+            <i data-lucide="eye" class="w-3.5 h-3.5"></i> 檢視詳情
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+/**
+ * 預覽學生報告並支援教師線上即時批閱給分
+ */
+function previewStudentReport(reportId) {
+  let rep = allClassReports.find(r => r.id === reportId);
+  if (!rep) {
+    try {
+      const local = JSON.parse(localStorage.getItem('vnu_erp_reports') || '[]');
+      rep = local.find(r => r.id === reportId);
+    } catch (e) {}
+  }
+  if (!rep) {
+    alert('找不到該篇報告資料！');
+    return;
+  }
+
+  currentPreviewReport = rep;
+
+  const modal = document.getElementById('report-preview-modal');
+  if (!modal) return;
+
+  const badgeElem = document.getElementById('preview-report-badge');
+  const titleElem = document.getElementById('preview-report-title');
+  const studentElem = document.getElementById('preview-report-student');
+  const idElem = document.getElementById('preview-report-id');
+  const timeElem = document.getElementById('preview-report-time');
+  const certElem = document.getElementById('preview-report-cert');
+  const summaryElem = document.getElementById('preview-report-summary');
+  const linkBox = document.getElementById('preview-report-link-container');
+  const linkElem = document.getElementById('preview-report-link');
+  const fileBox = document.getElementById('preview-report-file-container');
+  const fileElem = document.getElementById('preview-report-file');
+  const filenameElem = document.getElementById('preview-report-filename');
+  const teacherGradingBox = document.getElementById('preview-teacher-grading-box');
+  const scoreInput = document.getElementById('preview-score-input');
+  const commentInput = document.getElementById('preview-comment-input');
+
+  if (badgeElem) {
+    badgeElem.textContent = rep.report_type || '專案報告';
+    badgeElem.className = rep.report_type === '期末報告'
+      ? 'bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded'
+      : 'bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded';
+  }
+  if (titleElem) titleElem.textContent = rep.title || '無標題';
+  if (studentElem) studentElem.textContent = rep.student_name || '同學';
+  if (idElem) idElem.textContent = rep.student_id || '未登記';
+  if (timeElem) timeElem.textContent = rep.submitted_at || '--';
+  if (certElem) {
+    certElem.textContent = rep.cert_applied ? '🌟 已申請 AI 賦能 ERP / 專業證照特別加分' : '無';
+    certElem.className = rep.cert_applied ? 'font-bold text-amber-700' : 'text-slate-500';
+  }
+  if (summaryElem) summaryElem.textContent = rep.summary || '無摘要說明';
+
+  if (linkBox && linkElem) {
+    if (rep.url) {
+      linkElem.href = rep.url;
+      linkBox.classList.remove('hidden');
+    } else {
+      linkBox.classList.add('hidden');
+    }
+  }
+
+  if (fileBox && fileElem && filenameElem) {
+    if (rep.file_data || rep.file_name) {
+      filenameElem.textContent = `下載附件：${rep.file_name || '檔案'}`;
+      fileElem.href = rep.file_data || '#';
+      fileElem.download = rep.file_name || 'erp_assignment_file';
+      fileBox.classList.remove('hidden');
+    } else {
+      fileBox.classList.add('hidden');
+    }
+  }
+
+  // 若為授課教師，顯示批閱打分區塊
+  if (teacherGradingBox) {
+    if (isTeacherUser) {
+      teacherGradingBox.classList.remove('hidden');
+      if (scoreInput) scoreInput.value = (rep.score !== null && rep.score !== undefined) ? rep.score : '';
+      if (commentInput) commentInput.value = rep.teacher_comment || '';
+    } else {
+      teacherGradingBox.classList.add('hidden');
+    }
+  }
+
+  modal.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closeReportPreviewModal() {
+  const modal = document.getElementById('report-preview-modal');
+  if (modal) modal.classList.add('hidden');
+  currentPreviewReport = null;
+}
+
+/**
+ * 教師在預覽彈窗中直接儲存評分與評語
+ */
+async function savePreviewModalGrade() {
+  if (!currentPreviewReport || !isTeacherUser) return;
+
+  const scoreInput = document.getElementById('preview-score-input');
+  const commentInput = document.getElementById('preview-comment-input');
+  const scoreVal = scoreInput ? scoreInput.value.trim() : '';
+  const commentVal = commentInput ? commentInput.value.trim() : '';
+
+  if (scoreVal === '') {
+    alert('請填寫評定分數 (0~100)！');
+    return;
+  }
+  const scoreNum = Number(scoreVal);
+  if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100) {
+    alert('評定分數請填寫 0 ~ 100 之間數值！');
+    return;
+  }
+
+  const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
+  currentPreviewReport.score = scoreNum;
+  currentPreviewReport.teacher_comment = commentVal;
+  currentPreviewReport.graded_at = nowStr;
+
+  // 1. 同步更新 Firestore erp_reports
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('erp_reports').doc(currentPreviewReport.id).update({
+        score: scoreNum,
+        teacher_comment: commentVal,
+        graded_at: nowStr
+      });
+      console.log('✅ 評分已同步更新至 Firebase erp_reports');
+    } catch (err) {
+      console.warn('Firebase 評分更新警告:', err);
+    }
+  }
+
+  // 2. 更新本地報告快取
+  try {
+    const local = JSON.parse(localStorage.getItem('vnu_erp_reports') || '[]');
+    const idx = local.findIndex(r => r.id === currentPreviewReport.id);
+    if (idx !== -1) {
+      local[idx].score = scoreNum;
+      local[idx].teacher_comment = commentVal;
+      local[idx].graded_at = nowStr;
+      localStorage.setItem('vnu_erp_reports', JSON.stringify(local));
+    }
+  } catch(e) {}
+
+  // 3. 同時連動更新該學生在成績表上的分數
+  const sKey = currentPreviewReport.student_id || currentPreviewReport.uid;
+  if (sKey) {
+    let curGrade = allClassGradesMap[sKey] || {
+      student_id: currentPreviewReport.student_id,
+      student_name: currentPreviewReport.student_name,
+      attendance: 90,
+      midterm_score: '',
+      final_score: '',
+      cert_bonus: currentPreviewReport.cert_applied ? 5 : 0,
+      teacher_comment: ''
+    };
+    if (currentPreviewReport.report_type === '期中報告') {
+      curGrade.midterm_score = scoreNum;
+    } else if (currentPreviewReport.report_type === '期末報告') {
+      curGrade.final_score = scoreNum;
+    }
+    if (commentVal) curGrade.teacher_comment = commentVal;
+    allClassGradesMap[sKey] = curGrade;
+
+    // 儲存至 erp_grades
+    if (firestoreDb) {
+      firestoreDb.collection('erp_grades').doc(sKey).set({
+        ...curGrade,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
+  }
+
+  alert(`✅ 已成功儲存【${currentPreviewReport.student_name}】同學之 ${currentPreviewReport.report_type} 得分：${scoreNum} 分！`);
+  closeReportPreviewModal();
+  renderTeacherGradeDashboard();
+  loadStudentPersonalReports();
+}
+
+/**
+ * 教師線上成績管理後台：載入資料庫所有學生、繳交報告與成績紀錄
+ */
+async function loadTeacherGradeDashboard() {
+  if (!isTeacherUser) return;
+
+  const tbody = document.getElementById('teacher-grades-tbody');
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center py-8 text-slate-400">
+          <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300"></i>
+          正在從 Firebase 雲端載入全班名冊與成績資料...
+        </td>
+      </tr>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  allClassStudents = [];
+  allClassReports = [];
+  allClassGradesMap = {};
+
+  // 1. 載入全班學生資料 (Firestore users)
+  if (firestoreDb) {
+    try {
+      const userSnap = await firestoreDb.collection('users').get();
+      userSnap.forEach(doc => {
+        const u = doc.data();
+        if (u.role !== 'teacher' && u.studentId !== 'TEACHER') {
+          allClassStudents.push(u);
+        }
+      });
+    } catch (e) {
+      console.warn('Firestore load users error:', e);
+    }
+
+    // 2. 載入全部繳交報告 (Firestore erp_reports)
+    try {
+      const repSnap = await firestoreDb.collection('erp_reports').get();
+      repSnap.forEach(doc => allClassReports.push(doc.data()));
+    } catch (e) {
+      console.warn('Firestore load reports error:', e);
+    }
+
+    // 3. 載入教師已存成績記錄 (Firestore erp_grades)
+    try {
+      const grdSnap = await firestoreDb.collection('erp_grades').get();
+      grdSnap.forEach(doc => {
+        allClassGradesMap[doc.id] = doc.data();
+      });
+    } catch (e) {
+      console.warn('Firestore load grades error:', e);
+    }
+  }
+
+  // 合併本機 localStorage 報告備份
+  try {
+    const localReps = JSON.parse(localStorage.getItem('vnu_erp_reports') || '[]');
+    localReps.forEach(lr => {
+      if (!allClassReports.find(r => r.id === lr.id)) {
+        allClassReports.push(lr);
+      }
+      // 若學生不在 users 列表中，自動補入
+      if (lr.student_id && lr.student_id !== '未設定') {
+        const exists = allClassStudents.find(s => s.studentId === lr.student_id || s.uid === lr.uid);
+        if (!exists) {
+          allClassStudents.push({
+            uid: lr.uid || lr.student_id,
+            studentId: lr.student_id,
+            studentName: lr.student_name,
+            email: lr.email || '',
+            class: '進企四系4甲',
+            course: '11501企業資源規劃'
+          });
+        }
+      }
+    });
+  } catch (e) {}
+
+  // 合併本機 localStorage 成績備份
+  try {
+    const localGrades = JSON.parse(localStorage.getItem('vnu_erp_grades') || '{}');
+    for (const [k, v] of Object.entries(localGrades)) {
+      if (!allClassGradesMap[k]) {
+        allClassGradesMap[k] = v;
+      }
+    }
+  } catch (e) {}
+
+  // 確保從報告推導新學生名單
+  allClassReports.forEach(r => {
+    if (r.student_id && r.student_id !== '未設定') {
+      const exists = allClassStudents.find(s => s.studentId === r.student_id || s.uid === r.uid);
+      if (!exists) {
+        allClassStudents.push({
+          uid: r.uid || r.student_id,
+          studentId: r.student_id,
+          studentName: r.student_name,
+          email: r.email || '',
+          class: '進企四系4甲'
+        });
+      }
+    }
+  });
+
+  // 排序：學號升冪
+  allClassStudents.sort((a, b) => ((a.studentId || '') > (b.studentId || '') ? 1 : -1));
+
+  renderTeacherGradeDashboard();
+}
+
+/**
+ * 渲染教師成績總表與計算權重統計
+ */
+function renderTeacherGradeDashboard() {
+  if (!isTeacherUser) return;
+  const tbody = document.getElementById('teacher-grades-tbody');
+  if (!tbody) return;
+
+  // 1. 統計看板計算
+  let totalStudents = allClassStudents.length;
+  let midtermCount = 0;
+  let finalCount = 0;
+  let pendingCount = 0;
+  let gradedCount = 0;
+  let totalScoreSum = 0;
+  let totalScoreStudents = 0;
+
+  allClassReports.forEach(r => {
+    if (r.report_type === '期中報告') midtermCount++;
+    if (r.report_type === '期末報告') finalCount++;
+    if (r.score !== null && r.score !== undefined && r.score !== '') {
+      gradedCount++;
+    } else {
+      pendingCount++;
+    }
+  });
+
+  const statTotal = document.getElementById('stat-teacher-total-students');
+  const statMidterm = document.getElementById('stat-teacher-midterm-count');
+  const statFinal = document.getElementById('stat-teacher-final-count');
+  const statPending = document.getElementById('stat-teacher-pending-count');
+  const statGraded = document.getElementById('stat-teacher-graded-count');
+  const statAvg = document.getElementById('stat-teacher-avg-score');
+
+  if (statTotal) statTotal.textContent = totalStudents;
+  if (statMidterm) statMidterm.textContent = midtermCount;
+  if (statFinal) statFinal.textContent = finalCount;
+  if (statPending) statPending.textContent = pendingCount;
+  if (statGraded) statGraded.textContent = gradedCount;
+
+  // 2. 搜尋與條件過濾
+  const searchQ = (document.getElementById('teacher-search-box')?.value || '').trim().toLowerCase();
+  const filterStat = document.getElementById('teacher-filter-status-select')?.value || 'all';
+
+  const filtered = allClassStudents.filter(s => {
+    const sId = (s.studentId || '').toLowerCase();
+    const sName = (s.studentName || '').toLowerCase();
+    const sEmail = (s.email || '').toLowerCase();
+
+    // 關鍵字搜尋
+    if (searchQ) {
+      const match = sId.includes(searchQ) || sName.includes(searchQ) || sEmail.includes(searchQ);
+      if (!match) return false;
+    }
+
+    // 學生繳交狀態比對
+    const sKey = s.studentId || s.uid;
+    const hasMid = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
+    const hasFin = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+    const hasPending = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.score === null || r.score === undefined || r.score === ''));
+
+    if (filterStat === 'midterm_submitted' && !hasMid) return false;
+    if (filterStat === 'final_submitted' && !hasFin) return false;
+    if (filterStat === 'needs_grading' && !hasPending) return false;
+
+    return true;
+  });
+
+  const countLabel = document.getElementById('teacher-table-count-label');
+  if (countLabel) countLabel.textContent = `顯示 ${filtered.length} / ${totalStudents} 位學生`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center py-8 text-slate-400">
+          <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+          查無符合搜尋條件的學生資料。
+        </td>
+      </tr>
+    `;
+    if (statAvg) statAvg.textContent = '--';
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  let rowsHtml = '';
+
+  filtered.forEach(s => {
+    const sKey = s.studentId || s.uid;
+    const savedGrade = allClassGradesMap[sKey] || {};
+
+    // 查找學生的期中與期末報告
+    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
+    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+
+    // 預設分數填入邏輯：優先採用已儲存成績，次之連動報告批改得分，否則依出席率預設 90
+    const attendanceVal = (savedGrade.attendance !== undefined && savedGrade.attendance !== '') ? savedGrade.attendance : 90;
+    const midtermVal = (savedGrade.midterm_score !== undefined && savedGrade.midterm_score !== '') ? savedGrade.midterm_score : (midtermRep && midtermRep.score !== null ? midtermRep.score : '');
+    const finalVal = (savedGrade.final_score !== undefined && savedGrade.final_score !== '') ? savedGrade.final_score : (finalRep && finalRep.score !== null ? finalRep.score : '');
+    
+    // 證照加分：若學生在任一報告勾選加分且尚未設定加分值，預設給 +5
+    const hasCertApplied = (midtermRep && midtermRep.cert_applied) || (finalRep && finalRep.cert_applied);
+    const certVal = (savedGrade.cert_bonus !== undefined && savedGrade.cert_bonus !== '') ? savedGrade.cert_bonus : (hasCertApplied ? 5 : 0);
+    const commentVal = savedGrade.teacher_comment || '';
+
+    // 計算加權總成績
+    const attNum = Number(attendanceVal) || 0;
+    const midNum = (midtermVal !== '') ? Number(midtermVal) : null;
+    const finNum = (finalVal !== '') ? Number(finalVal) : null;
+    const certNum = Number(certVal) || 0;
+
+    let totalScoreDisplay = '--';
+    let totalScoreNum = 0;
+    let hasCalculableScore = false;
+
+    if (midNum !== null || finNum !== null) {
+      // 依比例計算 (平時20% + 期中40% + 期末40% + 證照加分)
+      const mScore = midNum !== null ? midNum : 0;
+      const fScore = finNum !== null ? finNum : 0;
+      totalScoreNum = Math.round((attNum * 0.2) + (mScore * 0.4) + (fScore * 0.4) + certNum);
+      totalScoreDisplay = totalScoreNum + ' 分';
+      hasCalculableScore = true;
+      totalScoreSum += totalScoreNum;
+      totalScoreStudents++;
+    }
+
+    // 期中報告操作鈕
+    let midtermCell = '';
+    if (midtermRep) {
+      const isGraded = midtermRep.score !== null && midtermRep.score !== undefined && midtermRep.score !== '';
+      midtermCell = `
+        <div class="space-y-1">
+          <input type="number" min="0" max="100" id="row-mid-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${midtermVal}" placeholder="40%" class="w-20 text-center font-bold text-indigo-700 bg-indigo-50/50 border border-indigo-200 rounded p-1 mx-auto block text-xs">
+          <button type="button" onclick="previewStudentReport('${escapeHtml(midtermRep.id)}')" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold underline">
+            <span>檢視期中</span> ${isGraded ? `<span class="text-emerald-600">(${midtermRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
+          </button>
+        </div>
+      `;
+    } else {
+      midtermCell = `
+        <div class="space-y-1">
+          <input type="number" min="0" max="100" id="row-mid-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${midtermVal}" placeholder="40%" class="w-20 text-center font-medium text-slate-500 border border-slate-200 rounded p-1 mx-auto block text-xs">
+          <span class="text-[10px] text-slate-400">未繳交</span>
+        </div>
+      `;
+    }
+
+    // 期末報告操作鈕
+    let finalCell = '';
+    if (finalRep) {
+      const isGraded = finalRep.score !== null && finalRep.score !== undefined && finalRep.score !== '';
+      finalCell = `
+        <div class="space-y-1">
+          <input type="number" min="0" max="100" id="row-fin-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${finalVal}" placeholder="40%" class="w-20 text-center font-bold text-purple-700 bg-purple-50/50 border border-purple-200 rounded p-1 mx-auto block text-xs">
+          <button type="button" onclick="previewStudentReport('${escapeHtml(finalRep.id)}')" class="inline-flex items-center gap-1 text-[10px] text-purple-600 hover:text-purple-800 font-semibold underline">
+            <span>檢視期末</span> ${isGraded ? `<span class="text-emerald-600">(${finalRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
+          </button>
+        </div>
+      `;
+    } else {
+      finalCell = `
+        <div class="space-y-1">
+          <input type="number" min="0" max="100" id="row-fin-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${finalVal}" placeholder="40%" class="w-20 text-center font-medium text-slate-500 border border-slate-200 rounded p-1 mx-auto block text-xs">
+          <span class="text-[10px] text-slate-400">未繳交</span>
+        </div>
+      `;
+    }
+
+    rowsHtml += `
+      <tr id="grade-row-${escapeHtml(sKey)}" class="hover:bg-slate-50 transition">
+        <td class="py-3 px-3 font-mono font-bold text-blue-900">${escapeHtml(s.studentId || '未設定')}</td>
+        <td class="py-3 px-3 font-bold text-slate-900">${escapeHtml(s.studentName || '同學')}</td>
+        <td class="py-3 px-3 text-slate-500 truncate max-w-[150px]" title="${escapeHtml(s.email || '')}">${escapeHtml(s.email || '--')}</td>
+        <td class="py-3 px-2 text-center">
+          <input type="number" min="0" max="100" id="row-att-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${attendanceVal}" class="w-16 text-center font-semibold text-blue-700 border border-blue-200 rounded p-1 mx-auto text-xs">
+        </td>
+        <td class="py-3 px-3 text-center">${midtermCell}</td>
+        <td class="py-3 px-3 text-center">${finalCell}</td>
+        <td class="py-3 px-2 text-center">
+          <input type="number" min="0" max="20" id="row-cert-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${certVal}" class="w-14 text-center font-bold text-amber-700 bg-amber-50/50 border border-amber-200 rounded p-1 mx-auto text-xs" title="證照加分值">
+        </td>
+        <td class="py-3 px-3 text-center bg-amber-50/50 font-black text-sm text-amber-900" id="row-total-${escapeHtml(sKey)}">
+          ${totalScoreDisplay}
+        </td>
+        <td class="py-3 px-3">
+          <input type="text" id="row-comm-${escapeHtml(sKey)}" value="${escapeHtml(commentVal)}" placeholder="輸入教師評語..." class="w-full border border-slate-200 rounded p-1.5 text-xs focus:border-blue-500">
+        </td>
+        <td class="py-3 px-3 text-center">
+          <button type="button" onclick="saveSingleGrade('${escapeHtml(sKey)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm text-xs transition flex items-center gap-1 mx-auto">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span>儲存</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = rowsHtml;
+
+  // 更新平均成績
+  if (statAvg) {
+    if (totalScoreStudents > 0) {
+      statAvg.textContent = (totalScoreSum / totalScoreStudents).toFixed(1) + ' 分';
+    } else {
+      statAvg.textContent = '尚無核算';
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+/**
+ * 即時連動試算單行學生總成績 (無需點擊儲存即可即時看見)
+ */
+function calcRowTotal(sKey) {
+  const attElem = document.getElementById(`row-att-${sKey}`);
+  const midElem = document.getElementById(`row-mid-${sKey}`);
+  const finElem = document.getElementById(`row-fin-${sKey}`);
+  const certElem = document.getElementById(`row-cert-${sKey}`);
+  const totalElem = document.getElementById(`row-total-${sKey}`);
+
+  if (!totalElem) return;
+
+  const att = attElem ? Number(attElem.value) || 0 : 0;
+  const midVal = midElem ? midElem.value.trim() : '';
+  const finVal = finElem ? finElem.value.trim() : '';
+  const cert = certElem ? Number(certElem.value) || 0 : 0;
+
+  if (midVal === '' && finVal === '') {
+    totalElem.textContent = '--';
+    return;
+  }
+
+  const mid = midVal !== '' ? Number(midVal) || 0 : 0;
+  const fin = finVal !== '' ? Number(finVal) || 0 : 0;
+
+  // 評分標準：平時出席20% + 期中40% + 期末40% + 證照加分
+  const total = Math.round((att * 0.2) + (mid * 0.4) + (fin * 0.4) + cert);
+  totalElem.textContent = total + ' 分';
+  totalElem.className = total >= 60
+    ? 'py-3 px-3 text-center bg-amber-50/50 font-black text-sm text-emerald-700'
+    : 'py-3 px-3 text-center bg-rose-50 font-black text-sm text-rose-700';
+}
+
+/**
+ * 儲存單一學生成績至雲端與本地
+ */
+async function saveSingleGrade(sKey) {
+  if (!isTeacherUser) {
+    alert('僅授課教師可執行成績登錄！');
+    return;
+  }
+
+  const s = allClassStudents.find(st => (st.studentId === sKey || st.uid === sKey)) || { studentId: sKey, studentName: '同學' };
+  const attElem = document.getElementById(`row-att-${sKey}`);
+  const midElem = document.getElementById(`row-mid-${sKey}`);
+  const finElem = document.getElementById(`row-fin-${sKey}`);
+  const certElem = document.getElementById(`row-cert-${sKey}`);
+  const commElem = document.getElementById(`row-comm-${sKey}`);
+
+  const att = attElem ? Number(attElem.value) || 0 : 0;
+  const midVal = midElem ? midElem.value.trim() : '';
+  const finVal = finElem ? finElem.value.trim() : '';
+  const cert = certElem ? Number(certElem.value) || 0 : 0;
+  const comment = commElem ? commElem.value.trim() : '';
+
+  const mid = midVal !== '' ? Number(midVal) : null;
+  const fin = finVal !== '' ? Number(finVal) : null;
+
+  let totalScore = null;
+  if (mid !== null || fin !== null) {
+    totalScore = Math.round((att * 0.2) + ((mid || 0) * 0.4) + ((fin || 0) * 0.4) + cert);
+  }
+
+  const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
+
+  const gradeData = {
+    student_id: s.studentId || sKey,
+    student_name: s.studentName || '同學',
+    course: '11501企業資源規劃',
+    class: '進企四系4甲',
+    attendance: att,
+    midterm_score: mid !== null ? mid : '',
+    final_score: fin !== null ? fin : '',
+    cert_bonus: cert,
+    total_score: totalScore,
+    teacher_comment: comment,
+    updated_at: nowStr
+  };
+
+  allClassGradesMap[sKey] = gradeData;
+
+  // 1. 同步寫入 Firestore erp_grades
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('erp_grades').doc(sKey).set({
+        ...gradeData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      console.log('✅ 成績已同步更新至 Firebase erp_grades');
+    } catch (err) {
+      console.warn('Firestore grade save error:', err);
+    }
+  }
+
+  // 2. 本地儲存備份
+  try {
+    const localGrades = JSON.parse(localStorage.getItem('vnu_erp_grades') || '{}');
+    localGrades[sKey] = gradeData;
+    localStorage.setItem('vnu_erp_grades', JSON.stringify(localGrades));
+  } catch(e) {}
+
+  alert(`✅ 已成功儲存【${s.studentName || sKey}】同學之學期成績！\n總成績：${totalScore !== null ? totalScore + ' 分' : '尚在評定中'}`);
+}
+
+/**
+ * 篩選成績表格
+ */
+function filterTeacherGradesTable() {
+  renderTeacherGradeDashboard();
+}
+
+/**
+ * 匯出全班成績總表為 Excel (CSV UTF-8 BOM 避免亂碼)
+ */
+function exportAllGradesToExcel() {
+  if (!isTeacherUser) {
+    alert('僅授課教師可匯出全班成績！');
+    return;
+  }
+
+  if (allClassStudents.length === 0) {
+    alert('目前尚無學生修課名單可匯出！');
+    return;
+  }
+
+  let csv = '\uFEFF學號,姓名,班級,Email,平時出席(20%),期中報告得分(40%),期末報告得分(40%),證照加分,學期總成績,期中報告繳交題名,期末報告繳交題名,證照加分申請,教師評語,登錄更新時間\n';
+
+  allClassStudents.forEach(s => {
+    const sKey = s.studentId || s.uid;
+    const g = allClassGradesMap[sKey] || {};
+
+    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
+    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+
+    const att = (g.attendance !== undefined && g.attendance !== '') ? g.attendance : 90;
+    const mid = (g.midterm_score !== undefined && g.midterm_score !== '') ? g.midterm_score : (midtermRep ? midtermRep.score || '' : '');
+    const fin = (g.final_score !== undefined && g.final_score !== '') ? g.final_score : (finalRep ? finalRep.score || '' : '');
+    const cert = (g.cert_bonus !== undefined && g.cert_bonus !== '') ? g.cert_bonus : ((midtermRep?.cert_applied || finalRep?.cert_applied) ? 5 : 0);
+
+    let total = '';
+    if (mid !== '' || fin !== '') {
+      total = Math.round((Number(att) * 0.2) + (Number(mid || 0) * 0.4) + (Number(fin || 0) * 0.4) + Number(cert));
+    }
+
+    const midTitle = midtermRep ? (midtermRep.title || '').replace(/"/g, '""') : '未繳交';
+    const finTitle = finalRep ? (finalRep.title || '').replace(/"/g, '""') : '未繳交';
+    const certApplied = (midtermRep?.cert_applied || finalRep?.cert_applied) ? '已申請' : '無';
+    const comm = (g.teacher_comment || '').replace(/"/g, '""');
+    const upTime = g.updated_at || '';
+
+    csv += `"${s.studentId || ''}","${s.studentName || ''}","進企四系4甲","${s.email || ''}","${att}","${mid}","${fin}","${cert}","${total}","${midTitle}","${finTitle}","${certApplied}","${comm}","${upTime}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `萬能科技大學_11501企業資源規劃_進企四系4甲_學期成績總表_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 
