@@ -26,6 +26,9 @@ def main():
     with open('data/antigravity_missions.json', 'r', encoding='utf-8') as f:
         missions = f.read()
 
+    with open('data/slides.json', 'r', encoding='utf-8') as f:
+        slides = f.read()
+
     # Replace css link with inline style
     html = html.replace('<link rel="stylesheet" href="/static/css/style.css">', f'<style>{css}</style>')
 
@@ -36,6 +39,7 @@ def main():
   window.OFFLINE_QUESTIONS = {questions};
   window.OFFLINE_TEMPLATES = {templates};
   window.OFFLINE_MISSIONS = {missions};
+  window.OFFLINE_SLIDES = {slides};
 </script>
 """
 
@@ -64,6 +68,10 @@ def main():
     js_offline = js_offline.replace(
         "console.warn('Using local fallback templates');",
         "agentTemplates = window.OFFLINE_TEMPLATES || [];"
+    )
+    js_offline = js_offline.replace(
+        "console.warn('簡報資料載入失敗，等待離線備份', e);",
+        "slidesData = window.OFFLINE_SLIDES || [];"
     )
 
     full_html = html.replace('<script src="/static/js/app.js"></script>', inlined_data + f'<script>{js_offline}</script>')

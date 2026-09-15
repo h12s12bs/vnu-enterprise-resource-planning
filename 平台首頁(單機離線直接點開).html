@@ -150,6 +150,69 @@ body {
     background: white;
   }
 }
+
+/* ==================== Fullscreen Slide Presentation Player ==================== */
+#slide-deck-modal {
+  backdrop-filter: blur(12px);
+}
+
+#slide-stage {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.15);
+}
+
+.slide-anim {
+  animation: slideFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Big readable typography for presentations (>= 28pt on standard displays) */
+.slide-title-large {
+  font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.slide-bullet-text {
+  font-size: clamp(1.15rem, 1.85vw, 1.65rem); /* Equivalent to 26pt~32pt in presentations */
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.slide-cover-title {
+  font-size: clamp(2rem, 3.8vw, 3.4rem);
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+.slide-cover-subtitle {
+  font-size: clamp(1.2rem, 2vw, 1.85rem);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.slide-footer-text {
+  font-size: clamp(0.85rem, 1.15vw, 1.1rem);
+  line-height: 1.4;
+}
+
+/* Dot indicator active state */
+.slide-dot.active {
+  background-color: #f59e0b;
+  width: 1.5rem;
+}
+
 </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
@@ -179,15 +242,8 @@ body {
           </div>
         </div>
 
-        <!-- Right Side: Classroom IP & Firebase Auth -->
+        <!-- Right Side: Firebase Google Auth -->
         <div class="flex items-center space-x-3">
-          <!-- Classroom LAN badge -->
-          <div id="classroom-ip-badge" class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer hover:bg-emerald-100 transition" onclick="copyClassroomUrl()" title="點擊複製全班連線網址">
-            <i data-lucide="wifi" class="w-4 h-4 text-emerald-600"></i>
-            <span>教室網址: <strong id="header-lan-ip">載入中...</strong></span>
-            <i data-lucide="copy" class="w-3 h-3 text-emerald-600 ml-1"></i>
-          </div>
-
           <!-- Google Login Button (shown when not logged in) -->
           <button type="button" id="btn-google-login" onclick="loginWithGoogle()" class="inline-flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs sm:text-sm transition border border-slate-300 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -234,31 +290,35 @@ body {
         </div>
       </div>
 
-      <!-- MAIN NAVIGATION TABS -->
-      <nav class="flex space-x-1 sm:space-x-4 border-t border-slate-100 py-2 overflow-x-auto">
-        <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shrink-0">
+      <!-- MAIN NAVIGATION TABS (No sliding, full wrap display) -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2.5 border-t border-slate-100 py-2.5">
+        <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2">
           <i data-lucide="calendar" class="w-4 h-4"></i>
           <span>18週教學進度</span>
         </button>
-        <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2 shrink-0">
+        <button onclick="openSlideDeck()" id="nav-slides" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white flex items-center space-x-1.5 shadow-sm transition">
+          <i data-lucide="presentation" class="w-4 h-4"></i>
+          <span>🖥️ 全螢幕簡報播放</span>
+        </button>
+        <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2">
           <i data-lucide="terminal" class="w-4 h-4 text-purple-600"></i>
           <span>💻 Antigravity 實戰專案包</span>
           <span class="bg-purple-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">動手做成果</span>
         </button>
-        <button onclick="switchTab('simulators')" id="nav-simulators" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('simulators')" id="nav-simulators" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
           <span>流程成果驗證沙盒</span>
         </button>
-        <button onclick="switchTab('agentic')" id="nav-agentic" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('agentic')" id="nav-agentic" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center space-x-2">
           <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
           <span>ReAct 推理引擎展示</span>
         </button>
-        <button onclick="switchTab('exam')" id="nav-exam" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('exam')" id="nav-exam" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
           <span>ERP 實務題庫測驗</span>
           <span class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded font-bold">200+題</span>
         </button>
-        <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="bookmark-check" class="w-4 h-4"></i>
           <span>學習成就與錯題</span>
         </button>
@@ -319,7 +379,7 @@ body {
             </div>
 
             <div class="pt-2 border-t border-slate-200 text-xs space-y-1 text-slate-500">
-              <div>📧 信箱: <a href="mailto:cwchiu@vnu.edu.tw" class="text-blue-600 hover:underline">cwchiu@vnu.edu.tw</a> ｜ <a href="mailto:kevin87332000@gmail.com" class="text-blue-600 hover:underline">kevin87332000@gmail.com</a></div>
+              <div>📧 信箱: <a href="mailto:jimchiu@vnu.edu.tw" class="text-blue-600 hover:underline font-semibold">jimchiu@vnu.edu.tw</a></div>
               <div>📞 電話: 0976-595-981</div>
               <div>🌐 個人網站: <a href="https://h12s12bs.github.io/vanung-faculty-portfolio/index.html" target="_blank" class="text-blue-600 hover:underline">邱俊維博士教師專長網頁 ↗</a></div>
             </div>
@@ -330,29 +390,30 @@ body {
             <div>
               <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
-                學期成績評量標準 (Grading Policy)
+                學期成績評量標準 (簡明清晰好計算)
               </h3>
               
-              <div class="space-y-2 text-xs">
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 平時出缺席與課堂參與</span>
-                  <span class="font-bold text-blue-700">20%</span>
+              <div class="space-y-2.5 text-xs">
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 平時出席</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">出席狀況檢核（比重調低，輕鬆無負擔）</p>
+                  </div>
+                  <span class="font-black text-sm text-blue-700 bg-blue-50 px-2 py-1 rounded">20%</span>
                 </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 每週隨堂測驗與課堂實作</span>
-                  <span class="font-bold text-blue-700">20%</span>
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 期中報告繳交</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">期中實務流程分析報告</p>
+                  </div>
+                  <span class="font-black text-sm text-indigo-700 bg-indigo-50 px-2 py-1 rounded">40%</span>
                 </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 期中考（理論與流程測驗）</span>
-                  <span class="font-bold text-blue-700">25%</span>
-                </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 期末考／綜合實戰評量</span>
-                  <span class="font-bold text-blue-700">25%</span>
-                </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• AI 輔助企業流程專題提案</span>
-                  <span class="font-bold text-purple-700">10%</span>
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 期末報告繳交</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">期末 ERP 應用專題成果報告</p>
+                  </div>
+                  <span class="font-black text-sm text-indigo-700 bg-indigo-50 px-2 py-1 rounded">40%</span>
                 </div>
               </div>
             </div>
@@ -364,7 +425,7 @@ body {
                 🌟 專業證照特別加分機制
               </div>
               <p class="text-slate-700 leading-relaxed font-medium">
-                修課期間考取<strong>「AI 賦能 ERP 規劃師」</strong>或<strong>「ERP 規劃師 / 基礎檢定」</strong>等相關專業證照，<strong>直接計入學期總成績特別加分！</strong>鼓勵全班同學踴躍報考取得專業資格！
+                修課期間考取<strong>「AI 賦能 ERP 規劃師」</strong>或<strong>「ERP 規劃師 / 基礎檢定」</strong>等相關專業證照，<strong>直接計入學期總成績特別加分！</strong>
               </p>
             </div>
           </div>
@@ -438,21 +499,25 @@ body {
             <h2 id="week-title" class="text-xl font-bold text-slate-900">課程導論、ERP 概念演進與企業數位轉型</h2>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <a id="week-pptx-btn" href="#" target="_blank" download class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="file-text" class="w-4 h-4"></i>
-              <span>下載教學簡報 (PPTX 大字版)</span>
-            </a>
-            <a id="week-project-zip-btn" href="#" target="_blank" download class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="folder-down" class="w-4 h-4"></i>
-              <span>📥 下載本週 Antigravity 實作專案包 (ZIP)</span>
-            </a>
-            <button id="week-quiz-btn" onclick="startWeeklyQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-              <span>啟動當週 5 題快測</span>
+            <button onclick="openCurrentWeekSlideDeck()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3.5 py-2 rounded-lg text-sm inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="presentation" class="w-4 h-4 text-slate-900"></i>
+              <span>🖥️ 全螢幕播放簡報</span>
             </button>
-            <button id="week-sim-shortcut-btn" onclick="goToWeekSimulator()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold items-center gap-1.5 shadow-sm transition">
+            <a id="week-pptx-btn" href="#" target="_blank" download class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>下載 PPTX</span>
+            </a>
+            <a id="week-project-zip-btn" href="#" target="_blank" download class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="folder-down" class="w-4 h-4"></i>
+              <span>下載專案包 (ZIP)</span>
+            </a>
+            <button id="week-quiz-btn" onclick="startWeeklyQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>當週 5 題快測</span>
+            </button>
+            <button id="week-sim-shortcut-btn" onclick="goToWeekSimulator()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-semibold items-center gap-1.5 shadow-sm transition">
               <i data-lucide="play" class="w-4 h-4"></i>
-              <span>流程成果驗證沙盒</span>
+              <span>成果驗證沙盒</span>
             </button>
           </div>
         </div>
@@ -481,11 +546,11 @@ body {
             </p>
           </div>
 
-          <!-- Pillar 3: 證照重點 -->
+          <!-- Pillar 3: 實務重點與觀念解析 -->
           <div class="bg-amber-50/60 rounded-xl p-4 border border-amber-100 space-y-2">
             <div class="flex items-center gap-2 text-amber-900 font-bold text-sm">
               <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
-              <span>專業證照高頻考點提點</span>
+              <span>實務重點與觀念解析</span>
             </div>
             <p id="week-cerps-focus-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
               載入中...
@@ -497,16 +562,20 @@ body {
         <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-md space-y-4 border border-purple-800">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/80 pb-3">
             <div class="flex items-center gap-2.5">
-              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md shadow">💻 電腦教室動手做</span>
-              <h3 id="week-ag-title" class="font-bold text-base text-white">本週 Antigravity 實作任務：載入中...</h3>
+              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md shadow">💻 零門檻動手做</span>
+              <h3 id="week-ag-title" class="font-bold text-base text-white">本週實作任務：載入中...</h3>
             </div>
-            <div class="flex items-center gap-2">
-              <a id="week-ag-zip-link" href="#" download class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="goToWeekSimulator()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                <span>⚡ 免安裝網頁沙盒一秒驗收</span>
+              </button>
+              <a id="week-ag-zip-link" href="#" download class="bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>下載本週專案包 (.zip)</span>
+                <span>下載專案包 (.zip)</span>
               </a>
-              <button onclick="switchTab('antigravity')" class="bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
-                <span>前往專案工作坊 ➔</span>
+              <button onclick="switchTab('antigravity')" class="bg-purple-950/80 hover:bg-purple-900 text-purple-200 font-medium px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 transition border border-purple-700">
+                <span>專案工作坊 ➔</span>
               </button>
             </div>
           </div>
@@ -1398,7 +1467,7 @@ body {
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <div>
-          <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">期末專題 10% 評分標準</span>
+          <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">期末成果報告參考格式</span>
           <h3 class="font-bold text-lg text-slate-900 mt-1 flex items-center gap-2">
             <i data-lucide="file-text" class="w-5 h-5 text-purple-600"></i>
             企業 Agentic AI 流程優化專題提案企劃書
@@ -1410,32 +1479,31 @@ body {
       </div>
 
       <!-- Proposal Form -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      <div class="space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">提案小組 / 學生：</label>
+            <input type="text" id="prop-student" placeholder="例：進企四系4甲 王小明" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">鎖定 ERP 營運模組：</label>
+            <input type="text" id="prop-module" placeholder="例：SD 銷售訂單自動化 / MM 採購合規核帳" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
+          </div>
+        </div>
+
         <div>
-          <label class="block font-bold text-slate-700 mb-1">專案主題名稱：</label>
-          <input type="text" id="prop-title" value="基於 Agentic AI 之 O2C 智慧訂單自動化與庫存 ATP 調度提案" class="w-full border border-slate-300 rounded p-2">
+          <label class="block font-semibold text-slate-700 mb-1">企業現行痛點 (AS-IS 流程障礙)：</label>
+          <textarea id="prop-painpoint" rows="2" class="w-full border border-slate-300 rounded-lg p-2 leading-relaxed" placeholder="說明人工打單慢、發票核帳易出錯或資訊孤島等問題..."></textarea>
         </div>
+
         <div>
-          <label class="block font-bold text-slate-700 mb-1">分組組別與組員姓名：</label>
-          <input type="text" id="prop-members" value="第 3 組：王小明、李大華、張雅婷" class="w-full border border-slate-300 rounded p-2">
+          <label class="block font-semibold text-slate-700 mb-1">Agentic AI 解決方案與人機協同架構 (TO-BE)：</label>
+          <textarea id="prop-solution" rows="3" class="w-full border border-slate-300 rounded-lg p-2 leading-relaxed" placeholder="說明 Trigger 觸發機制、Prompt 提示詞工程、調用之 ERP API Tools 與安全防線 Guardrails..."></textarea>
         </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">企業現況與營運痛點描述：</label>
-          <textarea id="prop-pain" rows="2" class="w-full border border-slate-300 rounded p-2">目前業務助理每日需花費 3~4 小時手動核對客戶非結構化採購 Email，再手動登入 ERP 查庫存打單，常發生打錯品號與超賣交期延誤之問題。</textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">所規劃之 Agentic AI 工作流與人機協同機制：</label>
-          <textarea id="prop-workflow" rows="3" class="w-full border border-slate-300 rounded p-2">1. 透過 Email Webhook 接收非結構化訂單文字。
-2. Sales Agent 呼叫 LLM 進行實體萃取，取得客戶代號、品號、數量。
-3. 呼叫 ERP API (erp_check_atp 與 erp_check_credit) 進行庫存可用量與信用核驗。
-4. 設定防呆門檻：訂單金額 > 50 萬元或 ATP 不足時，啟動 Human-in-the-Loop 主管審批。
-5. 核准後自動生成正式 ERP 銷售訂單 (SO)，並回傳確認函給客戶。</textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">預期效益評估 (量化 KPI)：</label>
-          <textarea id="prop-benefits" rows="2" class="w-full border border-slate-300 rounded p-2">• 訂單登打作業時間由 20 分鐘縮減至 1.5 秒 (效率提升 99%)
-• 消除手動鍵入之人為疏失 (錯誤率降至 0.05% 以下)
-• ATP 自動預警排產，交期達交率預估提升 15%</textarea>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">預期量化效益 (ROI)：</label>
+          <input type="text" id="prop-roi" placeholder="例：單據處理時間縮短 80%、錯帳率歸零、節省每週 15 小時人工對帳" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
         </div>
       </div>
 
@@ -1449,6 +1517,95 @@ body {
             <i data-lucide="printer" class="w-4 h-4"></i> 列印 / 另存 PDF
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FULLSCREEN SLIDE PRESENTATION PLAYER MODAL ==================== -->
+  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col select-none hidden">
+    <!-- Top Toolbar -->
+    <div class="h-14 bg-slate-900/90 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
+      <!-- Left: Course Tag & Week Select -->
+      <div class="flex items-center gap-3">
+        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded shadow">11501 ERP</span>
+        <span class="font-bold text-sm text-slate-200 hidden md:inline">邱俊維 博士 課堂簡報投影</span>
+        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer">
+          <!-- Filled by JS: Week 1 ~ 18 -->
+        </select>
+      </div>
+
+      <!-- Center: Slide Progress Indicator -->
+      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300">
+        <span>第</span>
+        <span id="slide-deck-current-num" class="text-amber-400 text-base font-black">1</span>
+        <span>/</span>
+        <span id="slide-deck-total-num" class="text-slate-400">10</span>
+        <span>頁</span>
+      </div>
+
+      <!-- Right: Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700" title="投影片目錄總覽">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">目錄</span>
+        </button>
+        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換全螢幕 (快速鍵 F)">
+          <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">全螢幕 (F)</span>
+        </button>
+        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700" title="下載本週 PPTX 檔案">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">PPTX</span>
+        </a>
+        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/40 hover:bg-rose-800 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800" title="關閉播放 (Esc)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">關閉</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Slide Stage Area -->
+    <div class="flex-1 flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden relative">
+      <!-- Floating Navigation Arrows -->
+      <button type="button" onclick="prevSlide()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="上一頁 (←)">
+        <i data-lucide="chevron-left" class="w-7 h-7"></i>
+      </button>
+      <button type="button" onclick="nextSlide()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
+        <i data-lucide="chevron-right" class="w-7 h-7"></i>
+      </button>
+
+      <!-- 16:9 Presentation Canvas Container -->
+      <div id="slide-stage" class="w-full max-w-6xl aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl shadow-2xl border border-slate-700/80 p-6 sm:p-10 md:p-14 flex flex-col justify-between relative overflow-hidden">
+        <!-- Rendered dynamically by renderSlide() in app.js -->
+        <div id="slide-content-container" class="h-full flex flex-col justify-between">
+          <!-- Slide Header, Body & Footer dynamically injected -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Control & Quick Progress Dots -->
+    <div class="h-12 bg-slate-900/90 border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-30 text-xs text-slate-400">
+      <div class="flex items-center gap-1" id="slide-dots-container">
+        <!-- Progress dots generated by JS -->
+      </div>
+      <div class="text-[11px] text-slate-400 hidden sm:block">
+        💡 鍵盤快速鍵：<kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">←</kbd> 上一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Space</kbd> 下一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">F</kbd> 全螢幕 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Esc</kbd> 關閉
+      </div>
+    </div>
+
+    <!-- Slide Thumbnails Drawer (Overlay inside modal) -->
+    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-12 max-h-72 bg-slate-900/98 border-t border-slate-700 p-4 overflow-y-auto hidden z-40 shadow-2xl transition-all">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
+          本週投影片目錄總覽（點擊快速跳轉）
+        </h4>
+        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs">
+          ✕ 隱藏目錄
+        </button>
+      </div>
+      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <!-- Filled by JS -->
       </div>
     </div>
   </div>
@@ -6408,6 +6565,1374 @@ body {
     "starter_code_preview": "# -*- coding: utf-8 -*-\n\"\"\"\nWeek 18 期末成果驗收：AI 賦能 ERP 流程優化專案發布\n學生姓名：__________   學號：__________\n\"\"\"\nimport json\n\ndef finalize_project_submission(config_file=\"sample_data.json\"):\n    with open(config_file, \"r\", encoding=\"utf-8\") as f:\n        proj = json.load(f)\n        \n    md_content = f\"\"\"# 萬能科技大學 企業資源規劃 (ERP) ✕ Agentic AI 期末專題成果報告\n\n## 專案主題：{proj.get('project_title')}\n- **組別**：{proj.get('group_nam..."
   }
 ];
+  window.OFFLINE_SLIDES = [
+  {
+    "week": 1,
+    "title": "課程導論、ERP 概念演進與數位轉型",
+    "subtitle": "企業核心流程整合 ✕ Agentic AI 前瞻應用",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "課程導論、ERP 概念演進與數位轉型",
+        "subtitle": "企業核心流程整合 ✕ Agentic AI 前瞻應用"
+      },
+      {
+        "type": "content",
+        "badge": "教師簡介",
+        "title": "授課教師個人自我介紹",
+        "bullets": [
+          "授課教師：邱俊維 博士 (Dr. Chun-Wei Chiu)",
+          "學歷背景：長庚大學 管理研究所 博士",
+          "專長領域：決策分析、AI Agent 實務、全端開發、ERP 企業資源規劃",
+          "授課時間：每週四 16:20 ~ 17:50 ｜ 上課地點：電腦教室",
+          "課業諮詢 (Office Hours)：每週一 15:00~16:00 (J801-1 研究室)"
+        ],
+        "footer": "聯絡信箱：jimchiu@vnu.edu.tw ｜ 電話：0976-595-981"
+      },
+      {
+        "type": "content",
+        "badge": "修課規範",
+        "title": "開課基本資訊與學期評分標準",
+        "bullets": [
+          "授課班級：進修部 企業管理系 四系 4 甲 (進企四系4甲)",
+          "上課時間：每週四 16:20 ~ 17:50 ｜ 上課地點：電腦教室",
+          "平時出席：20% (出席狀況檢核，比重適中輕鬆無負擔)",
+          "期中報告：40% (期中實務流程分析報告繳交)",
+          "期末報告：40% (期末 ERP 應用專題成果報告繳交)",
+          "★ 專業證照加分：考取 AI 賦能 ERP 或相關證照直接總成績加分！"
+        ],
+        "footer": "評分簡明好計算，請同學每週準時到課並登入教學平台！"
+      },
+      {
+        "type": "content",
+        "badge": "加分機制",
+        "title": "★ 專業證照特別加分規定",
+        "bullets": [
+          "修課期間考取 AI 賦能 ERP 或相關證照直接加分！",
+          "推薦證照一：中華企業資源規劃學會「AI 賦能 ERP 規劃師」",
+          "推薦證照二：中華企業資源規劃學會「ERP 規劃師 / 基礎檢定」",
+          "凡考取學會專業認證者，直接計入學期總成績特別加分！",
+          "落實「課堂學習即考照複習」，輔導全班順利考取證照！"
+        ],
+        "footer": "平台內建 200+ 題全真題庫，每週均配有 5 題快測助你輕鬆考照！"
+      },
+      {
+        "type": "content",
+        "badge": "教學節奏",
+        "title": "每週上課教學節奏 (100 分鐘標準配比)",
+        "bullets": [
+          "【前半段 50 分鐘】核心觀念精講與實務重點剖析",
+          "• 破冰引言 (10分) ➔ 單元架構圖解 (30分) ➔ 核心觀念解析 (10分)",
+          "【後半段 50 分鐘】流程實戰、情境演練與 AI 實務",
+          "• 企業情境模擬題 (35分) ➔ 防呆檢核 (10分) ➔ 隨堂快測評量 (5分)",
+          "全班在電腦教室一邊聽講、一邊同步動手執行 Antigravity 專案實作與驗收！"
+        ],
+        "footer": "高效率 100 分鐘，兼具「理論理解」與「實務操作」！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "企業營運痛點：什麼是「資訊孤島」？",
+        "bullets": [
+          "傳統企業各部門使用獨立系統，互不相通，形同孤島！",
+          "業務接單不知道倉庫庫存，容易超賣發生跳票危機",
+          "採購不知道工廠生產排程，盲目進貨導致原物料爆倉",
+          "跨部門傳遞單據依賴人工紙本鍵入，錯誤率高且效率低",
+          "ERP 的終極使命：打破部門穀倉，建立單一真實數據源！"
+        ],
+        "footer": "資訊孤島 (Information Island) 是 ERP 專業檢定必考核心概念！"
+      },
+      {
+        "type": "content",
+        "badge": "歷史演進",
+        "title": "ERP 系統演進關鍵四階段",
+        "bullets": [
+          "1960s MRP (材料需求規劃)：計算物料何時需要、需要多少",
+          "1980s MRPII (製造資源規劃)：納入產能、工時與成本財務控制",
+          "1990s ERP (企業資源規劃)：橫向打通銷配、採購、財務、人資",
+          "2020s Agentic AI 賦能 ERP：具備自主感知、工具調用與人機協同"
+        ],
+        "footer": "APICS 權威定義：ERP 為會計導向的企業資源整合系統！"
+      },
+      {
+        "type": "content",
+        "badge": "前瞻技術",
+        "title": "傳統 ERP vs Agentic AI 升級對比",
+        "bullets": [
+          "傳統 ERP：高度依賴人工鍵入單據，員工花費大量時間打單",
+          "現代 Agentic AI：自主解析非結構化 Email/LINE 訂單需求",
+          "AI Agent 能自動呼叫 ERP API 查詢 ATP 庫存並驗證客戶信用",
+          "內建安全邊界 (Guardrails)：大額單據自動觸發主管人機審批",
+          "從『流程數位化』躍升為『智慧自主化』企業營運大腦！"
+        ],
+        "footer": "本學期第 16 週將實作專屬 Agentic AI 企業工作流！"
+      },
+      {
+        "type": "content",
+        "badge": "重點解析",
+        "title": "ERP 專業核心實務觀念解析",
+        "bullets": [
+          "重點 1：ERP 名詞由 Gartner Group 提出，APICS 定義最權威",
+          "重點 2：ERP 本質為會計導向 (Accounting-oriented) 系統",
+          "重點 3：ERP 最主要效益為跨部門資訊整合與即時反應",
+          "重點 4：資訊科技 (IT) 已從競爭武器轉為企業生存必備基石"
+        ],
+        "footer": "每週完成平台隨堂 5 題快測，實務觀念輕鬆上手！"
+      }
+    ]
+  },
+  {
+    "week": 2,
+    "title": "企業模式與企業流程管理 (BPR)",
+    "subtitle": "打破部門穀倉 ✕ 端到端流程重構",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "企業模式與企業流程管理 (BPR)",
+        "subtitle": "打破部門穀倉 ✕ 端到端流程重構"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "釐清「職能組織導向」與「流程導向」之本質差異",
+          "掌握企業流程再造 (BPR, Business Process Reengineering) 原則",
+          "剖析企業三大核心營運循環 (O2C, P2P, Plan-to-Produce)",
+          "理解現代 Agentic AI 在流程自動化中扮演的協同角色"
+        ],
+        "footer": "流程思維是 ERP 導入與管理的核心靈魂！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：組織穀倉 (Silo Effect)",
+        "bullets": [
+          "部門各掃門前雪：業務只管衝業績、財務只管嚴審帳",
+          "客戶需要一個商品，單據在五個部門間流轉簽核兩星期",
+          "顧客只在乎『何時交貨？品質如何？』，不在乎部門分工",
+          "BPR 的核心精神：徹底揚棄職能分工，以顧客價值為導向！"
+        ],
+        "footer": "BPR 創始人 Michael Hammer：『不要自動化現有不良流程！』"
+      },
+      {
+        "type": "content",
+        "badge": "核心流程",
+        "title": "企業三大端到端商業循環",
+        "bullets": [
+          "1. 銷售循環 (Order-to-Cash, O2C)：報價 ➔ 訂單 ➔ 揀貨 ➔ 開立發票 ➔ 收款",
+          "2. 採購循環 (Procure-to-Pay, P2P)：請購 ➔ 詢價 ➔ 採購 ➔ 收料驗收 ➔ 付款",
+          "3. 生產循環 (Plan-to-Produce)：MPS 排程 ➔ MRP 展開 ➔ 製令工單 ➔ 完工入庫"
+        ],
+        "footer": "三大循環的單據流向與會計勾稽，是 ERP 實作與證照核心！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 賦能",
+        "title": "BPR 流程再造遇上 Agentic AI",
+        "bullets": [
+          "過去 BPR：靠人為畫流程圖、精簡表單關卡，仍有人工作業",
+          "現代 AI BPR：讓 AI Agents 接管跨部門重複性單據核對",
+          "案例：客戶 Email 自動由 Sales Agent 轉入 ERP 建立正式訂單",
+          "實現真正『零碰觸 (Zero-Touch)』端到端智慧流程！"
+        ],
+        "footer": "上課平台【Agentic Studio】內建完整流程體驗！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：BPR 強調根本性 (Fundamental) 重新思考與徹底重組",
+          "考點 2：BPR 主張以端到端顧客價值為核心，非局部優化",
+          "考點 3：企業導入 ERP 往往伴隨 BPR，以符合系統最佳實踐",
+          "考點 4：三大商業循環英文縮寫與單據先後順序為必考重點"
+        ],
+        "footer": "請同學登入教學平台完成第 2 週隨堂測驗 (5題)！"
+      }
+    ]
+  },
+  {
+    "week": 3,
+    "title": "銷售與配銷模組 (SD) - 訂單管理與 ATP 試算",
+    "subtitle": "客戶主檔設定 ✕ ATP 即時可承諾量計算",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "銷售與配銷模組 (SD) - 訂單管理與 ATP 試算",
+        "subtitle": "客戶主檔設定 ✕ ATP 即時可承諾量計算"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握客戶主檔 (Customer Master) 與商業定價條件",
+          "理解報價單 (Quotation) 轉正式銷售訂單 (SO) 之機制",
+          "精熟 ATP (Available-to-Promise，可承諾量) 公式與計算",
+          "實機操作平台【ATP 即時試算沙盒】並體驗急單調度"
+        ],
+        "footer": "ATP 試算是證照檢定與企業營運必考實務運算！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂破冰痛點：急單來了，業務能不能接？",
+        "bullets": [
+          "VIP 客戶致電：『我下週五要 100 件，能準時交貨嗎？』",
+          "業務只看倉庫庫存就滿口答應，殊不知早已被別的訂單預約！",
+          "結果造成嚴重超賣、違約罰款與客訴客戶流失！",
+          "解法：必須透過 ERP 即時執行 ATP (可承諾量) 檢核！"
+        ],
+        "footer": "沒有系統 ATP 檢核，業務就像盲人摸象！"
+      },
+      {
+        "type": "content",
+        "badge": "核心公式",
+        "title": "ATP (可承諾量) 計算公式大解析",
+        "bullets": [
+          "可用庫存 ＝ 現有庫存 － 安全存量底線",
+          "總可承諾量 (ATP) ＝ 現有庫存 ＋ 預計到貨 － 已承諾訂單 － 安全存量",
+          "唯有計算出 ATP > 客戶需求量，業務才能給予 100% 交期承諾！",
+          "若 ATP 不足：系統自動觸發分批交貨或向生管/採購預警！"
+        ],
+        "footer": "請記住：安全存量是最後一道防線，不可輕易動用！"
+      },
+      {
+        "type": "content",
+        "badge": "電腦實作",
+        "title": "上機實作：ATP 互動模擬沙盒演練",
+        "bullets": [
+          "一人一機實作：下載 Week 03 Antigravity 專案包，執行 calculate_atp() 並驗收！",
+          "步驟 1：調整庫存 100、在途到貨 50、已承諾 40、安全存量 20",
+          "步驟 2：輸入客戶急單需求 70 台，觀察 ATP 運算結果",
+          "步驟 3：體驗接單燈號判定 (🟢 充足放行 / 🟡 分批 / 🔴 缺貨)",
+          "步驟 4：檢視 Sales Order Agent 給出的調度建議"
+        ],
+        "footer": "完成實作操作即可解鎖平台【ATP 調度大師】成就勳章！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：ATP (Available-to-Promise) 的完整定義與公式",
+          "考點 2：客戶主檔欄位包含：信用額度、定價群組、送貨條款",
+          "考點 3：報價單轉銷售訂單可繼承原單據資料，避免人為重複鍵入",
+          "考點 4：當客戶訂單金額超過信用額度上限時，系統會自動阻擋"
+        ],
+        "footer": "考取相關證照享學期總成績加分！請完成隨堂 5 題快測！"
+      }
+    ]
+  },
+  {
+    "week": 4,
+    "title": "銷售與配銷模組 (SD) - 出貨、開立發票與應收",
+    "subtitle": "Order-to-Cash 完結 ✕ 借貸自動拋轉",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "銷售與配銷模組 (SD) - 出貨、開立發票與應收",
+        "subtitle": "Order-to-Cash 完結 ✕ 借貸自動拋轉"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握倉庫揀貨、包裝、出庫發料過帳之作業流程",
+          "理解開立發票 (Billing) 與應收帳款 (AR) 沖銷勾稽",
+          "精熟出貨發料與開立發票在會計總帳中的借貸分錄自動拋轉",
+          "剖析 O2C 流程中 AI Agent 在物流與帳單通知上的創新"
+        ],
+        "footer": "出貨不是銷配的結束，收款沖銷才是商業的落袋！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：出貨過帳與會計即時連動",
+        "bullets": [
+          "倉庫出貨刷條碼的瞬間，ERP 後台庫存數量立刻扣減！",
+          "與此同時，會計模組自動產生借貸傳票，無需人工貼傳票！",
+          "若系統未整合：庫存帳實不符、銷貨成本算錯、發票漏開！",
+          "這就是 ERP「資訊一次登錄，全系統即時同步」的核心威力！"
+        ],
+        "footer": "即時整合是 ERP 與傳統單機套裝會計軟體的最大差別！"
+      },
+      {
+        "type": "content",
+        "badge": "會計勾稽",
+        "title": "重要必考：出貨與發票自動拋轉分錄",
+        "bullets": [
+          "1. 倉庫出貨過帳時 (實體存貨減少)：",
+          "   【借：銷貨成本 ｜ 貸：存貨】",
+          "2. 財務開立銷售發票時 (確認債權與收益)：",
+          "   【借：應收帳款 ｜ 貸：銷貨收入、銷項稅額】",
+          "3. 收到客戶貨款時 (消除應收帳款)：",
+          "   【借：銀行存款 ｜ 貸：應收帳款】"
+        ],
+        "footer": "借貸自動拋轉分錄是期中考與 ERP 檢定核心檢定重點！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 應用",
+        "title": "Agentic AI 在 O2C 流程的最新實踐",
+        "bullets": [
+          "智慧倉儲 Agent：自動規劃撿貨最短路徑與裝箱演算法",
+          "帳單寄送 Agent：發票一開立，自動轉發 PDF 與付款連結至客戶 LINE",
+          "應收帳款預警 Agent：自動追蹤逾期款項並產出催收清單",
+          "大幅降低業務與會計例行追蹤工時達 80% 以上！"
+        ],
+        "footer": "流程自動化讓企業經營更敏捷、更具競爭力！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：銷貨發料時產生之分錄（借：銷貨成本，貸：存貨）",
+          "考點 2：開立發票 (Billing Document) 為應收帳款認列之依據",
+          "考點 3：Order-to-Cash (O2C) 單據完整順序：報價➔訂單➔出貨➔發票➔收款",
+          "考點 4：ERP 權限控管原則：出貨人員不可同時具備開立發票權限"
+        ],
+        "footer": "請進入教學平台完成第 4 週隨堂快測，檢測學習成果！"
+      }
+    ]
+  },
+  {
+    "week": 5,
+    "title": "採購與庫存管理 (MM) - 採購流程與供應商管理",
+    "subtitle": "請購與採購之分權 ✕ 供應商主檔與詢比議價",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "採購與庫存管理 (MM) - 採購流程與供應商管理",
+        "subtitle": "請購與採購之分權 ✕ 供應商主檔與詢比議價"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握請購單 (PR) 與採購單 (PO) 之本質區別與內控分權",
+          "理解供應商主檔 (Vendor Master) 與詢比議價流程",
+          "認識存貨管理指標：安全存量、再訂購點 (ROP) 與前置時間",
+          "探索 Procurement Agent 智慧採購代理人之實務應用"
+        ],
+        "footer": "採購是成本控制的第一線，內控嚴謹才能防堵弊端！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：現場缺料，領班能直接叫貨嗎？",
+        "bullets": [
+          "產線領班如果能直接打電話叫貨，會發生什麼事？",
+          "1. 價格沒人把關，可能買貴或買到劣質品",
+          "2. 缺乏採購單據，會計根本不知道這筆帳該不該付！",
+          "內控原則：各單位只能提『請購 (PR)』，由專職採購發出『採購單 (PO)』",
+          "分權制衡 (Segregation of Duties) 是企業舞弊防範的基石！"
+        ],
+        "footer": "請購與採購職能分離是內部稽核重要審查項目！"
+      },
+      {
+        "type": "content",
+        "badge": "作業流程",
+        "title": "Procure-to-Pay (P2P) 採購循環標準流程",
+        "bullets": [
+          "1. 請購申請 (PR)：各部門提出需求數量與預計使用日期",
+          "2. 詢價與比價 (RFQ)：採購向合格供應商發出詢價單並比價",
+          "3. 採購單簽核 (PO)：依採購授權金額階層進行主管審批",
+          "4. 發出訂單：透過 EDI / Email 將正式採購單傳送給供應商",
+          "5. 跟催與交期監控：追蹤廠商在途到貨狀況確保不缺料"
+        ],
+        "footer": "標準流程確保每一筆採購都合規且具備最佳價格優勢！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 賦能",
+        "title": "智慧採購代理 (Procurement Agent) 實務",
+        "bullets": [
+          "物料即時監控：當庫存跌破安全存量，AI 自動觸發請購草稿",
+          "供應商智慧比價：根據歷史達交率、品質良率與合約自動排序",
+          "自動化詢價草擬：AI 自動發送標準詢價信件並彙整廠商報價",
+          "採購專員只需做最終確認，例行比價作業時間縮減 70%！"
+        ],
+        "footer": "AI 賦能 ERP 重點提及智慧採購代理！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：請購單 (PR) 為內部文件，採購單 (PO) 具法律效力",
+          "考點 2：採購單核准階層依採購總金額大小而有所不同",
+          "考點 3：供應商評選四大維度：品質 (Q)、成本 (C)、交期 (D)、服務 (S)",
+          "考點 4：前置時間 (Lead Time) 為下單至貨物實際入庫的總時長"
+        ],
+        "footer": "請進入教學平台完成第 5 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 6,
+    "title": "採購與庫存管理 (MM) - 收料檢驗與三向比對",
+    "subtitle": "收料入庫 GR ✕ 三向比對 Three-Way Matching 稽核",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "採購與庫存管理 (MM) - 收料檢驗與三向比對",
+        "subtitle": "收料入庫 GR ✕ 三向比對 Three-Way Matching 稽核"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握收料驗收入庫 (Goods Receipt, GR) 與品檢過帳流程",
+          "深入理解會計「三向比對 (Three-Way Matching)」稽核原理",
+          "實機操作平台【三向比對除錯沙盒】破解 5 大企業發票陷阱",
+          "掌握會計容差率 (Tolerance) 與人機協同審批設定"
+        ],
+        "footer": "三向比對是企業財務應付帳款最關鍵的防護網！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：廠商請款，會計敢不敢直接付？",
+        "bullets": [
+          "供應商寄來 10 萬元發票，會計能不能看到發票就開支票？",
+          "絕對不行！萬一：",
+          "1. 廠商根本沒送貨？（幽靈發票詐騙）",
+          "2. 倉庫只收到 80 件，發票卻請款 100 件？（短裝溢開）",
+          "3. 當初 PO 約定單價 $3,200，發票卻擅自調漲到 $3,600？（單價浮報）",
+          "必須透過「三向比對」嚴密勾稽方能放行過帳！"
+        ],
+        "footer": "防範採購舞弊與帳目混亂的根本核心就是三向比對！"
+      },
+      {
+        "type": "content",
+        "badge": "核心機制",
+        "title": "三向比對 (Three-Way Matching) 稽核金三角",
+        "bullets": [
+          "1. 採購單 (PO)：當初採購主管核准的品號、數量與約定單價",
+          "2. 驗收單 (GR)：倉庫實際品檢簽收之合格良品數量",
+          "3. 廠商發票 (Invoice)：供應商正式開立之請款數量、單價與稅額",
+          "三者交集完全吻合 ➔ 系統全自動過帳拋轉應付帳款 (AP)！",
+          "任一項超額 ➔ 系統自動阻擋，觸發人工審批或退回發票！"
+        ],
+        "footer": "三向比對核心：數量比對 (PO vs GR vs Inv) ✕ 單價比對 (PO vs Inv)！"
+      },
+      {
+        "type": "content",
+        "badge": "電腦實作",
+        "title": "上機實作：三向比對除錯沙盒挑戰",
+        "bullets": [
+          "一人一機實作：下載 Week 06 Antigravity 專案包，實作三向比對引擎並產出 audit_report.json！",
+          "挑戰 1：正常完美吻合 ➔ 體驗【✅ 自動放行過帳】",
+          "挑戰 2：單價浮報陷阱 (單價 +12.5%) ➔ 執行【⚠️ 呈報主管】",
+          "挑戰 3：短裝溢開陷阱 (實收80件開100件) ➔ 執行【❌ 退回發票】",
+          "挑戰 4：容差內微幅稅差 ➔ 體驗系統自動小額調帳過帳"
+        ],
+        "footer": "完成除錯挑戰即可解鎖平台【三向核帳神探】榮譽勳章！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：三向比對涵蓋哪三項單據？(PO ✕ GR ✕ Invoice)",
+          "考點 2：收料過帳分錄（借：在途存貨/暫估應付，貸：應付帳款）",
+          "考點 3：容差率 (Tolerance) 允許微小四捨五入誤差內自動過帳",
+          "考點 4：發票比對不符時，系統會設定付款凍結 (Payment Block)"
+        ],
+        "footer": "考取相關證照直接計入學期總成績特別加分！"
+      }
+    ]
+  },
+  {
+    "week": 7,
+    "title": "生產規劃與控制 (PP) - 主排程與 BOM 表",
+    "subtitle": "MTS/MTO/ATO 生產型態 ✕ 產品結構清單 BOM",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "生產規劃與控制 (PP) - 主排程與 BOM 表",
+        "subtitle": "MTS/MTO/ATO 生產型態 ✕ 產品結構清單 BOM"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握三大製造生產型態 (MTS, MTO, ATO) 之特性與適用場景",
+          "深入理解物料清單 (Bill of Materials, BOM) 階層展開結構",
+          "掌握主生產排程 (MPS, Master Production Schedule) 之功能",
+          "實機操作平台【自行車多階層 BOM 結構展開沙盒】"
+        ],
+        "footer": "BOM 表是產品的基因密碼，也是 MRP 運算不可或缺的基石！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：三大生產型態的抉擇",
+        "bullets": [
+          "MTS (存貨生產)：依市場預測預先生產，如瓶裝飲料，交期快但怕庫存呆滯",
+          "MTO (訂單生產)：收到顧客訂單才投產，如客製機械，零庫存但交期長",
+          "ATO (組裝生產)：事先備妥模組零件，接單快速組裝，如戴爾電腦客製",
+          "不同產業型態必須配置不同的 ERP 生產規劃策略！"
+        ],
+        "footer": "ATO 兼具 MTS 的短交期與 MTO 的客製多樣化優勢！"
+      },
+      {
+        "type": "content",
+        "badge": "核心概念",
+        "title": "物料清單 (BOM 表) 多階層展開",
+        "bullets": [
+          "【Level 0 成品】：BIKE-001 登山自行車 (1 台)",
+          "【Level 1 總成件】：車架總成 x 1、輪組總成 x 2、傳動組 x 1",
+          "【Level 2 零組件】：(輪組底下) 輪圈 x 1、輪胎 x 1、輻條 x 36 根",
+          "生產 100 台自行車，需要多少輻條？",
+          "計算：100 台 ✕ 2 個輪組 ✕ 36 根輻條 ＝ 7,200 根輻條！"
+        ],
+        "footer": "BOM 表若有任何一個用量或損耗率設定錯誤，工廠就會斷料停機！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 應用",
+        "title": "AI 賦能製造業：CAD 自動生成工程 BOM",
+        "bullets": [
+          "過去痛點：工程師畫完 CAD 3D 圖，手動輸入幾百個零件 BOM 表，耗時且易錯",
+          "AI 突破：AI 視覺辨識自動讀取 CAD 圖紙與圖元，10 秒生成工程 BOM (EBOM)",
+          "跨部門串接：AI 自動對照庫存主檔品號，將 EBOM 轉換為生產用製造 BOM (MBOM)",
+          "大幅縮短新產品導入 (NPI) 前置時間達 60% 以上！"
+        ],
+        "footer": "智慧製造的核心在於設計與製造數據的無縫對接！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：BOM 表結構明確定義成品與子件之耗用數量比配",
+          "考點 2：ATO 生產型態在收到訂單前生產半成品，收到訂單後組裝成車",
+          "考點 3：主生產排程 (MPS) 是對最終成品（獨立需求）的生產計畫",
+          "考點 4：單階 BOM 只展開下一層，多階 BOM 展開至最底層原物料"
+        ],
+        "footer": "請進入平台完成第 7 週隨堂測驗！"
+      }
+    ]
+  },
+  {
+    "week": 8,
+    "title": "生產規劃與控制 (PP) - 物料需求規劃 (MRP)",
+    "subtitle": "MRP 三大輸入 ✕ 淨需求推導公式 ✕ 九宮格實作",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "生產規劃與控制 (PP) - 物料需求規劃 (MRP)",
+        "subtitle": "MRP 三大輸入 ✕ 淨需求推導公式 ✕ 九宮格實作"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "精熟 MRP (物料需求規劃) 三大核心輸入主檔",
+          "掌握淨需求 (Net Requirements) 計算核心公式與邏輯",
+          "理解前置時間 (Lead Time) 倒排與計畫發出訂單",
+          "實機操作平台【九宮格 MRP 淨需求推導運算沙盒】"
+        ],
+        "footer": "MRP 運算題為期中考與 ERP 檢定必考大題！"
+      },
+      {
+        "type": "content",
+        "badge": "三大輸入",
+        "title": "MRP 運算的三大核心輸入主檔",
+        "bullets": [
+          "1. 主生產排程 (MPS)：告訴系統『何時要生產多少最終成品？』",
+          "2. 物料清單 (BOM)：告訴系統『做一個成品需要哪些零件與數量？』",
+          "3. 庫存狀態檔 (Inventory File)：告訴系統『現有多少庫存？在途採購有多少？安全存量是多少？』",
+          "缺一不可！三大檔案結合，MRP 即可展開所有相依需求！"
+        ],
+        "footer": "ERP 檢定必考選擇題：下列何者非 MRP 三大輸入？答案常為員工考勤檔！"
+      },
+      {
+        "type": "content",
+        "badge": "核心公式",
+        "title": "MRP 淨需求推導公式大解密",
+        "bullets": [
+          "淨需求 ＝ 毛需求 － 現有可用庫存 － 預計在途到貨 ＋ 安全存量",
+          "若淨需求 > 0：代表庫存不足，必須排產或向廠商採購！",
+          "計畫發出訂單 (Release Date) ＝ 需求日 － 前置時間 (Lead Time)",
+          "例如：第 2 週需要 70 件，前置時間為 1 週，則必須在『第 1 週提前發出工令』！"
+        ],
+        "footer": "提前發出工令是保證生產線準時開工的關鍵！"
+      },
+      {
+        "type": "content",
+        "badge": "電腦實作",
+        "title": "上機實作：九宮格 MRP 淨需求運算",
+        "bullets": [
+          "一人一機實作：下載 Week 08 Antigravity 專案包，執行 MRP 淨需求展開並產出 mrp_schedule_output.json！",
+          "步驟 1：檢視輪組總成 (WHEEL-02) 第 1 週至第 4 週毛需求",
+          "步驟 2：自行填寫預期可用庫存與淨需求欄位",
+          "步驟 3：點選【🤖 AI 自動推導解答】，對照推算公式與答案",
+          "步驟 4：理解批量法則 (L4L 實需批量 vs 固定批量 FOQ)"
+        ],
+        "footer": "完成實作即可解鎖平台【MRP 運算專家】榮譽勳章！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：獨立需求 (Independent Demand) 指成車，相依需求指零件",
+          "考點 2：MRP 淨需求推導公式各參數的正負符號關係",
+          "考點 3：安全存量 (Safety Stock) 之目的在因應交期延誤與需求波動",
+          "考點 4：批量法則 (Lot Sizing) 如 L4L 逐批訂購法最符合精實生產"
+        ],
+        "footer": "下週為期中模擬檢定，請同學本週務必完成隨堂快測複習！"
+      }
+    ]
+  },
+  {
+    "week": 9,
+    "title": "期中學習評量與證照考點總複習",
+    "subtitle": "CH01~CH07 核心考點盤點 ✕ 期中 50 題全真模考",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "期中學習評量與證照考點總複習",
+        "subtitle": "CH01~CH07 核心考點盤點 ✕ 期中 50 題全真模考"
+      },
+      {
+        "type": "content",
+        "badge": "評量目標",
+        "title": "期中評量目標與複習指引",
+        "bullets": [
+          "全盤串聯前半學期核心模組：O2C 銷售 ✕ P2P 採購 ✕ PP 生產",
+          "釐清各模組單據流向、資訊勾稽與借貸分錄自動拋轉",
+          "於電腦教室上機實施【期中全真模擬考 50 題 (60分鐘)】",
+          "分析落點診斷雷達圖，精準掌握個人盲點並收錄至錯題筆記！"
+        ],
+        "footer": "期中成績佔學期總成績 25%，考取證照直接加分！"
+      },
+      {
+        "type": "content",
+        "badge": "名詞速查",
+        "title": "重要英文縮寫速記寶典 (必考！)",
+        "bullets": [
+          "O2C (Order-to-Cash)：銷售循環（報價➔訂單➔發貨➔發票➔收款）",
+          "P2P (Procure-to-Pay)：採購循環（請購➔採購➔收料➔發票➔付款）",
+          "ATP (Available-to-Promise)：可承諾量，業務接單交期依據",
+          "BOM (Bill of Materials)：物料清單，產品結構階層清單",
+          "MRP (Material Requirements Planning)：物料需求規劃"
+        ],
+        "footer": "掌握這五大英文縮寫與單據關係，就掌握了前半學期 80% 核心！"
+      },
+      {
+        "type": "content",
+        "badge": "分錄速記",
+        "title": "會計借貸自動拋轉核心規則速記",
+        "bullets": [
+          "銷貨發料過帳：【借：銷貨成本 ｜ 貸：存貨】",
+          "開立銷貨發票：【借：應收帳款 ｜ 貸：銷貨收入、銷項稅額】",
+          "採購驗收入庫：【借：在途存貨/暫估應付 ｜ 貸：應付帳款】",
+          "發票三向比對通過：【借：進項稅額 ｜ 貸：應付帳款正式確立】",
+          "ERP 確保實體物流與會計金流分秒不差、完美勾稽！"
+        ],
+        "footer": "借貸方向切勿混淆！出庫存貨在貸方，收料存貨在借方！"
+      },
+      {
+        "type": "content",
+        "badge": "期中模考",
+        "title": "期中全真模擬考測驗說明 (50 題)",
+        "bullets": [
+          "請同學開啟平台【ERP 實務題庫測驗中心 ➔ 期中全真模考】",
+          "測驗題數：50 題選擇題 ｜ 倒數計時：60 分鐘",
+          "涵蓋範圍：第 1 章至第 7 章完整考點 ＋ AI ERP 前瞻觀念",
+          "及格門檻：70 分合格線，模擬正式學會檢定考試標準！",
+          "交卷後系統即時顯示分數與各模組落點雷達圖，並提供逐題詳解！"
+        ],
+        "footer": "點選交卷後做錯的題目會自動收進【錯題筆記本】方便重練！"
+      }
+    ]
+  },
+  {
+    "week": 10,
+    "title": "會計與財務管理模組 (FI/CO)",
+    "subtitle": "財務會計 FI ✕ 管理會計 CO 責任中心與自動分錄",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "會計與財務管理模組 (FI/CO)",
+        "subtitle": "財務會計 FI ✕ 管理會計 CO 責任中心與自動分錄"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "釐清財務會計 (FI) 與管理會計 (CO) 之本質任務差異",
+          "掌握 ERP 跨模組作業之借貸分錄自動拋轉 (Posting) 機制",
+          "理解成本中心 (Cost Center) 與利潤中心 (Profit Center) 責任制",
+          "認識 AI 在智慧對帳與異常費用智慧稽核中之應用"
+        ],
+        "footer": "FI 顧外部合規，CO 助內部決策，是企業財務雙核心！"
+      },
+      {
+        "type": "content",
+        "badge": "對比解析",
+        "title": "財務會計 (FI) vs 管理會計 (CO) 核心對比",
+        "bullets": [
+          "財務會計 (FI)：",
+          "• 服務對象：外部投資人、銀行、稅捐稽徵機關",
+          "• 準則依據：嚴格遵行一般公認會計準則 (GAAP / IFRS)，要求借貸平衡",
+          "管理會計 (CO)：",
+          "• 服務對象：內部各級管理階層",
+          "• 準則依據：無固定格式，著重成本分攤、部門利潤分析與經營決策"
+        ],
+        "footer": "ERP 檢定經典考題：下列何者非 FI 模組之主要服務對象？"
+      },
+      {
+        "type": "content",
+        "badge": "責任中心",
+        "title": "管理會計 CO：成本中心與利潤中心",
+        "bullets": [
+          "成本中心 (Cost Center)：只產生費用、不產生營收之部門（如人資、資訊、總務）",
+          "利潤中心 (Profit Center)：具備獨立營收與成本之單位（如各大事業群、分公司）",
+          "成本分攤 (Cost Allocation)：將公共費用（如水電、租金）依合理動因分攤至各產品",
+          "ERP 讓高階主管能看清每一款產品、每一個專案的真實淨利！"
+        ],
+        "footer": "精準核算成本是企業定價與停止虧損業務的重要依據！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 應用",
+        "title": "AI 賦能財務：自動對帳與異常稽核 Agent",
+        "bullets": [
+          "銀行對帳 Agent：每日自動介接各大網銀明細，與 ERP 總帳快速勾稽",
+          "員工報支稽核 Agent：AI OCR 辨識差旅發票，自動查核是否重複報支或超出差旅標準",
+          "異常費用預警：利用異常偵測模型即時標註異常暴增的費用科目",
+          "提升財務月結效率，由過去耗時 7 天大幅縮減至 1 天以內！"
+        ],
+        "footer": "財務人員從貼憑證解脫，轉型為具備商業洞察的財務分析師！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：FI 主要產出資產負債表與綜合損益表供外部查閱",
+          "考點 2：CO 模組提供成本分攤與內部主管績效衡量",
+          "考點 3：ERP 自動分錄拋轉有效降低人工記帳疏失與重工",
+          "考點 4：總帳 (General Ledger, GL) 為所有子帳戶彙總之核心"
+        ],
+        "footer": "請進入教學平台完成第 10 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 11,
+    "title": "人力資源管理模組 (HR)",
+    "subtitle": "組織主檔 ✕ 差勤考勤 ✕ 薪資結算與總帳串接",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "人力資源管理模組 (HR)",
+        "subtitle": "組織主檔 ✕ 差勤考勤 ✕ 薪資結算與總帳串接"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握人力資源主檔架構 (職稱、職等、薪資結構、班表)",
+          "理解差勤打卡、請假、加班與薪資計算之系統勾稽",
+          "掌握薪資批次結算後對財務會計總帳之自動分錄拋轉",
+          "探索 HR Agent 在員工規章問答與出勤異常預警之實務"
+        ],
+        "footer": "人力資本是企業核心資源，HR 模組確保合法合規與激勵！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：每月發薪水，人資為什麼總是加班？",
+        "bullets": [
+          "五百人公司的薪資計算，為什麼每到月底人資焦頭爛額？",
+          "1. 員工請假單、加班單散落在紙本與通訊軟體中",
+          "2. 健保投保級距調整、勞保費扣繳、二代健保計算複雜",
+          "3. 算完薪水還要手動把應付薪資與費用一筆筆鍵入會計系統",
+          "HR 模組的價值：將考勤打卡、薪資計算與會計總帳完全串連！"
+        ],
+        "footer": "系統串聯後，千人企業薪資結算只需一鍵批次完成！"
+      },
+      {
+        "type": "content",
+        "badge": "業務流程",
+        "title": "HR 薪資結算與財務會計連動流程",
+        "bullets": [
+          "步驟 1：刷卡鐘資料自動匯入 ERP 差勤系統，比對班表與排班",
+          "步驟 2：系統自動核算加班費、事病假扣款與特休未休工資",
+          "步驟 3：依最新法定級距自動代扣勞保、健保與所得稅",
+          "步驟 4：產出薪資清冊並自動拋轉會計分錄：",
+          "       【借：薪資費用 ｜ 貸：應付薪資、代收款項】",
+          "步驟 5：一鍵產生銀行薪轉電匯媒體檔 (Media Exchange)！"
+        ],
+        "footer": "全程資料緊密勾稽，符合勞基法與稅法稽核規範！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 應用",
+        "title": "AI 賦能人資：HR 智慧夥伴 Agent",
+        "bullets": [
+          "員工規章問答 Agent：利用 RAG 檢索員工手冊，解答年假天數與福利規章",
+          "勞基法工時預警 Agent：當員工連續加班接近上限，自動向主管發出預警",
+          "智慧班表最佳化：依據門市歷史客流預測，自動產出最省人力之排班表",
+          "讓 HR 擺脫瑣碎行政問答，聚焦於人才發展與組織變革！"
+        ],
+        "footer": "人機協同提升員工滿意度，打造數位化幸福職場！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：HR 模組組織主檔為矩陣或樹狀層級架構",
+          "考點 2：薪資結算會自動產生會計傳票拋轉至財務總帳",
+          "考點 3：班表設定與打卡時間連動，為計算加班費之基礎",
+          "考點 4：員工主檔為機敏個資，必須落實角色存取權限 (RBAC) 控管"
+        ],
+        "footer": "請進入平台完成第 11 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 12,
+    "title": "供應鏈管理 (SCM) 與跨企業協同運作",
+    "subtitle": "長鞭效應成因 ✕ 啤酒遊戲體驗 ✕ VMI 供應商管理庫存",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "供應鏈管理 (SCM) 與跨企業協同運作",
+        "subtitle": "長鞭效應成因 ✕ 啤酒遊戲體驗 ✕ VMI 供應商管理庫存"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "深入剖析供應鏈「長鞭效應 (Bullwhip Effect)」成因與危害",
+          "掌握供應商管理庫存 (VMI, Vendor Managed Inventory) 運作模式",
+          "實機操作平台【長鞭效應震撼模擬沙盒】體驗資訊透明之威力",
+          "理解供應鏈能見度 (Visibility) 與 JIT 及時生產理念"
+        ],
+        "footer": "供應鏈競爭是現代企業競爭的最高維度！"
+      },
+      {
+        "type": "content",
+        "badge": "震撼破冰",
+        "title": "課堂痛點破冰：什麼是長鞭效應？",
+        "bullets": [
+          "消費者只是因為週末烤肉，稍微多買了 10% 的洋芋片",
+          "零售商怕缺貨，向批發商訂了 130% 的庫存",
+          "批發商為了規模經濟與安全考量，向製造廠訂了 180%",
+          "製造廠擴建生產線，向馬鈴薯原料商下了 240% 的巨額訂單！",
+          "這就是長鞭效應：終端微小變動，在供應鏈上游掀起海嘯！"
+        ],
+        "footer": "缺乏資訊共享導致整個供應鏈堆疊了極高庫存成本與呆滯風險！"
+      },
+      {
+        "type": "content",
+        "badge": "成因剖析",
+        "title": "長鞭效應四大關鍵成因 (ERP 檢定必考！)",
+        "bullets": [
+          "1. 需求預測更新 (Demand Forecast Updating)：各層級基於放大後的訂單重新預測",
+          "2. 批量訂購 (Order Batching)：為湊滿一卡車或折扣，拉長訂購週期",
+          "3. 價格促銷波動 (Price Fluctuations)：折扣促銷引起下游非理性囤貨",
+          "4. 配額配銷博弈 (Rationing and Shortage Gaming)：缺貨時下游虛報訂單搶配額"
+        ],
+        "footer": "四大成因交互作用，是造成供應鏈週期性大賺大賠的主因！"
+      },
+      {
+        "type": "content",
+        "badge": "平抑對策",
+        "title": "破解長鞭效應的解方：VMI 協同",
+        "bullets": [
+          "什麼是 VMI (Vendor Managed Inventory，供應商管理庫存)？",
+          "傳統模式：零售商決定何時叫貨、叫多少貨",
+          "VMI 模式：零售商向供應商開放即時銷售 (POS) 與庫存數據，由供應商主動負責補貨！",
+          "效益：消除中間預測失真，上游直接掌握終端真實脈動！",
+          "搭配跨企業 AI SCM Agent，實現供應鏈端到端資訊透明協同！"
+        ],
+        "footer": "沃爾瑪 (Walmart) 與寶僑 (P&G) 便是靠 VMI 成為全球供應鏈典範！"
+      },
+      {
+        "type": "content",
+        "badge": "電腦實作",
+        "title": "上機實作：長鞭效應模擬沙盒體驗",
+        "bullets": [
+          "一人一機實作：下載 Week 11 Antigravity 專案包，模擬供應鏈波動並計算長鞭效應指數！",
+          "步驟 1：點選【顧客需求 +15%】，觀察各層級訂單放大至 2.45 倍！",
+          "步驟 2：閱讀長鞭效應診斷報告，感受傳統資訊孤島的代價",
+          "步驟 3：勾選【✨ 啟用 AI 驅動 VMI 協同模式】",
+          "步驟 4：觀察圖表波動如何被奇蹟般撫平為 1.0 倍同步！"
+        ],
+        "footer": "完成實作即可解鎖平台【長鞭效應平抑者】榮譽勳章！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：長鞭效應指下游微小波動在上游被逐級放大的現象",
+          "考點 2：長鞭效應四大成因英文名詞與內涵為核心檢定重點",
+          "考點 3：VMI 模式由供應商負責監控庫存並主動補貨",
+          "考點 4：資訊共享 (Information Sharing) 是消除長鞭效應的最有效方法"
+        ],
+        "footer": "請進入教學平台完成第 12 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 13,
+    "title": "客戶關係管理 (CRM) 與全通路行銷",
+    "subtitle": "CRM 三大構面 ✕ 顧客終身價值 CLV ✕ AI 客服 Agent",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "客戶關係管理 (CRM) 與全通路行銷",
+        "subtitle": "CRM 三大構面 ✕ 顧客終身價值 CLV ✕ AI 客服 Agent"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握客戶關係管理 (CRM) 三大核心構面與銷售漏斗",
+          "理解顧客終身價值 (Customer Lifetime Value, CLV) 計算與 RFM 分群",
+          "探索 CRM 與 ERP 核心資料庫（訂單、庫存、發票）之整合",
+          "實作平台【RMA 售後服務與退換貨 AI 客服 Agent】"
+        ],
+        "footer": "留住一位老客戶的成本只有開發一位新客戶的五分之一！"
+      },
+      {
+        "type": "content",
+        "badge": "核心架構",
+        "title": "CRM 客戶關係管理三大核心構面",
+        "bullets": [
+          "1. 操作型 CRM (Operational CRM)：前線銷售自動化 (SFA)、行銷自動化與客服中心",
+          "2. 分析型 CRM (Analytical CRM)：大數據分析顧客購買偏好、RFM 分群與流失預警",
+          "3. 協同型 CRM (Collaborative CRM)：整合官網、LINE、門市全通路一致溝通",
+          "三大構面互相支撐，將每一次接觸轉化為長期顧客忠誠度！"
+        ],
+        "footer": "操作型負責前線作戰，分析型提供智慧大腦，協同型打通多渠道！"
+      },
+      {
+        "type": "content",
+        "badge": "顧客價值",
+        "title": "顧客終身價值 (CLV) 與 RFM 分群",
+        "bullets": [
+          "顧客終身價值 (CLV)：顧客在與企業維持關係的整個生命週期中所帶來的總利潤",
+          "RFM 經典顧客分群模型：",
+          "• R (Recency)：最近一次消費時間（越近越活躍）",
+          "• F (Frequency)：特定期間內消費頻率（越高越忠誠）",
+          "• M (Monetary)：累計消費金額（越高貢獻越大）",
+          "透過 RFM 分群實施差異化精準行銷，最大化行銷 ROI！"
+        ],
+        "footer": "高價值 VIP 顧客值得享有專屬客服與最優先交期保障！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 實務",
+        "title": "Agentic AI 賦能：售後退換貨 RMA Agent",
+        "bullets": [
+          "傳統客服：顧客致電查保固，客服反覆向倉庫確認退貨政策，耗時 15 分鐘",
+          "智慧 RMA Agent：",
+          "1. 接收顧客自然語言詢問，自動呼叫 ERP 查詢歷史訂單出貨日",
+          "2. 比對保固條款：30 天內免費換新，1 年內免費維修",
+          "3. 自動於 ERP 生成 RMA 單號，並呼叫物流 API 安排黑貓到府取件",
+          "4. 全自動完成僅需 2 秒，大幅提升客戶尊榮體驗！"
+        ],
+        "footer": "請同學在平台【Agentic Studio】中體驗 RMA 客服 Agent！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：CRM 三大構面（操作型、分析型、協同型）之定義與區隔",
+          "考點 2：SFA (Sales Force Automation，銷售自動化) 屬於操作型 CRM",
+          "考點 3：顧客終身價值 (CLV) 為長期利潤總和，非單次交易額",
+          "考點 4：CRM 必須與 ERP 訂單庫存整合，才能提供精準售後服務"
+        ],
+        "footer": "請進入教學平台完成第 13 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 14,
+    "title": "商業智慧 (BI) 與企業營運大數據分析",
+    "subtitle": "資料倉儲 DW ✕ ETL 清洗 ✕ OLAP 多維度切片分析",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "商業智慧 (BI) 與企業營運大數據分析",
+        "subtitle": "資料倉儲 DW ✕ ETL 清洗 ✕ OLAP 多維度切片分析"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "釐清交易型資料庫 (OLTP) 與分析型資料倉儲 (OLAP) 之差異",
+          "掌握 ETL (Extract-Transform-Load，抽取-轉換-載入) 流程",
+          "掌握 OLAP 多維度分析五大操作 (切片、切塊、鑽取、彙總、旋轉)",
+          "認識 AI 驅動之商業智慧 (AI-driven BI) 與自然語言決策儀表板"
+        ],
+        "footer": "資料是現代企業的新石油，BI 是提煉高價值汽油的精煉廠！"
+      },
+      {
+        "type": "content",
+        "badge": "對比解析",
+        "title": "OLTP 交易處理 vs OLAP 分析處理",
+        "bullets": [
+          "OLTP (線上交易處理，如 ERP)：",
+          "• 目的：日常交易處理，強調高併發、快速回應、即時 ACID 寫入",
+          "• 資料特性：高度正規化、存放最新即時明細資料",
+          "OLAP (線上分析處理，如 資料倉儲 BI)：",
+          "• 目的：支援高階主管策略決策，強調複雜多維度查詢",
+          "• 資料特性：星狀綱要 (Star Schema)、存放大量歷史彙總資料"
+        ],
+        "footer": "不可直接在 ERP 交易庫跑大數據報表，否則會導致產線打單停擺！"
+      },
+      {
+        "type": "content",
+        "badge": "核心技術",
+        "title": "ETL 流程與 OLAP 五大操作",
+        "bullets": [
+          "ETL 流程：抽取 (Extract) ➔ 清洗轉換 (Transform) ➔ 載入倉儲 (Load)",
+          "OLAP 多維度分析五大神技：",
+          "1. 切片 (Slice)：固定某一維度觀察（如只看 2026 年）",
+          "2. 切塊 (Dice)：設定多個維度範圍（如北部地區 ✕ 登山車）",
+          "3. 向下鑽取 (Drill-Down)：由年度細看至月份、每日明細",
+          "4. 向上彙總 (Roll-Up)：由門市向上加總至全國總額",
+          "5. 樞紐旋轉 (Pivot)：行列維度對調，變換報表觀察角度"
+        ],
+        "footer": "OLAP 五大操作為 ERP 專業證照與期末測驗必考核心考點！"
+      },
+      {
+        "type": "content",
+        "badge": "AI 前瞻",
+        "title": "AI 時代的商業智慧：AI-driven BI",
+        "bullets": [
+          "過去痛點：主管想看特殊交叉分析，需向資訊部提需求等待兩週",
+          "現代突破：主管直接以自然語言詢問 AI：",
+          "『上個月哪一款產品在桃園廠毛利率下滑最多？原因為何？』",
+          "AI Agent 自動生成 SQL 查詢資料倉儲，秒產視覺化圖表與歸因分析！",
+          "實現真正『人人都擁有專屬營運數據分析師』的智慧決策！"
+        ],
+        "footer": "AI 賦能 ERP 單元高度關注生成式決策支援！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：OLTP 處理日常交易，OLAP 支援管理決策分析",
+          "考點 2：ETL 為資料倉儲建置中最耗時但最重要的資料清洗階段",
+          "考點 3：OLAP 切片 (Slice) 與切塊 (Dice) 的精確定義辨析",
+          "考點 4：KPI (關鍵績效指標) 儀表板提供高階主管即時營運總覽"
+        ],
+        "footer": "請進入教學平台完成第 14 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 15,
+    "title": "ERP 系統導入方法論與系統評選",
+    "subtitle": "五大導入生命週期 ✕ 關鍵成功因素 CSF ✕ 變革管理",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "ERP 系統導入方法論與系統評選",
+        "subtitle": "五大導入生命週期 ✕ 關鍵成功因素 CSF ✕ 變革管理"
+      },
+      {
+        "type": "content",
+        "badge": "學習目標",
+        "title": "本週核心學習目標",
+        "bullets": [
+          "掌握 ERP 導入五大生命週期 (準備 ➔ 藍圖 ➔ 實現 ➔ 上線 ➔ 維運)",
+          "剖析 ERP 專案關鍵成功因素 (CSF) 與失敗風險成因",
+          "掌握三大系統切換策略 (大爆炸 Big Bang vs 階段切換 vs 平行運作)",
+          "理解組織變革管理 (Change Management) 克服員工抗拒之策略"
+        ],
+        "footer": "三分技術，七分管理，十二分資料！導入成敗關鍵在人與管理！"
+      },
+      {
+        "type": "content",
+        "badge": "痛點破冰",
+        "title": "課堂痛點破冰：為什麼超過 40% 的 ERP 導入失敗？",
+        "bullets": [
+          "花費數千萬採購世界頂級 ERP，為什麼最後卻落得上線失敗？",
+          "失敗主因從來不是軟體程式寫錯，而是：",
+          "1. 高階主管未全程承諾支持，部門主管各自角力杯葛",
+          "2. 員工習慣原有舊做法，抗拒變革，甚至私下繼續用 Excel 記帳",
+          "3. 主檔資料未落實清洗，垃圾進垃圾出 (Garbage in, Garbage out)",
+          "4. 過度客製化，破壞了 ERP 原本內建的最佳實踐流程 (Best Practices)！"
+        ],
+        "footer": "客製化越多，未來系統升級與維護成本就越高！"
+      },
+      {
+        "type": "content",
+        "badge": "導入階段",
+        "title": "ERP 導入標準生命週期五大階段",
+        "bullets": [
+          "1. 專案準備 (Project Preparation)：成立專案小組、明確目標與預算",
+          "2. 企業藍圖 (Business Blueprint)：流程差異分析 (GAP Analysis)、定義未來流程",
+          "3. 系統實現 (Realization)：系統參數設定、客製化開發、單元與整合測試",
+          "4. 最後準備 (Final Preparation)：終端使用者教育訓練、主檔與期初資料轉檔",
+          "5. 正式上線與維運 (Go-Live & Support)：系統切換、現場指導與持續優化"
+        ],
+        "footer": "五大階段按部就班，是大型企業 ERP 上線成功的定海神針！"
+      },
+      {
+        "type": "content",
+        "badge": "切換策略",
+        "title": "系統切換三大策略對比",
+        "bullets": [
+          "1. 大爆炸直接切換 (Big Bang / Direct Cutover)：某特定日舊系統全停、新系統全面上線。工期短成本低，但風險最高！",
+          "2. 階段式切換 (Phased Approach)：按模組或分公司分批上線。風險分散，但需建立過渡期介面。",
+          "3. 平行運作 (Parallel Run)：新舊系統並行記帳一段時間。最安全穩健，但員工工作量倍增。"
+        ],
+        "footer": "企業應依自身承受風險之能力與資源選擇最適合的切換策略！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "ERP 專業核心考點解析",
+        "bullets": [
+          "考點 1：高階主管全力支持與承諾 (Top Management Support) 為公認首要 CSF",
+          "考點 2：大爆炸切換 vs 階段切換之優缺點比較為重點問答與選擇題",
+          "考點 3：標準化軟體與客製化 (Customization) 之權衡原則",
+          "考點 4：終端使用者教育訓練不足為導致系統上線抗拒的主因"
+        ],
+        "footer": "請進入教學平台完成第 15 週隨堂快測！"
+      }
+    ]
+  },
+  {
+    "week": 16,
+    "title": "AI 時代的 ERP：AI Agent 與流程自動化實務",
+    "subtitle": "AI 賦能 ERP 考點 ✕ ReAct 推理框架 ✕ 專題企劃書產出",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "AI 時代的 ERP：AI Agent 與流程自動化實務",
+        "subtitle": "AI 賦能 ERP 考點 ✕ ReAct 推理框架 ✕ 專題企劃書產出"
+      },
+      {
+        "type": "content",
+        "badge": "前瞻亮點",
+        "title": "本週核心學習目標 (本課程核心前瞻亮點！)",
+        "bullets": [
+          "深入掌握《從 ERP 到 AI 數位轉型》企業實務核心",
+          "掌握 ERP 整合 AI 的四層架構 (基礎設施層 ➔ 資料層 ➔ 模型層 ➔ 流程層)",
+          "理解 Agentic AI 與傳統 RPA 差異，精熟 ReAct 推理框架",
+          "於平台【Agentic Studio】實作並一鍵匯出期末專題企劃書 (10%)"
+        ],
+        "footer": "學會規劃企業 Agentic AI 流程，是邁向高薪 AI 顧問的核心門票！"
+      },
+      {
+        "type": "content",
+        "badge": "架構精析",
+        "title": "AI 賦能 ERP 四層整合架構 (ERP 檢定必考！)",
+        "bullets": [
+          "1. 基礎設施層 (Infrastructure)：提供雲端算力與高擴展性儲存環境",
+          "2. 資料層 (Data Layer)：集中治理 ERP 交易數據，建立 AI-Ready 純淨資料湖",
+          "3. 模型層 (Model Layer)：大語言模型 (LLM)、預測分析模型與 RAG 知識檢索",
+          "4. 流程層 (Process Layer)：將 AI Agents 嵌入 ERP 端到端作業自主調用工具！"
+        ],
+        "footer": "流程層是 Agentic AI 真正落地發揮企業效益的最高指揮中心！"
+      },
+      {
+        "type": "content",
+        "badge": "概念辨析",
+        "title": "Agentic AI 智慧代理人 vs 傳統 RPA 流程機器人",
+        "bullets": [
+          "傳統 RPA：依照既定腳本執行死板點擊，遇到非預期錯誤直接崩潰中斷",
+          "Agentic AI：具備目標感知、自主推理規劃 (Planning)、工具調用 (Tool Calling)",
+          "能理解非結構化文字（如客戶亂碼格式 Email），並自我反思除錯",
+          "配合人機協同 (Human-in-the-Loop)：正常單據秒級自主放行，異常單據召喚人類覆核！"
+        ],
+        "footer": "Agentic AI 賦予企業流程前所未有的彈性與適應力！"
+      },
+      {
+        "type": "content",
+        "badge": "推理框架",
+        "title": "ReAct (Reasoning + Acting) 推理框架大解密",
+        "bullets": [
+          "Cycle 1 - 思考 (Thought)：『客戶來信要訂 50 台車，先查庫存 ATP 是否充裕』",
+          "Cycle 2 - 行動 (Action)：呼叫 ERP 工具 `erp_check_atp(item, qty)`",
+          "Cycle 3 - 觀察 (Observation)：接收 ERP API 回傳『目前剩餘 ATP 為 60 台，庫存充裕』",
+          "Cycle 4 - 思考與防呆 (Thought & Guardrail)：『金額超額，召喚主管審核』",
+          "Cycle 5 - 最終成果 (Final Output)：正式產生 ERP 銷售訂單 #SO-20260909-088！"
+        ],
+        "footer": "請在平台上點擊【🚀 啟動 ReAct 模擬】親眼見證思考日誌！"
+      },
+      {
+        "type": "content",
+        "badge": "專題實作",
+        "title": "期末專題實作：產出 Agentic AI 專題企劃書",
+        "bullets": [
+          "一人一機實作：下載 Week 16 Antigravity 專案包，撰寫 ReAct Agent 自主調用 ERP API！",
+          "自選一項企業實務範本：O2C 智慧訂單 / P2P 智慧核帳 / MRP 智慧補貨 / CRM 退換貨",
+          "調整觸發器、Prompt 指令、勾選 ERP 工具並設定防呆門檻",
+          "點選【產出學生專題企劃書】，填入組員名單與預期效益量化 KPI",
+          "點選【下載 Markdown】或【列印/另存 PDF】，即可繳交期末 10% 專題作業！"
+        ],
+        "footer": "完成專題規劃即可解鎖平台【Agentic AI 架構師】榮譽成就勳章！"
+      },
+      {
+        "type": "content",
+        "badge": "證照考點",
+        "title": "AI 賦能 ERP 專業考點解析",
+        "bullets": [
+          "考點 1：AI ERP 四層架構中調度 Agents 執行業務的是『流程層』",
+          "考點 2：Agentic AI 核心特徵為自主感知、推理規劃與工具調用",
+          "考點 3：人機協同 (Human-in-the-Loop) 於重大金額或異常時必須由人類介入",
+          "考點 4：主檔資料治理 (Data Governance) 是避免垃圾進垃圾出的首要前提"
+        ],
+        "footer": "考取 AI 賦能 ERP 證照直接加分！請完成隨堂 5 題快測！"
+      }
+    ]
+  },
+  {
+    "week": 17,
+    "title": "ERP 專業考前總衝刺與全真模擬測驗",
+    "subtitle": "15 章考點精華速記 ✕ 100 題全真模擬考 ✕ 及格加分衝刺",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "ERP 專業考前總衝刺與全真模擬測驗",
+        "subtitle": "15 章考點精華速記 ✕ 100 題全真模擬考 ✕ 及格加分衝刺"
+      },
+      {
+        "type": "content",
+        "badge": "衝刺目標",
+        "title": "本週考前衝刺目標",
+        "bullets": [
+          "全冊 15 章 ＋ AI-ERP 前瞻單元核心觀念快速總盤點",
+          "破除出題慣性陷阱與易混淆名詞（ATP, BOM, MRP, 三向比對）",
+          "於電腦教室實施【期末全真考照衝刺 100 題 (100分鐘)】",
+          "鎖定 70 分及格門檻，解鎖模擬合格證書，準備正式考照領取特別加分！"
+        ],
+        "footer": "學期總成績特別加分！請全班同學全力以赴！"
+      },
+      {
+        "type": "content",
+        "badge": "重點速記",
+        "title": "全冊 15 章實務核心觀念終極盤點",
+        "bullets": [
+          "• CH01~02：ERP 定義、四階段演進、BPR 以顧客價值為核心",
+          "• CH07 (SD)：ATP 可承諾量公式、出貨分錄（借：銷貨成本，貸：存貨）",
+          "• CH09 (MM)：請購 vs 採購分權、三向比對 (PO ✕ GR ✕ Invoice) 稽核",
+          "• CH08 (PP)：三大生產型態 (MTS/MTO/ATO)、BOM 表、MRP 淨需求推導",
+          "• CH12~13 (FI/CO)：FI 對外遵行 GAAP，CO 對內成本分攤與利潤中心",
+          "• CH06/12 (SCM)：長鞭效應四大成因、VMI 供應商管理庫存協同",
+          "• CH13 (AI)：四層架構、ReAct 推理、AI 採購/客服代理人"
+        ],
+        "footer": "考前熟讀此張投影片，即可掌握 ERP 專業 85% 以上核心觀念！"
+      },
+      {
+        "type": "content",
+        "badge": "期末模考",
+        "title": "100 題全真模擬檢定考實施說明",
+        "bullets": [
+          "請同學開啟平台【ERP 實務題庫測驗中心 ➔ 期末全真衝刺 (100題)】",
+          "測驗時間：100 分鐘 ｜ 及格門檻：70 分",
+          "答題時注意控制節奏，平均每題 45 秒，遇難題先做記號先跳過",
+          "全真模擬學會檢定倒數計時環境，提前適應真實考試壓力！",
+          "交卷後系統立即進行落點分析，考取 70 分以上解鎖【專業模擬檢定合格證明】！"
+        ],
+        "footer": "做錯的題目請善用【錯題筆記本】進行考前專注重練！"
+      },
+      {
+        "type": "content",
+        "badge": "考照加分",
+        "title": "★ 考照特別加分最後提醒",
+        "bullets": [
+          "凡於修課期間考取 AI 賦能 ERP 或相關專業證照者：",
+          "👉 請將證照影本或合格成績單上傳或繳交給老師",
+          "👉 直接計入學期總成績特別加分！",
+          "取得專業證照，為未來實習、就業、履歷加分爭取最大優勢！"
+        ],
+        "footer": "邱老師預祝全班同學考照順利，全員高分通過！"
+      }
+    ]
+  },
+  {
+    "week": 18,
+    "title": "期末成果驗收 ／ 企業資源規劃專業證照檢定",
+    "subtitle": "專題成果講評 ✕ 學期總結 ✕ 智慧商管未來職涯發展",
+    "slides": [
+      {
+        "type": "cover",
+        "title": "期末成果驗收 ／ 企業資源規劃專業證照檢定",
+        "subtitle": "專題成果講評 ✕ 學期總結 ✕ 智慧商管未來職涯發展"
+      },
+      {
+        "type": "content",
+        "badge": "學期總結",
+        "title": "18 週學習成果總結：我們掌握的三大核心實力",
+        "bullets": [
+          "1. 企業端到端流程整合力：透徹掌握 O2C, P2P, PP, FI 各模組運作與勾稽",
+          "2. Agentic AI 流程規劃前瞻力：學會設計智慧代理人、ReAct 框架與人機協同",
+          "3. 專業證照實戰通過力：熟練 200+ 題庫與實作題，取得專業認證並享加分！"
+        ],
+        "footer": "萬能科大企管系培育兼具「流程思維」與「數位前瞻力」之頂尖人才！"
+      },
+      {
+        "type": "content",
+        "badge": "專題展演",
+        "title": "AI 輔助企業流程專題提案評析",
+        "bullets": [
+          "各組同學展現優秀的企業痛點洞察與 Agentic AI 解決方案",
+          "O2C 智慧訂單組：成功解決業務手動打單痛點，交期準確率大幅躍升",
+          "P2P 智慧核帳組：嚴謹落實三向比對內控，零接觸防堵幽靈發票",
+          "MRP 預測補貨組：精準推導淨需求，有效消除工廠缺料危機",
+          "CRM 售後客服組：結合 RAG 與保固規章，打造尊榮秒級退換貨體驗！"
+        ],
+        "footer": "專題成果可直接放入個人求職作品集 (Portfolio) 中！"
+      },
+      {
+        "type": "content",
+        "badge": "職涯發展",
+        "title": "智慧商管與 ERP 人才未來職場發展藍圖",
+        "bullets": [
+          "1. ERP 系統導入顧問 (ERP Consultant)：鼎新、SAP、Oracle 原廠與管顧業高薪搶手",
+          "2. 企業商業流程分析師 (Business Process Analyst, BPA)：引領企業數位轉型",
+          "3. 供應鏈與排程規劃師 (Supply Chain / Material Planner)：高科技製造業核心支柱",
+          "4. 企業 AI Agent 流程架構師：銜接業務與 AI 技術的新興高薪職缺！"
+        ],
+        "footer": "具備跨領域『業務流程 ✕ AI 應用』的人才，職場身價無可取代！"
+      },
+      {
+        "type": "content",
+        "badge": "老師寄語",
+        "title": "邱俊維 博士 課堂寄語與結語",
+        "bullets": [
+          "科技會不斷迭代，但『以顧客價值為核心的端到端流程思維』永不過時！",
+          "學會與 AI 代理人協同合作，讓 AI 幫你做繁瑣例行工作，由你掌控關鍵決策",
+          "保持對新科技的好奇心，大膽嘗試、動手驗證，勇敢迎向智慧商業時代！",
+          "感謝進企四系4甲全體同學一學期的認真投入與精彩互動！"
+        ],
+        "footer": "祝各位同學校園證照檢定順利通過！未來展翅高飛、前程似錦！"
+      }
+    ]
+  }
+];
 </script>
 <script>/**
  * 萬能科技大學 - 企業資源規劃 (ERP) ✕ Agentic AI 互動教學平台
@@ -6498,7 +8023,7 @@ function initFirebase() {
         if (user) {
           console.log('👤 Google 使用者已登入:', user.email, user.uid);
           const userEmail = (user.email || '').toLowerCase().trim();
-          const teacherEmails = ['kevin87332000', 'kevin87332000@gmail.com', 'jimchiu', 'jimchiu@mail.vnu.edu.tw', 'vnuemba@gmail.com', 'h12s12bs', 'h12s12bs@gmail.com'];
+          const teacherEmails = ['jimchiu@vnu.edu.tw', 'kevin87332000', 'kevin87332000@gmail.com', 'jimchiu', 'jimchiu@mail.vnu.edu.tw', 'vnuemba@gmail.com', 'h12s12bs', 'h12s12bs@gmail.com'];
           isTeacherUser = teacherEmails.some(em => userEmail.includes(em.toLowerCase()));
 
           if (loginBtn) loginBtn.classList.add('hidden');
@@ -6665,6 +8190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadQuestions();
   await loadAgentTemplates();
   await loadAntigravityMissions();
+  await loadSlidesData();
 
   // Initialize UI
   renderWeekSelectors();
@@ -6810,20 +8336,22 @@ async function initSystemInfo() {
     const res = await fetch('/api/system_info');
     if (res.ok) {
       const info = await res.json();
-      document.getElementById('header-lan-ip').textContent = `http://${info.local_ip}:5000`;
-      document.getElementById('classroom-ip-badge').classList.remove('hidden');
+      const ipElem = document.getElementById('header-lan-ip');
+      if (ipElem) ipElem.textContent = `http://${info.local_ip}:5000`;
+      const badge = document.getElementById('classroom-ip-badge');
+      if (badge) badge.classList.remove('hidden');
       window.lanClassroomUrl = info.classroom_url;
     }
   } catch (e) {
-    // Standalone fallback
-    document.getElementById('header-lan-ip').textContent = '本機單機模式';
+    const ipElem = document.getElementById('header-lan-ip');
+    if (ipElem) ipElem.textContent = '本機單機模式';
   }
 }
 
 function copyClassroomUrl() {
   const url = window.lanClassroomUrl || window.location.href;
   navigator.clipboard.writeText(url).then(() => {
-    alert(`已複製電腦教室連線網址：\n${url}\n\n可直接廣播給全班學生開啟瀏覽器輸入！`);
+    alert(`已複製連線網址：\n${url}`);
   });
 }
 
@@ -6936,7 +8464,7 @@ function showWeekDetail(weekNum) {
   document.getElementById('week-title').textContent = weekInfo.title || '';
   document.getElementById('week-hook-text').textContent = weekInfo.concept_card?.hook || '';
   document.getElementById('week-ai-upgrade-text').textContent = weekInfo.concept_card?.ai_upgrade || '';
-  document.getElementById('week-cerps-focus-text').textContent = weekInfo.cerps_focus || '';
+  document.getElementById('week-cerps-focus-text').textContent = weekInfo.concept_card?.cerps_focus || weekInfo.cerps_focus || '';
 
   // PPTX Download Button
   const pptxBtn = document.getElementById('week-pptx-btn');
@@ -7903,6 +9431,314 @@ function retryMistakeQuestions() {
   switchTab('exam');
   startExamSession('錯題筆記專屬重練模式', mistakes, Math.ceil(mistakes.length * 1.5));
 }
+
+// ==================== 18 週簡報全螢幕網頁播放系統 (Slide Deck Presentation Player) ====================
+let slidesData = [];
+let currentSlideWeek = 1;
+let currentSlideIndex = 0;
+
+async function loadSlidesData() {
+  if (window.OFFLINE_SLIDES && window.OFFLINE_SLIDES.length > 0) {
+    slidesData = window.OFFLINE_SLIDES;
+    console.log('✅ 成功載入內嵌簡報資料 (週數:', slidesData.length, ')');
+    return;
+  }
+  try {
+    const res = await fetch('data/slides.json');
+    if (res.ok) {
+      slidesData = await res.json();
+      console.log('✅ 成功由 data/slides.json 載入簡報資料 (週數:', slidesData.length, ')');
+    }
+  } catch (e) {
+    slidesData = window.OFFLINE_SLIDES || [];
+  }
+}
+
+function openSlideDeck(weekNum = null, slideIdx = 0) {
+  currentSlideWeek = parseInt(weekNum || currentWeek || 1, 10);
+  currentSlideIndex = parseInt(slideIdx, 10) || 0;
+
+  const modal = document.getElementById('slide-deck-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  // Populate week dropdown
+  const select = document.getElementById('slide-deck-week-select');
+  if (select && select.options.length < 18) {
+    select.innerHTML = '';
+    for (let w = 1; w <= 18; w++) {
+      const opt = document.createElement('option');
+      opt.value = w;
+      const wInfo = (curriculumData && curriculumData.find(c => c.week === w)) || null;
+      const title = wInfo ? wInfo.title : `第 ${w} 週教學`;
+      opt.textContent = `第 ${String(w).padStart(2, '0')} 週 ｜ ${title}`;
+      select.appendChild(opt);
+    }
+  }
+  if (select) select.value = currentSlideWeek;
+
+  renderCurrentSlide();
+  document.body.style.overflow = 'hidden';
+}
+
+function openCurrentWeekSlideDeck() {
+  openSlideDeck(currentWeek, 0);
+}
+
+function closeSlideDeck() {
+  const modal = document.getElementById('slide-deck-modal');
+  if (modal) modal.classList.add('hidden');
+  document.body.style.overflow = '';
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => {});
+  }
+  toggleSlideThumbnailsDrawer(false);
+}
+
+function onSlideDeckWeekChange(val) {
+  currentSlideWeek = parseInt(val, 10) || 1;
+  currentSlideIndex = 0;
+  renderCurrentSlide();
+}
+
+function renderCurrentSlide() {
+  const weekObj = slidesData.find(s => s.week === currentSlideWeek) || {
+    week: currentSlideWeek,
+    title: `第 ${currentSlideWeek} 週 企業流程規劃`,
+    subtitle: '萬能科技大學 企業管理系 邱俊維 博士',
+    slides: []
+  };
+
+  const slides = weekObj.slides || [];
+  const total = slides.length || 1;
+  if (currentSlideIndex >= total) currentSlideIndex = Math.max(0, total - 1);
+  if (currentSlideIndex < 0) currentSlideIndex = 0;
+
+  const slide = slides[currentSlideIndex] || {
+    type: 'content',
+    badge: '教學重點',
+    title: weekObj.title,
+    bullets: ['請確認簡報資料載入情況。'],
+    footer: '萬能科技大學 企業管理系 邱俊維 博士'
+  };
+
+  // Update counters
+  const curNum = document.getElementById('slide-deck-current-num');
+  const totNum = document.getElementById('slide-deck-total-num');
+  if (curNum) curNum.textContent = currentSlideIndex + 1;
+  if (totNum) totNum.textContent = total;
+
+  // Update download PPTX button in modal
+  const pptxLink = document.getElementById('slide-deck-download-pptx');
+  const pptxFile = WEEK_PPTX_MAP[currentSlideWeek];
+  const isFlaskServer = window.location.port === '5000' || (window.location.hostname === 'localhost' && window.location.port !== '');
+  if (pptxLink && pptxFile) {
+    pptxLink.setAttribute('download', pptxFile);
+    pptxLink.href = isFlaskServer
+      ? `/slides/${encodeURIComponent(pptxFile)}`
+      : `01_每週教學簡報_PPT/${encodeURIComponent(pptxFile)}`;
+  }
+
+  // Update progress dots
+  const dotsContainer = document.getElementById('slide-dots-container');
+  if (dotsContainer) {
+    dotsContainer.innerHTML = Array.from({ length: total }, (_, i) => `
+      <button onclick="goToSlide(${i})" class="slide-dot h-2 rounded-full transition-all ${i === currentSlideIndex ? 'active bg-amber-400 w-6' : 'bg-slate-700 hover:bg-slate-500 w-2'}" title="第 ${i+1} 頁"></button>
+    `).join('');
+  }
+
+  // Render slide content in #slide-content-container
+  const container = document.getElementById('slide-content-container');
+  if (!container) return;
+  container.className = 'h-full flex flex-col justify-between slide-anim';
+
+  if (slide.type === 'cover') {
+    container.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
+          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs font-bold px-3 py-1 rounded-full">進企四系4甲</span>
+          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs font-bold px-3 py-1 rounded-full">週四 16:20~17:50</span>
+        </div>
+        <span class="text-amber-400 text-xs font-bold font-mono">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
+      </div>
+
+      <div class="my-auto text-center space-y-5 px-4">
+        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-1">
+          企業資源規劃 (ERP) ✕ Agentic AI 前瞻應用
+        </div>
+        <h1 class="slide-cover-title text-white tracking-tight leading-tight">
+          ${slide.title}
+        </h1>
+        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-4xl mx-auto">
+          ${slide.subtitle || weekObj.subtitle || ''}
+        </p>
+      </div>
+
+      <div class="border-t border-slate-700/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-200 text-sm">授課教師：邱俊維 博士</span>
+          <span>｜ 研究室：J801-1 ｜ 信箱：jimchiu@vnu.edu.tw</span>
+        </div>
+        <div class="text-amber-400 font-bold">
+          ★ 考取 AI 賦能 ERP 或相關證照直接加分！
+        </div>
+      </div>
+    `;
+  } else {
+    // Standard Content Slide
+    const bulletsHtml = (slide.bullets || []).map((b, idx) => `
+      <li class="flex items-start gap-3.5 group">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600/30 text-amber-400 border border-blue-500/40 text-sm font-bold shrink-0 mt-0.5 shadow">
+          ${idx + 1}
+        </span>
+        <span class="slide-bullet-text text-slate-100 font-normal leading-relaxed">
+          ${b}
+        </span>
+      </li>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="bg-amber-500 text-slate-950 font-black text-xs px-2.5 py-1 rounded shadow">
+            第 ${currentSlideWeek} 週
+          </span>
+          <span class="bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-md shadow">
+            ${slide.badge || '實務精講'}
+          </span>
+          <span class="text-xs text-slate-400 hidden sm:inline">${weekObj.title}</span>
+        </div>
+        <div class="text-xs font-mono text-slate-400 font-bold">
+          ${currentSlideIndex + 1} / ${total}
+        </div>
+      </div>
+
+      <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
+        <h2 class="slide-title-large text-amber-300 font-extrabold tracking-tight">
+          ${slide.title}
+        </h2>
+        <ul class="space-y-3 sm:space-y-4 max-w-5xl">
+          ${bulletsHtml}
+        </ul>
+      </div>
+
+      <div class="border-t border-slate-700/60 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-slate-300 slide-footer-text">
+          <span class="text-amber-400 font-bold">💡 重點摘要：</span>
+          <span>${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
+        </div>
+        <div class="text-[11px] text-slate-400 shrink-0 font-medium">
+          萬能科大企管系 ｜ 邱俊維 博士
+        </div>
+      </div>
+    `;
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function nextSlide() {
+  const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+  const slides = weekObj ? weekObj.slides || [] : [];
+  if (currentSlideIndex < slides.length - 1) {
+    currentSlideIndex++;
+    renderCurrentSlide();
+  } else if (currentSlideWeek < 18) {
+    currentSlideWeek++;
+    currentSlideIndex = 0;
+    const select = document.getElementById('slide-deck-week-select');
+    if (select) select.value = currentSlideWeek;
+    renderCurrentSlide();
+  }
+}
+
+function prevSlide() {
+  if (currentSlideIndex > 0) {
+    currentSlideIndex--;
+    renderCurrentSlide();
+  } else if (currentSlideWeek > 1) {
+    currentSlideWeek--;
+    const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+    const slides = weekObj ? weekObj.slides || [] : [];
+    currentSlideIndex = Math.max(0, slides.length - 1);
+    const select = document.getElementById('slide-deck-week-select');
+    if (select) select.value = currentSlideWeek;
+    renderCurrentSlide();
+  }
+}
+
+function goToSlide(idx) {
+  currentSlideIndex = idx;
+  renderCurrentSlide();
+  toggleSlideThumbnailsDrawer(false);
+}
+
+function toggleSlideFullscreen() {
+  const elem = document.getElementById('slide-deck-modal');
+  if (!elem) return;
+  if (!document.fullscreenElement) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch(err => {
+        console.warn('Fullscreen failed:', err);
+      });
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+function toggleSlideThumbnailsDrawer(forceState) {
+  const drawer = document.getElementById('slide-thumbnails-drawer');
+  if (!drawer) return;
+  const isHidden = drawer.classList.contains('hidden');
+  const shouldShow = forceState !== undefined ? forceState : isHidden;
+
+  if (shouldShow) {
+    const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+    const slides = weekObj ? weekObj.slides || [] : [];
+    const grid = document.getElementById('slide-thumbnails-grid');
+    if (grid) {
+      grid.innerHTML = slides.map((s, idx) => `
+        <button onclick="goToSlide(${idx})" class="p-2.5 rounded-lg text-left transition border ${idx === currentSlideIndex ? 'bg-blue-900/60 border-amber-400 text-white' : 'bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-slate-300'}">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+            <span class="font-bold font-mono">P.${idx + 1}</span>
+            <span class="px-1.5 py-0.2 rounded bg-slate-900 text-amber-300 font-bold">${s.badge || (s.type === 'cover' ? '封面' : '內容')}</span>
+          </div>
+          <div class="font-bold text-xs line-clamp-1">${s.title}</div>
+        </button>
+      `).join('');
+    }
+    drawer.classList.remove('hidden');
+  } else {
+    drawer.classList.add('hidden');
+  }
+}
+
+// Global Keyboard Navigation for Slide Deck
+window.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('slide-deck-modal');
+  if (!modal || modal.classList.contains('hidden')) return;
+
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+    e.preventDefault();
+    nextSlide();
+  } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault();
+    prevSlide();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeSlideDeck();
+  } else if (e.key === 'f' || e.key === 'F') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      toggleSlideFullscreen();
+    }
+  }
+});
+
 </script>
 </body>
 </html>

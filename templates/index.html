@@ -41,15 +41,8 @@
           </div>
         </div>
 
-        <!-- Right Side: Classroom IP & Firebase Auth -->
+        <!-- Right Side: Firebase Google Auth -->
         <div class="flex items-center space-x-3">
-          <!-- Classroom LAN badge -->
-          <div id="classroom-ip-badge" class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer hover:bg-emerald-100 transition" onclick="copyClassroomUrl()" title="點擊複製全班連線網址">
-            <i data-lucide="wifi" class="w-4 h-4 text-emerald-600"></i>
-            <span>教室網址: <strong id="header-lan-ip">載入中...</strong></span>
-            <i data-lucide="copy" class="w-3 h-3 text-emerald-600 ml-1"></i>
-          </div>
-
           <!-- Google Login Button (shown when not logged in) -->
           <button type="button" id="btn-google-login" onclick="loginWithGoogle()" class="inline-flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs sm:text-sm transition border border-slate-300 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -96,31 +89,35 @@
         </div>
       </div>
 
-      <!-- MAIN NAVIGATION TABS -->
-      <nav class="flex space-x-1 sm:space-x-4 border-t border-slate-100 py-2 overflow-x-auto">
-        <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shrink-0">
+      <!-- MAIN NAVIGATION TABS (No sliding, full wrap display) -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2.5 border-t border-slate-100 py-2.5">
+        <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2">
           <i data-lucide="calendar" class="w-4 h-4"></i>
           <span>18週教學進度</span>
         </button>
-        <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2 shrink-0">
+        <button onclick="openSlideDeck()" id="nav-slides" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white flex items-center space-x-1.5 shadow-sm transition">
+          <i data-lucide="presentation" class="w-4 h-4"></i>
+          <span>🖥️ 全螢幕簡報播放</span>
+        </button>
+        <button onclick="switchTab('antigravity')" id="nav-antigravity" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:text-purple-900 hover:bg-purple-50 flex items-center space-x-2">
           <i data-lucide="terminal" class="w-4 h-4 text-purple-600"></i>
           <span>💻 Antigravity 實戰專案包</span>
           <span class="bg-purple-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">動手做成果</span>
         </button>
-        <button onclick="switchTab('simulators')" id="nav-simulators" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('simulators')" id="nav-simulators" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
           <span>流程成果驗證沙盒</span>
         </button>
-        <button onclick="switchTab('agentic')" id="nav-agentic" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('agentic')" id="nav-agentic" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center space-x-2">
           <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
           <span>ReAct 推理引擎展示</span>
         </button>
-        <button onclick="switchTab('exam')" id="nav-exam" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('exam')" id="nav-exam" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
           <span>ERP 實務題庫測驗</span>
           <span class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded font-bold">200+題</span>
         </button>
-        <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+        <button onclick="switchTab('achievements')" id="nav-achievements" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2">
           <i data-lucide="bookmark-check" class="w-4 h-4"></i>
           <span>學習成就與錯題</span>
         </button>
@@ -181,7 +178,7 @@
             </div>
 
             <div class="pt-2 border-t border-slate-200 text-xs space-y-1 text-slate-500">
-              <div>📧 信箱: <a href="mailto:cwchiu@vnu.edu.tw" class="text-blue-600 hover:underline">cwchiu@vnu.edu.tw</a> ｜ <a href="mailto:kevin87332000@gmail.com" class="text-blue-600 hover:underline">kevin87332000@gmail.com</a></div>
+              <div>📧 信箱: <a href="mailto:jimchiu@vnu.edu.tw" class="text-blue-600 hover:underline font-semibold">jimchiu@vnu.edu.tw</a></div>
               <div>📞 電話: 0976-595-981</div>
               <div>🌐 個人網站: <a href="https://h12s12bs.github.io/vanung-faculty-portfolio/index.html" target="_blank" class="text-blue-600 hover:underline">邱俊維博士教師專長網頁 ↗</a></div>
             </div>
@@ -192,29 +189,30 @@
             <div>
               <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
-                學期成績評量標準 (Grading Policy)
+                學期成績評量標準 (簡明清晰好計算)
               </h3>
               
-              <div class="space-y-2 text-xs">
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 平時出缺席與課堂參與</span>
-                  <span class="font-bold text-blue-700">20%</span>
+              <div class="space-y-2.5 text-xs">
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 平時出席</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">出席狀況檢核（比重調低，輕鬆無負擔）</p>
+                  </div>
+                  <span class="font-black text-sm text-blue-700 bg-blue-50 px-2 py-1 rounded">20%</span>
                 </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 每週隨堂測驗與課堂實作</span>
-                  <span class="font-bold text-blue-700">20%</span>
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 期中報告繳交</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">期中實務流程分析報告</p>
+                  </div>
+                  <span class="font-black text-sm text-indigo-700 bg-indigo-50 px-2 py-1 rounded">40%</span>
                 </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 期中考（理論與流程測驗）</span>
-                  <span class="font-bold text-blue-700">25%</span>
-                </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• 期末考／綜合實戰評量</span>
-                  <span class="font-bold text-blue-700">25%</span>
-                </div>
-                <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200">
-                  <span class="font-medium text-slate-700">• AI 輔助企業流程專題提案</span>
-                  <span class="font-bold text-purple-700">10%</span>
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span class="font-bold text-slate-800">• 期末報告繳交</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">期末 ERP 應用專題成果報告</p>
+                  </div>
+                  <span class="font-black text-sm text-indigo-700 bg-indigo-50 px-2 py-1 rounded">40%</span>
                 </div>
               </div>
             </div>
@@ -226,7 +224,7 @@
                 🌟 專業證照特別加分機制
               </div>
               <p class="text-slate-700 leading-relaxed font-medium">
-                修課期間考取<strong>「AI 賦能 ERP 規劃師」</strong>或<strong>「ERP 規劃師 / 基礎檢定」</strong>等相關專業證照，<strong>直接計入學期總成績特別加分！</strong>鼓勵全班同學踴躍報考取得專業資格！
+                修課期間考取<strong>「AI 賦能 ERP 規劃師」</strong>或<strong>「ERP 規劃師 / 基礎檢定」</strong>等相關專業證照，<strong>直接計入學期總成績特別加分！</strong>
               </p>
             </div>
           </div>
@@ -300,21 +298,25 @@
             <h2 id="week-title" class="text-xl font-bold text-slate-900">課程導論、ERP 概念演進與企業數位轉型</h2>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <a id="week-pptx-btn" href="#" target="_blank" download class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="file-text" class="w-4 h-4"></i>
-              <span>下載教學簡報 (PPTX 大字版)</span>
-            </a>
-            <a id="week-project-zip-btn" href="#" target="_blank" download class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="folder-down" class="w-4 h-4"></i>
-              <span>📥 下載本週 Antigravity 實作專案包 (ZIP)</span>
-            </a>
-            <button id="week-quiz-btn" onclick="startWeeklyQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-              <span>啟動當週 5 題快測</span>
+            <button onclick="openCurrentWeekSlideDeck()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3.5 py-2 rounded-lg text-sm inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="presentation" class="w-4 h-4 text-slate-900"></i>
+              <span>🖥️ 全螢幕播放簡報</span>
             </button>
-            <button id="week-sim-shortcut-btn" onclick="goToWeekSimulator()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold items-center gap-1.5 shadow-sm transition">
+            <a id="week-pptx-btn" href="#" target="_blank" download class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>下載 PPTX</span>
+            </a>
+            <a id="week-project-zip-btn" href="#" target="_blank" download class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="folder-down" class="w-4 h-4"></i>
+              <span>下載專案包 (ZIP)</span>
+            </a>
+            <button id="week-quiz-btn" onclick="startWeeklyQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>當週 5 題快測</span>
+            </button>
+            <button id="week-sim-shortcut-btn" onclick="goToWeekSimulator()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-semibold items-center gap-1.5 shadow-sm transition">
               <i data-lucide="play" class="w-4 h-4"></i>
-              <span>流程成果驗證沙盒</span>
+              <span>成果驗證沙盒</span>
             </button>
           </div>
         </div>
@@ -343,11 +345,11 @@
             </p>
           </div>
 
-          <!-- Pillar 3: 證照重點 -->
+          <!-- Pillar 3: 實務重點與觀念解析 -->
           <div class="bg-amber-50/60 rounded-xl p-4 border border-amber-100 space-y-2">
             <div class="flex items-center gap-2 text-amber-900 font-bold text-sm">
               <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
-              <span>專業證照高頻考點提點</span>
+              <span>實務重點與觀念解析</span>
             </div>
             <p id="week-cerps-focus-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
               載入中...
@@ -359,16 +361,20 @@
         <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-md space-y-4 border border-purple-800">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/80 pb-3">
             <div class="flex items-center gap-2.5">
-              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md shadow">💻 電腦教室動手做</span>
-              <h3 id="week-ag-title" class="font-bold text-base text-white">本週 Antigravity 實作任務：載入中...</h3>
+              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md shadow">💻 零門檻動手做</span>
+              <h3 id="week-ag-title" class="font-bold text-base text-white">本週實作任務：載入中...</h3>
             </div>
-            <div class="flex items-center gap-2">
-              <a id="week-ag-zip-link" href="#" download class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="goToWeekSimulator()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                <span>⚡ 免安裝網頁沙盒一秒驗收</span>
+              </button>
+              <a id="week-ag-zip-link" href="#" download class="bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow transition">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>下載本週專案包 (.zip)</span>
+                <span>下載專案包 (.zip)</span>
               </a>
-              <button onclick="switchTab('antigravity')" class="bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
-                <span>前往專案工作坊 ➔</span>
+              <button onclick="switchTab('antigravity')" class="bg-purple-950/80 hover:bg-purple-900 text-purple-200 font-medium px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 transition border border-purple-700">
+                <span>專案工作坊 ➔</span>
               </button>
             </div>
           </div>
@@ -1260,7 +1266,7 @@
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <div>
-          <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">期末專題 10% 評分標準</span>
+          <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">期末成果報告參考格式</span>
           <h3 class="font-bold text-lg text-slate-900 mt-1 flex items-center gap-2">
             <i data-lucide="file-text" class="w-5 h-5 text-purple-600"></i>
             企業 Agentic AI 流程優化專題提案企劃書
@@ -1272,32 +1278,31 @@
       </div>
 
       <!-- Proposal Form -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      <div class="space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">提案小組 / 學生：</label>
+            <input type="text" id="prop-student" placeholder="例：進企四系4甲 王小明" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">鎖定 ERP 營運模組：</label>
+            <input type="text" id="prop-module" placeholder="例：SD 銷售訂單自動化 / MM 採購合規核帳" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
+          </div>
+        </div>
+
         <div>
-          <label class="block font-bold text-slate-700 mb-1">專案主題名稱：</label>
-          <input type="text" id="prop-title" value="基於 Agentic AI 之 O2C 智慧訂單自動化與庫存 ATP 調度提案" class="w-full border border-slate-300 rounded p-2">
+          <label class="block font-semibold text-slate-700 mb-1">企業現行痛點 (AS-IS 流程障礙)：</label>
+          <textarea id="prop-painpoint" rows="2" class="w-full border border-slate-300 rounded-lg p-2 leading-relaxed" placeholder="說明人工打單慢、發票核帳易出錯或資訊孤島等問題..."></textarea>
         </div>
+
         <div>
-          <label class="block font-bold text-slate-700 mb-1">分組組別與組員姓名：</label>
-          <input type="text" id="prop-members" value="第 3 組：王小明、李大華、張雅婷" class="w-full border border-slate-300 rounded p-2">
+          <label class="block font-semibold text-slate-700 mb-1">Agentic AI 解決方案與人機協同架構 (TO-BE)：</label>
+          <textarea id="prop-solution" rows="3" class="w-full border border-slate-300 rounded-lg p-2 leading-relaxed" placeholder="說明 Trigger 觸發機制、Prompt 提示詞工程、調用之 ERP API Tools 與安全防線 Guardrails..."></textarea>
         </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">企業現況與營運痛點描述：</label>
-          <textarea id="prop-pain" rows="2" class="w-full border border-slate-300 rounded p-2">目前業務助理每日需花費 3~4 小時手動核對客戶非結構化採購 Email，再手動登入 ERP 查庫存打單，常發生打錯品號與超賣交期延誤之問題。</textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">所規劃之 Agentic AI 工作流與人機協同機制：</label>
-          <textarea id="prop-workflow" rows="3" class="w-full border border-slate-300 rounded p-2">1. 透過 Email Webhook 接收非結構化訂單文字。
-2. Sales Agent 呼叫 LLM 進行實體萃取，取得客戶代號、品號、數量。
-3. 呼叫 ERP API (erp_check_atp 與 erp_check_credit) 進行庫存可用量與信用核驗。
-4. 設定防呆門檻：訂單金額 > 50 萬元或 ATP 不足時，啟動 Human-in-the-Loop 主管審批。
-5. 核准後自動生成正式 ERP 銷售訂單 (SO)，並回傳確認函給客戶。</textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block font-bold text-slate-700 mb-1">預期效益評估 (量化 KPI)：</label>
-          <textarea id="prop-benefits" rows="2" class="w-full border border-slate-300 rounded p-2">• 訂單登打作業時間由 20 分鐘縮減至 1.5 秒 (效率提升 99%)
-• 消除手動鍵入之人為疏失 (錯誤率降至 0.05% 以下)
-• ATP 自動預警排產，交期達交率預估提升 15%</textarea>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">預期量化效益 (ROI)：</label>
+          <input type="text" id="prop-roi" placeholder="例：單據處理時間縮短 80%、錯帳率歸零、節省每週 15 小時人工對帳" class="w-full border border-slate-300 rounded-lg p-2 font-medium">
         </div>
       </div>
 
@@ -1311,6 +1316,95 @@
             <i data-lucide="printer" class="w-4 h-4"></i> 列印 / 另存 PDF
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FULLSCREEN SLIDE PRESENTATION PLAYER MODAL ==================== -->
+  <div id="slide-deck-modal" class="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col select-none hidden">
+    <!-- Top Toolbar -->
+    <div class="h-14 bg-slate-900/90 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
+      <!-- Left: Course Tag & Week Select -->
+      <div class="flex items-center gap-3">
+        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded shadow">11501 ERP</span>
+        <span class="font-bold text-sm text-slate-200 hidden md:inline">邱俊維 博士 課堂簡報投影</span>
+        <select id="slide-deck-week-select" onchange="onSlideDeckWeekChange(this.value)" class="bg-slate-800 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer">
+          <!-- Filled by JS: Week 1 ~ 18 -->
+        </select>
+      </div>
+
+      <!-- Center: Slide Progress Indicator -->
+      <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-300">
+        <span>第</span>
+        <span id="slide-deck-current-num" class="text-amber-400 text-base font-black">1</span>
+        <span>/</span>
+        <span id="slide-deck-total-num" class="text-slate-400">10</span>
+        <span>頁</span>
+      </div>
+
+      <!-- Right: Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="toggleSlideThumbnailsDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700" title="投影片目錄總覽">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">目錄</span>
+        </button>
+        <button type="button" onclick="toggleSlideFullscreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow" title="切換全螢幕 (快速鍵 F)">
+          <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">全螢幕 (F)</span>
+        </button>
+        <a id="slide-deck-download-pptx" href="#" download class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-700" title="下載本週 PPTX 檔案">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">PPTX</span>
+        </a>
+        <button type="button" onclick="closeSlideDeck()" class="bg-rose-900/40 hover:bg-rose-800 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition border border-rose-800" title="關閉播放 (Esc)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">關閉</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Slide Stage Area -->
+    <div class="flex-1 flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden relative">
+      <!-- Floating Navigation Arrows -->
+      <button type="button" onclick="prevSlide()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="上一頁 (←)">
+        <i data-lucide="chevron-left" class="w-7 h-7"></i>
+      </button>
+      <button type="button" onclick="nextSlide()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white flex items-center justify-center border border-slate-700 hover:border-blue-400 hover:scale-110 transition shadow-2xl z-20" title="下一頁 (→ / 空白鍵)">
+        <i data-lucide="chevron-right" class="w-7 h-7"></i>
+      </button>
+
+      <!-- 16:9 Presentation Canvas Container -->
+      <div id="slide-stage" class="w-full max-w-6xl aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl shadow-2xl border border-slate-700/80 p-6 sm:p-10 md:p-14 flex flex-col justify-between relative overflow-hidden">
+        <!-- Rendered dynamically by renderSlide() in app.js -->
+        <div id="slide-content-container" class="h-full flex flex-col justify-between">
+          <!-- Slide Header, Body & Footer dynamically injected -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Control & Quick Progress Dots -->
+    <div class="h-12 bg-slate-900/90 border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-30 text-xs text-slate-400">
+      <div class="flex items-center gap-1" id="slide-dots-container">
+        <!-- Progress dots generated by JS -->
+      </div>
+      <div class="text-[11px] text-slate-400 hidden sm:block">
+        💡 鍵盤快速鍵：<kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">←</kbd> 上一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">→</kbd> 或 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Space</kbd> 下一頁 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">F</kbd> 全螢幕 ｜ <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-amber-300">Esc</kbd> 關閉
+      </div>
+    </div>
+
+    <!-- Slide Thumbnails Drawer (Overlay inside modal) -->
+    <div id="slide-thumbnails-drawer" class="absolute inset-x-0 bottom-12 max-h-72 bg-slate-900/98 border-t border-slate-700 p-4 overflow-y-auto hidden z-40 shadow-2xl transition-all">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
+          本週投影片目錄總覽（點擊快速跳轉）
+        </h4>
+        <button type="button" onclick="toggleSlideThumbnailsDrawer(false)" class="text-slate-400 hover:text-white text-xs">
+          ✕ 隱藏目錄
+        </button>
+      </div>
+      <div id="slide-thumbnails-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <!-- Filled by JS -->
       </div>
     </div>
   </div>

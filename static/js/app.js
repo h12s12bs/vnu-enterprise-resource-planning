@@ -87,7 +87,7 @@ function initFirebase() {
         if (user) {
           console.log('👤 Google 使用者已登入:', user.email, user.uid);
           const userEmail = (user.email || '').toLowerCase().trim();
-          const teacherEmails = ['kevin87332000', 'kevin87332000@gmail.com', 'jimchiu', 'jimchiu@mail.vnu.edu.tw', 'vnuemba@gmail.com', 'h12s12bs', 'h12s12bs@gmail.com'];
+          const teacherEmails = ['jimchiu@vnu.edu.tw', 'kevin87332000', 'kevin87332000@gmail.com', 'jimchiu', 'jimchiu@mail.vnu.edu.tw', 'vnuemba@gmail.com', 'h12s12bs', 'h12s12bs@gmail.com'];
           isTeacherUser = teacherEmails.some(em => userEmail.includes(em.toLowerCase()));
 
           if (loginBtn) loginBtn.classList.add('hidden');
@@ -254,6 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadQuestions();
   await loadAgentTemplates();
   await loadAntigravityMissions();
+  await loadSlidesData();
 
   // Initialize UI
   renderWeekSelectors();
@@ -399,20 +400,22 @@ async function initSystemInfo() {
     const res = await fetch('/api/system_info');
     if (res.ok) {
       const info = await res.json();
-      document.getElementById('header-lan-ip').textContent = `http://${info.local_ip}:5000`;
-      document.getElementById('classroom-ip-badge').classList.remove('hidden');
+      const ipElem = document.getElementById('header-lan-ip');
+      if (ipElem) ipElem.textContent = `http://${info.local_ip}:5000`;
+      const badge = document.getElementById('classroom-ip-badge');
+      if (badge) badge.classList.remove('hidden');
       window.lanClassroomUrl = info.classroom_url;
     }
   } catch (e) {
-    // Standalone fallback
-    document.getElementById('header-lan-ip').textContent = '本機單機模式';
+    const ipElem = document.getElementById('header-lan-ip');
+    if (ipElem) ipElem.textContent = '本機單機模式';
   }
 }
 
 function copyClassroomUrl() {
   const url = window.lanClassroomUrl || window.location.href;
   navigator.clipboard.writeText(url).then(() => {
-    alert(`已複製電腦教室連線網址：\n${url}\n\n可直接廣播給全班學生開啟瀏覽器輸入！`);
+    alert(`已複製連線網址：\n${url}`);
   });
 }
 
@@ -524,7 +527,7 @@ function showWeekDetail(weekNum) {
   document.getElementById('week-title').textContent = weekInfo.title || '';
   document.getElementById('week-hook-text').textContent = weekInfo.concept_card?.hook || '';
   document.getElementById('week-ai-upgrade-text').textContent = weekInfo.concept_card?.ai_upgrade || '';
-  document.getElementById('week-cerps-focus-text').textContent = weekInfo.cerps_focus || '';
+  document.getElementById('week-cerps-focus-text').textContent = weekInfo.concept_card?.cerps_focus || weekInfo.cerps_focus || '';
 
   // PPTX Download Button
   const pptxBtn = document.getElementById('week-pptx-btn');
@@ -1489,3 +1492,311 @@ function retryMistakeQuestions() {
   switchTab('exam');
   startExamSession('錯題筆記專屬重練模式', mistakes, Math.ceil(mistakes.length * 1.5));
 }
+
+// ==================== 18 週簡報全螢幕網頁播放系統 (Slide Deck Presentation Player) ====================
+let slidesData = [];
+let currentSlideWeek = 1;
+let currentSlideIndex = 0;
+
+async function loadSlidesData() {
+  if (window.OFFLINE_SLIDES && window.OFFLINE_SLIDES.length > 0) {
+    slidesData = window.OFFLINE_SLIDES;
+    console.log('✅ 成功載入內嵌簡報資料 (週數:', slidesData.length, ')');
+    return;
+  }
+  try {
+    const res = await fetch('data/slides.json');
+    if (res.ok) {
+      slidesData = await res.json();
+      console.log('✅ 成功由 data/slides.json 載入簡報資料 (週數:', slidesData.length, ')');
+    }
+  } catch (e) {
+    console.warn('簡報資料載入失敗，等待離線備份', e);
+  }
+}
+
+function openSlideDeck(weekNum = null, slideIdx = 0) {
+  currentSlideWeek = parseInt(weekNum || currentWeek || 1, 10);
+  currentSlideIndex = parseInt(slideIdx, 10) || 0;
+
+  const modal = document.getElementById('slide-deck-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  // Populate week dropdown
+  const select = document.getElementById('slide-deck-week-select');
+  if (select && select.options.length < 18) {
+    select.innerHTML = '';
+    for (let w = 1; w <= 18; w++) {
+      const opt = document.createElement('option');
+      opt.value = w;
+      const wInfo = (curriculumData && curriculumData.find(c => c.week === w)) || null;
+      const title = wInfo ? wInfo.title : `第 ${w} 週教學`;
+      opt.textContent = `第 ${String(w).padStart(2, '0')} 週 ｜ ${title}`;
+      select.appendChild(opt);
+    }
+  }
+  if (select) select.value = currentSlideWeek;
+
+  renderCurrentSlide();
+  document.body.style.overflow = 'hidden';
+}
+
+function openCurrentWeekSlideDeck() {
+  openSlideDeck(currentWeek, 0);
+}
+
+function closeSlideDeck() {
+  const modal = document.getElementById('slide-deck-modal');
+  if (modal) modal.classList.add('hidden');
+  document.body.style.overflow = '';
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => {});
+  }
+  toggleSlideThumbnailsDrawer(false);
+}
+
+function onSlideDeckWeekChange(val) {
+  currentSlideWeek = parseInt(val, 10) || 1;
+  currentSlideIndex = 0;
+  renderCurrentSlide();
+}
+
+function renderCurrentSlide() {
+  const weekObj = slidesData.find(s => s.week === currentSlideWeek) || {
+    week: currentSlideWeek,
+    title: `第 ${currentSlideWeek} 週 企業流程規劃`,
+    subtitle: '萬能科技大學 企業管理系 邱俊維 博士',
+    slides: []
+  };
+
+  const slides = weekObj.slides || [];
+  const total = slides.length || 1;
+  if (currentSlideIndex >= total) currentSlideIndex = Math.max(0, total - 1);
+  if (currentSlideIndex < 0) currentSlideIndex = 0;
+
+  const slide = slides[currentSlideIndex] || {
+    type: 'content',
+    badge: '教學重點',
+    title: weekObj.title,
+    bullets: ['請確認簡報資料載入情況。'],
+    footer: '萬能科技大學 企業管理系 邱俊維 博士'
+  };
+
+  // Update counters
+  const curNum = document.getElementById('slide-deck-current-num');
+  const totNum = document.getElementById('slide-deck-total-num');
+  if (curNum) curNum.textContent = currentSlideIndex + 1;
+  if (totNum) totNum.textContent = total;
+
+  // Update download PPTX button in modal
+  const pptxLink = document.getElementById('slide-deck-download-pptx');
+  const pptxFile = WEEK_PPTX_MAP[currentSlideWeek];
+  const isFlaskServer = window.location.port === '5000' || (window.location.hostname === 'localhost' && window.location.port !== '');
+  if (pptxLink && pptxFile) {
+    pptxLink.setAttribute('download', pptxFile);
+    pptxLink.href = isFlaskServer
+      ? `/slides/${encodeURIComponent(pptxFile)}`
+      : `01_每週教學簡報_PPT/${encodeURIComponent(pptxFile)}`;
+  }
+
+  // Update progress dots
+  const dotsContainer = document.getElementById('slide-dots-container');
+  if (dotsContainer) {
+    dotsContainer.innerHTML = Array.from({ length: total }, (_, i) => `
+      <button onclick="goToSlide(${i})" class="slide-dot h-2 rounded-full transition-all ${i === currentSlideIndex ? 'active bg-amber-400 w-6' : 'bg-slate-700 hover:bg-slate-500 w-2'}" title="第 ${i+1} 頁"></button>
+    `).join('');
+  }
+
+  // Render slide content in #slide-content-container
+  const container = document.getElementById('slide-content-container');
+  if (!container) return;
+  container.className = 'h-full flex flex-col justify-between slide-anim';
+
+  if (slide.type === 'cover') {
+    container.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow tracking-wider">萬能科技大學 企業管理系</span>
+          <span class="bg-indigo-900/80 text-indigo-200 border border-indigo-700 text-xs font-bold px-3 py-1 rounded-full">進企四系4甲</span>
+          <span class="bg-emerald-900/80 text-emerald-200 border border-emerald-700 text-xs font-bold px-3 py-1 rounded-full">週四 16:20~17:50</span>
+        </div>
+        <span class="text-amber-400 text-xs font-bold font-mono">WEEK ${String(currentSlideWeek).padStart(2, '0')}</span>
+      </div>
+
+      <div class="my-auto text-center space-y-5 px-4">
+        <div class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-1">
+          企業資源規劃 (ERP) ✕ Agentic AI 前瞻應用
+        </div>
+        <h1 class="slide-cover-title text-white tracking-tight leading-tight">
+          ${slide.title}
+        </h1>
+        <p class="slide-cover-subtitle text-indigo-200 font-medium max-w-4xl mx-auto">
+          ${slide.subtitle || weekObj.subtitle || ''}
+        </p>
+      </div>
+
+      <div class="border-t border-slate-700/60 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-200 text-sm">授課教師：邱俊維 博士</span>
+          <span>｜ 研究室：J801-1 ｜ 信箱：jimchiu@vnu.edu.tw</span>
+        </div>
+        <div class="text-amber-400 font-bold">
+          ★ 考取 AI 賦能 ERP 或相關證照直接加分！
+        </div>
+      </div>
+    `;
+  } else {
+    // Standard Content Slide
+    const bulletsHtml = (slide.bullets || []).map((b, idx) => `
+      <li class="flex items-start gap-3.5 group">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600/30 text-amber-400 border border-blue-500/40 text-sm font-bold shrink-0 mt-0.5 shadow">
+          ${idx + 1}
+        </span>
+        <span class="slide-bullet-text text-slate-100 font-normal leading-relaxed">
+          ${b}
+        </span>
+      </li>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="bg-amber-500 text-slate-950 font-black text-xs px-2.5 py-1 rounded shadow">
+            第 ${currentSlideWeek} 週
+          </span>
+          <span class="bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-md shadow">
+            ${slide.badge || '實務精講'}
+          </span>
+          <span class="text-xs text-slate-400 hidden sm:inline">${weekObj.title}</span>
+        </div>
+        <div class="text-xs font-mono text-slate-400 font-bold">
+          ${currentSlideIndex + 1} / ${total}
+        </div>
+      </div>
+
+      <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
+        <h2 class="slide-title-large text-amber-300 font-extrabold tracking-tight">
+          ${slide.title}
+        </h2>
+        <ul class="space-y-3 sm:space-y-4 max-w-5xl">
+          ${bulletsHtml}
+        </ul>
+      </div>
+
+      <div class="border-t border-slate-700/60 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-slate-300 slide-footer-text">
+          <span class="text-amber-400 font-bold">💡 重點摘要：</span>
+          <span>${slide.footer || '熟練本單元核心流程與操作，即可掌握企業系統整合精神。'}</span>
+        </div>
+        <div class="text-[11px] text-slate-400 shrink-0 font-medium">
+          萬能科大企管系 ｜ 邱俊維 博士
+        </div>
+      </div>
+    `;
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function nextSlide() {
+  const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+  const slides = weekObj ? weekObj.slides || [] : [];
+  if (currentSlideIndex < slides.length - 1) {
+    currentSlideIndex++;
+    renderCurrentSlide();
+  } else if (currentSlideWeek < 18) {
+    currentSlideWeek++;
+    currentSlideIndex = 0;
+    const select = document.getElementById('slide-deck-week-select');
+    if (select) select.value = currentSlideWeek;
+    renderCurrentSlide();
+  }
+}
+
+function prevSlide() {
+  if (currentSlideIndex > 0) {
+    currentSlideIndex--;
+    renderCurrentSlide();
+  } else if (currentSlideWeek > 1) {
+    currentSlideWeek--;
+    const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+    const slides = weekObj ? weekObj.slides || [] : [];
+    currentSlideIndex = Math.max(0, slides.length - 1);
+    const select = document.getElementById('slide-deck-week-select');
+    if (select) select.value = currentSlideWeek;
+    renderCurrentSlide();
+  }
+}
+
+function goToSlide(idx) {
+  currentSlideIndex = idx;
+  renderCurrentSlide();
+  toggleSlideThumbnailsDrawer(false);
+}
+
+function toggleSlideFullscreen() {
+  const elem = document.getElementById('slide-deck-modal');
+  if (!elem) return;
+  if (!document.fullscreenElement) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch(err => {
+        console.warn('Fullscreen failed:', err);
+      });
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+function toggleSlideThumbnailsDrawer(forceState) {
+  const drawer = document.getElementById('slide-thumbnails-drawer');
+  if (!drawer) return;
+  const isHidden = drawer.classList.contains('hidden');
+  const shouldShow = forceState !== undefined ? forceState : isHidden;
+
+  if (shouldShow) {
+    const weekObj = slidesData.find(s => s.week === currentSlideWeek);
+    const slides = weekObj ? weekObj.slides || [] : [];
+    const grid = document.getElementById('slide-thumbnails-grid');
+    if (grid) {
+      grid.innerHTML = slides.map((s, idx) => `
+        <button onclick="goToSlide(${idx})" class="p-2.5 rounded-lg text-left transition border ${idx === currentSlideIndex ? 'bg-blue-900/60 border-amber-400 text-white' : 'bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-slate-300'}">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+            <span class="font-bold font-mono">P.${idx + 1}</span>
+            <span class="px-1.5 py-0.2 rounded bg-slate-900 text-amber-300 font-bold">${s.badge || (s.type === 'cover' ? '封面' : '內容')}</span>
+          </div>
+          <div class="font-bold text-xs line-clamp-1">${s.title}</div>
+        </button>
+      `).join('');
+    }
+    drawer.classList.remove('hidden');
+  } else {
+    drawer.classList.add('hidden');
+  }
+}
+
+// Global Keyboard Navigation for Slide Deck
+window.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('slide-deck-modal');
+  if (!modal || modal.classList.contains('hidden')) return;
+
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+    e.preventDefault();
+    nextSlide();
+  } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault();
+    prevSlide();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeSlideDeck();
+  } else if (e.key === 'f' || e.key === 'F') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      toggleSlideFullscreen();
+    }
+  }
+});
+
