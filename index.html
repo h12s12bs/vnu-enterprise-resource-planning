@@ -645,8 +645,9 @@ body {
                   載入中...
                 </div>
               </div>
-              <div class="text-[11px] text-amber-200/90 font-medium">
-                💡 實作 SOP：解壓縮 ➔ 開啟 Antigravity 貼上 Prompt ➔ 執行 `python starter.py` 產出檔案 ➔ `python verify.py`
+              <div class="text-[11px] text-amber-200/90 font-medium space-y-1">
+                <div>💡 實作 SOP：本機 PowerShell 先登入 ➔ 解壓至非中文路徑 ➔ 執行 `python starter.py` ➔ `python verify.py` 驗收</div>
+                <div class="text-rose-300 font-bold">⚠️ 電腦教室關機將自動重置！成果請務必立即上傳個人 Google Drive 或 GitHub 備份！</div>
               </div>
             </div>
           </div>
@@ -738,14 +739,14 @@ body {
 
               <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
                 <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i> 電腦教室實作步驟：
+                  <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i> 電腦教室實務操作 SOP（極簡 CLI 流程）：
                 </h4>
-                <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
-                  <li>下載上方專案包並解壓縮至電腦桌面。</li>
-                  <li>開啟終端機或 Antigravity，進入該專案目錄。</li>
-                  <li>複製右側 Prompt 貼給 Antigravity，引導 AI 補齊或擴充 `starter.py`。</li>
-                  <li>執行 `python starter.py` 產生交付檔案。</li>
-                  <li>執行 `python verify.py` 驗收成果是否通過！</li>
+                <ol class="text-xs text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                  <li><strong>本機登入（關鍵避坑）：</strong>開啟本機 PowerShell 執行 `antigravity login`，先完成 Google 帳號授權，避免全班同時在 Cloud Shell 登入造成併發塞車！</li>
+                  <li><strong>下載專案包：</strong>下載本週專案並解壓縮至非中文路徑（如 `D:/projects` 或隨身碟）。</li>
+                  <li><strong>執行與產生：</strong>在終端機中切換至該目錄，貼上右側 Prompt 引導 Antigravity，執行 `python starter.py` 產出交付檔案。</li>
+                  <li><strong>自我驗收：</strong>執行 `python verify.py` 驗收企業規則是否全數過關！</li>
+                  <li><strong class="text-rose-600">🚨 成果雲端備份（必做！）：</strong>電腦教室電腦關機後會自動重置還原！下課前請務必將成果檔案上傳至個人 Google Drive、GitHub 或課程平台作業區！</li>
                 </ol>
               </div>
             </div>
@@ -7464,125 +7465,160 @@ body {
       {
         "type": "content",
         "badge": "步驟 23",
-        "title": "【工具推薦】步驟 23：安裝 Visual Studio Code (VS Code)",
+        "title": "【終端啟航】步驟 23：免裝編輯器！Windows 內建 PowerShell 開啟",
         "bullets": [
-          "推薦好用的程式碼檢視與編輯工具：Visual Studio Code",
-          "前往 https://code.visualstudio.com 點選 Download for Windows",
-          "執行安裝檔，一路點選下一步，勾選『將「以 Code 開啟」新增至檔案快顯功能表』",
-          "安裝完成後開啟 VS Code",
-          "點擊左側積木圖示 (Extensions 套件庫)，搜尋『Chinese』安裝繁體中文語言包",
-          "重啟 VS Code 後全介面即呈現親切繁體中文！"
+          "本課程【不需要】學生去下載安裝複雜的 VS Code 或其他編輯器！",
+          "按鍵盤上的【Win 鍵 + R】，輸入 `powershell` 並按 Enter",
+          "或在 Windows 搜尋欄輸入『PowerShell』點開藍色視窗",
+          "直接使用 Windows 內建命令列工具，操作最簡潔、無任何額外軟體門檻！",
+          "在終端機中輸入 `python --version` 確認電腦教室 Python 環境正常"
         ],
-        "footer": "VS Code 是全球最受歡迎的編輯器，操作流暢且排版乾淨。"
+        "footer": "善用鍵盤【Tab 鍵】可以自動補齊資料夾名稱，不用辛苦手打長路徑！"
       },
       {
         "type": "content",
         "badge": "步驟 24",
-        "title": "【專案下載】步驟 24：在 GitHub Desktop 中 Clone 專案倉庫",
+        "title": "【工具配置】步驟 24：本機端安裝 Antigravity CLI 工具",
         "bullets": [
-          "打開剛剛登入好的 GitHub Desktop 軟體",
-          "點擊上方選單【File】➔ 點選【Clone repository...】(複製倉庫)",
-          "在彈出的視窗中切換到第三個分頁【URL】",
-          "在第一欄【Repository URL】貼上本課程官方倉庫網址：",
-          "• `https://github.com/h12s12bs/vnu-enterprise-resource-planning.git`",
-          "第二欄【Local path】為本地存檔路徑 (請參考下一步指引！)"
+          "在 PowerShell 視窗中輸入指令：",
+          "• `pip install antigravity` 並按下 Enter",
+          "（若電腦教室環境已預裝，亦可直接使用課堂提供的專案工具包）",
+          "稍候數秒看到 `Successfully installed` 即代表命令列工具配置完成！",
+          "輸入 `python -m antigravity --help` 檢視指令說明，確認工具運作就緒"
         ],
-        "footer": "Clone (克隆) 會把課程所有簡報、每週程式碼與實作專案完整抓到你的電腦！"
+        "footer": "命令列工具輕量、快速，最適合電腦教室大規模一人一機教學。"
       },
       {
         "type": "content",
         "badge": "步驟 25",
-        "title": "【路徑設定】步驟 25：選擇安全的本地存檔路徑",
+        "title": "⚠️【血淚避坑】步驟 25：為什麼務必先在本機端 CLI 登入？",
         "bullets": [
-          "在【Local path】點擊右邊按鈕【Choose...】挑選存放資料夾",
-          "⚠️【重要路徑避坑指南】：",
-          "• 建議存放在：`D:/projects` 或 `C:/projects`",
-          "• 嚴禁路徑包含中文、特殊符號或太深層的資料夾",
-          "• 避免放在桌面 (Desktop)，因電腦教室桌面有時重開機可能還原",
-          "選好路徑後，點擊右下角藍色按鈕【Clone】開始下載！"
+          "⚠️【真實課堂慘痛經驗】：",
+          "• 全班數十位同學若同時間在【網頁版 Google Cloud Shell】註冊或登入 Antigravity，",
+          "• 會因為 Google IP 併發限制與多重驗證請求過載，導致全班連線卡死、系統無法響應！",
+          "• 最終課堂被迫暫停，大家乾等無法實作！",
+          "✅【正確解法】：『先在本機端 CLI 登入取得憑證』！",
+          "每位同學直接在面前的電腦做獨立認證，各走各的網路連線，10 秒順暢搞定！"
         ],
-        "footer": "下載約需 10~30 秒，下載完成後主畫面即顯示專案內容！"
+        "footer": "本機端登入完成後，後續無論本機跑或 Cloud Shell 跑都能順暢不塞車！"
       },
       {
         "type": "content",
         "badge": "步驟 26",
-        "title": "【專案目錄】步驟 26：開啟專案目錄與架構巡檢",
+        "title": "【身分授權】步驟 26：本機 CLI 執行 `antigravity login` 授權",
         "bullets": [
-          "在 GitHub Desktop 中，點擊按鈕【Open in Visual Studio Code】",
-          "或在選單中點選【Repository】➔【Show in Explorer】在檔案總管開啟",
-          "檢視專案三大核心資料夾：",
-          "• `01_每週教學簡報_PPT/`：每週 16:9 高畫質投影片",
-          "• `02_每週Antigravity實作專案/`：18 週實務專案代碼包 (Week 01 ~ Week 18)",
-          "• `平台首頁(單機離線直接點開).html`：免網路隨時點開的互動系統"
+          "在剛剛開啟的本機 PowerShell 中輸入指令：",
+          "• `antigravity login` (或 `python -m antigravity auth login`) 並按 Enter",
+          "系統會自動呼叫並彈出您電腦的預設瀏覽器 (Chrome / Edge)",
+          "在網頁中選取您的學校 Google 帳號或個人 Google 帳號進行登入與授權",
+          "授權完成後，瀏覽器顯示『Authentication successful』即可關閉網頁！",
+          "回到 PowerShell，即會看到登入成功、憑證已安全儲存於本機！"
         ],
-        "footer": "所有教學資源整整齊齊備妥在您的本機電腦中！"
+        "footer": "本機獨立授權認證，徹底解決雲端伺服器集體卡死痛點！"
       },
       {
         "type": "content",
         "badge": "步驟 27",
-        "title": "【實作初探】步驟 27：進入第 01 週實作專案資料夾",
+        "title": "【專案取得】步驟 27：下載課程專案包至安全目錄",
         "bullets": [
-          "在 VS Code 左側檔案總管中展開：",
-          "📁 `02_每週Antigravity實作專案` ➔ 📁 `01_Week01_企業資料結構與主檔實體建模`",
-          "看見四個關鍵檔案：",
-          "1. `README.md`：本週任務說明書 (AS-IS 痛點與 TO-BE 解法)",
-          "2. `sample_data.json`：企業原始混亂資料 (內含缺失值與重複項)",
-          "3. `starter.py`：需要我們補充資料清理與主檔建模邏輯的程式",
-          "4. `verify.py`：批改評分驗證程式"
+          "取得本週企業專案實作包的兩種簡單方式：",
+          "• 方式 A (最簡單)：在課程平台點擊【下載本週專案包 (ZIP)】解壓至 `D:/projects`",
+          "• 方式 B：在 GitHub Desktop 中點擊【Clone repository】複製官方倉庫",
+          "⚠️【路徑安全指南】：",
+          "• 建議放置於：`D:/projects` 或 `C:/projects` 或自己的隨身碟",
+          "• 嚴禁包含中文目錄、空格或特殊符號，以避免 Python 讀檔錯誤！"
         ],
-        "footer": "這就是每週在電腦教室的標準實作單元配備！"
+        "footer": "路徑越乾淨，執行越順暢！"
       },
       {
         "type": "content",
         "badge": "步驟 28",
-        "title": "【執行程式】步驟 28：在 VS Code 中開啟終端機執行",
+        "title": "【目錄巡檢】步驟 28：命令列切換進入第 01 週專案目錄",
         "bullets": [
-          "在 VS Code 上方選單點選【終端機 (Terminal)】➔【新增終端機 (New Terminal)】",
-          "下方會彈出 PowerShell 命令列視窗",
-          "切換到第一週專案目錄：",
-          "• 輸入指令：`cd '02_每週Antigravity實作專案/01_Week01_企業資料結構與主檔實體建模'` 並按 Enter",
-          "初次嘗試執行啟動檔：",
-          "• 輸入指令：`python starter.py` 並按 Enter",
-          "終端機印出執行結果與資料筆數，代表 Python 執行完全正常！"
+          "在 PowerShell 中使用 `cd` 指令切換到實作資料夾：",
+          "• 輸入：`cd D:/projects/02_每週Antigravity實作專案/01_Week01_企業資料結構與主檔實體建模`",
+          "輸入指令 `dir` 查看資料夾中四大關鍵檔案：",
+          "1. `README.md`：本週任務說明書 (AS-IS 痛點與 TO-BE 解法)",
+          "2. `sample_data.json`：企業原始混亂資料 (內含缺失值與重複項)",
+          "3. `starter.py`：實務邏輯程式碼 ｜ 4. `verify.py`：評分驗證程式",
+          "不需要 VS Code！用 Windows 內建記事本 (Notepad) 就能直接檢視修改！"
         ],
-        "footer": "用鍵盤輸入指令時，善用鍵盤【Tab 鍵】可以自動補齊資料夾名稱！"
+        "footer": "Tab 鍵是鍵盤神鍵，輸入開頭兩三個字母按 Tab 即可自動補全路徑！"
       },
       {
         "type": "content",
         "badge": "步驟 29",
-        "title": "【自我驗證】步驟 29：執行 `verify.py` 自我檢查評分",
+        "title": "【實務運算】步驟 29：執行 `python starter.py` 產出企業主檔",
         "bullets": [
-          "每週專案最棒的設計：自帶評分老師 `verify.py`！",
+          "在終端機中輸入指令：",
+          "• `python starter.py` 並按下 Enter",
+          "程式會自動讀取 `sample_data.json` 中的混亂主檔資料",
+          "透過 Antigravity Agentic 邏輯執行：資料格式標準化、去除重複值與防呆防錯",
+          "終端機印出執行進度，並在當前目錄自動產出成果交付檔案：",
+          "• `master_data_clean.json` (清洗後之企業乾淨主檔)"
+        ],
+        "footer": "看見終端機印出清洗成功筆數，代表第一階段運算順利達標！"
+      },
+      {
+        "type": "content",
+        "badge": "步驟 30",
+        "title": "【自我驗證】步驟 30：執行 `python verify.py` 自我檢查評分",
+        "bullets": [
+          "每週專案最讚的設計：自帶評分老師 `verify.py`！",
           "在終端機中鍵入指令：`python verify.py` 並按下 Enter",
           "程式會自動執行 3~5 項企業業務規則檢驗 (如：主檔欄位驗證、除錯率計算)",
           "若全部通過，終端機會噴出彩色字樣：",
           "✨【SUCCESS】All validation tests passed! 實作成果完全符合企業標準！",
-          "若有錯誤，會清楚提示是哪一行規則未達標，修改 `starter.py` 再測即可！"
+          "若有錯誤，會清楚提示是哪一行規則未達標，修改後再測即可！"
         ],
         "footer": "寫完馬上知道自己對不對，完全不用擔心做錯！"
       },
       {
         "type": "content",
-        "badge": "步驟 30",
-        "title": "【雲端備份】步驟 30：用 GitHub Desktop 儲存成果並推送",
+        "badge": "步驟 31",
+        "title": "⚠️【🚨 重中之重】步驟 31：電腦教室「關機重置」生存法則！",
         "bullets": [
-          "當您在 VS Code 中修改並存檔了 `starter.py` 後，切換回 GitHub Desktop",
-          "左側欄位會自動偵測並打勾顯示您修改過的檔案！",
-          "在左下角【Summary】輸入紀錄摘要 (例：`完成第01週資料清洗實作`)",
-          "點擊藍色大按鈕【Commit to main】(儲存到本機版本庫)",
-          "接著點擊上方最右邊按鈕【Push origin】(推送到雲端)",
-          "不到 3 秒鐘，您的作業代碼已安全同步備份至 GitHub 雲端！"
+          "⚠️【電腦教室還原卡致命地雷】：",
+          "• 電腦教室的電腦皆安裝了『系統還原卡 / 還原軟體』！",
+          "• 只要【下課電腦關機】或【課堂中途重開機】，桌面與 C 槽檔案將【立即被徹底清除重置】！",
+          "• 下課如果沒把成果傳到雲端，今天辛苦做的所有程式與作業將『永久消失無法找回』！",
+          "🚨 全班同學請牢記：每次執行完成，下課前務必執行『下一步的雲端備份三部曲』！"
         ],
-        "footer": "哪怕電腦教室重開機還原，雲端也完整保存著您的所有心血！"
+        "footer": "絕對不要存了桌面就拍拍屁股走人，重開機全沒了！"
+      },
+      {
+        "type": "content",
+        "badge": "步驟 32",
+        "title": "【雲端備份】步驟 32：成果上傳至個人 Google Drive 或 GitHub",
+        "bullets": [
+          "每次執行產出作品後，請選擇以下任一方式備份上傳：",
+          "• 途徑 1 (最直覺)：開啟瀏覽器登入個人的【Google 雲端硬碟 (Google Drive)】，將今日做好的專案資料夾直接拖拉上傳備份！",
+          "• 途徑 2 (軟體人推薦)：在 GitHub Desktop 點選【Commit】與【Push】，直接推送到自己的 GitHub 雲端倉庫！",
+          "• 途徑 3 (作業繳交)：直接到本課程平台的【📤 學生報告繳交】專區上傳成果檔案！"
+        ],
+        "footer": "只要上傳到個人雲端，哪怕電腦重開機一百次，心血也永遠安全！"
+      },
+      {
+        "type": "content",
+        "badge": "步驟 33",
+        "title": "【雲端雙軌】步驟 33：備選方案 - Google Cloud Shell 雲端執行",
+        "bullets": [
+          "除了本機執行外，同學亦可使用 Google Cloud Shell 作為雲端備選：",
+          "• 網址：https://shell.cloud.google.com",
+          "• 由於我們剛剛已在本機熟悉了指令並取得授權，在 Cloud Shell 中不會再手忙腳亂",
+          "• Cloud Shell 好處：自帶 5GB 免費永久儲存空間，不受電腦教室關機重置影響！",
+          "• 隨時隨地用瀏覽器點開即可接續練習！"
+        ],
+        "footer": "本機 CLI 衝刺 ＋ Cloud Shell 雲端隨身備用，雙軌兼備最穩健！"
       },
       {
         "type": "content",
         "badge": "成果發布",
-        "title": "【作業繳交】步驟 31：成果如何讓老師線上看見？",
+        "title": "【作業繳交】步驟 34：成果如何讓老師線上看見？",
         "bullets": [
           "本課程提供專屬現代化線上繳交專區，不用再寄隨身碟或 Email 附件！",
           "兩種成果繳交方式：",
-          "1. 【線上公開成果網址】(推薦)：填寫您的 GitHub 倉庫或 GitHub Pages 網址",
+          "1. 【線上公開成果網址】(推薦)：填寫您的 GitHub 倉庫或雲端分享網址",
           "2. 【附件檔案上傳】：上傳您的報告 Word/PDF/Markdown 檔案 (10MB 內)",
           "繳交後即刻存入 Firebase 雲端資料庫，老師將在線上親自評閱打分！"
         ],
@@ -7591,7 +7627,7 @@ body {
       {
         "type": "content",
         "badge": "平台登入",
-        "title": "【作業繳交】步驟 32：進入課程平台並使用 Google 登入",
+        "title": "【作業繳交】步驟 35：進入課程平台並使用 Google 登入",
         "bullets": [
           "打開瀏覽器前往課程互動平台網址：",
           "• `https://h12s12bs.github.io/vnu-enterprise-resource-planning/`",
@@ -7605,13 +7641,13 @@ body {
       {
         "type": "content",
         "badge": "填寫表單",
-        "title": "【作業繳交】步驟 33：進入學生報告繳交專區",
+        "title": "【作業繳交】步驟 36：進入學生報告繳交專區",
         "bullets": [
           "點擊頂部導覽列按鈕【📤 學生報告繳交】進入繳交專區",
           "欄位 1【繳交報告類別】：依當前進度挑選『期中報告 (40%)』或『期末報告 (40%)』",
           "欄位 2【專案主題 / 標題】：輸入專案題名 (例：`自行車業主檔實體建模實作報告`)",
           "欄位 3【核心內容摘要與成果說明】：簡要撰寫 200~500 字心得以條列呈現",
-          "欄位 4【線上成果網址】：貼入您的 GitHub 專案網址",
+          "欄位 4【線上成果網址】：貼入您的 GitHub 專案或雲端網址",
           "欄位 5【附件檔案】：若有 PDF/Word 報告亦可一併附加"
         ],
         "footer": "內容摘要清楚說明遭遇問題與解決辦法，更容易獲得高分肯定！"
@@ -7619,7 +7655,7 @@ body {
       {
         "type": "content",
         "badge": "證照加分",
-        "title": "【作業繳交】步驟 34：勾選證照特別加分申請",
+        "title": "【作業繳交】步驟 37：勾選證照特別加分申請",
         "bullets": [
           "在繳交表單下方，有一個金黃色的特別加分勾選區塊：",
           "☑【🌟 申請專業證照特別加分】：",
@@ -7632,7 +7668,7 @@ body {
       {
         "type": "content",
         "badge": "成績查閱",
-        "title": "【作業繳交】步驟 35：在右側查看即時反饋與老師評語",
+        "title": "【作業繳交】步驟 38：在右側查看即時反饋與老師評語",
         "bullets": [
           "送出報告後，右側『我的報告繳交歷程與成績』會立即出現您的報告卡片！",
           "尚未批改時，會顯示金黃色徽章【⏳ 待老師批改中】",
@@ -19254,25 +19290,54 @@ function switchTab(tabId) {
 
 // ==================== 18 週進度地圖與 Antigravity 專案 ====================
 async function loadCurriculum() {
+  if (window.OFFLINE_CURRICULUM && window.OFFLINE_CURRICULUM.length > 0) {
+    curriculumData = window.OFFLINE_CURRICULUM;
+  }
   try {
     const res = await fetch('/api/curriculum');
     if (res.ok) {
       curriculumData = await res.json();
     if(!curriculumData || curriculumData.length===0) curriculumData = window.OFFLINE_CURRICULUM || [];
+    } else {
+      const resStatic = await fetch('data/curriculum.json');
+      if (resStatic.ok) {
+        curriculumData = await resStatic.json();
+      }
     }
   } catch (e) {
+    try {
+      const resStatic = await fetch('data/curriculum.json');
+      if (resStatic.ok) {
+        curriculumData = await resStatic.json();
+      }
+    } catch (err) {}
+  }
+  if (!curriculumData || curriculumData.length === 0) {
     curriculumData = window.OFFLINE_CURRICULUM || [];
   }
 }
 
 async function loadAntigravityMissions() {
+  if (window.OFFLINE_MISSIONS && window.OFFLINE_MISSIONS.length > 0) {
+    antigravityMissions = window.OFFLINE_MISSIONS;
+  }
   try {
     const res = await fetch('/api/antigravity_missions');
     if (res.ok) {
       antigravityMissions = await res.json();
+    } else {
+      const resStatic = await fetch('data/antigravity_missions.json');
+      if (resStatic.ok) {
+        antigravityMissions = await resStatic.json();
+      }
     }
   } catch (e) {
-    console.warn('Using local fallback antigravity missions');
+    try {
+      const resStatic = await fetch('data/antigravity_missions.json');
+      if (resStatic.ok) {
+        antigravityMissions = await resStatic.json();
+      }
+    } catch (err) {}
   }
   if (!antigravityMissions || antigravityMissions.length === 0) {
     antigravityMissions = window.OFFLINE_MISSIONS || [];
@@ -19330,10 +19395,15 @@ function showWeekDetail(weekNum) {
     activeBtn.classList.add('ring-2', 'ring-blue-600', 'bg-blue-600', 'text-white');
   }
 
-  const weekInfo = curriculumData.find(w => w.week === weekNum) || {
+  const pptxCleanTitle = (WEEK_PPTX_MAP[weekNum] || '')
+    .replace(/^ERP_第\d+週_/, '')
+    .replace('.pptx', '')
+    .replace(/_/g, ' ');
+
+  const weekInfo = (curriculumData && curriculumData.find(w => w.week === weekNum)) || {
     week: weekNum,
-    title: `第 ${weekNum} 週 企業流程與核心管理`,
-    chapter: `ERP 標準教學單元 (W${weekNum})`,
+    title: pptxCleanTitle || `第 ${weekNum} 週 ERP 實務單元`,
+    chapter: `ERP 標準教學單元 (第 ${weekNum} 週)`,
     objective: '掌握企業流程整合與 ERP 主檔設定',
     concept_card: {
       hook: '本週著重於 ERP 核心單據流轉與跨部門勾稽。',
@@ -19795,13 +19865,29 @@ function updateBullwhipUI() {
 
 // ==================== AGENTIC AI 規劃實驗室 ====================
 async function loadAgentTemplates() {
+  if (window.OFFLINE_TEMPLATES && window.OFFLINE_TEMPLATES.length > 0) {
+    agentTemplates = window.OFFLINE_TEMPLATES;
+  }
   try {
     const res = await fetch('/api/agent_templates');
     if (res.ok) {
       agentTemplates = await res.json();
     if(!agentTemplates || agentTemplates.length===0) agentTemplates = window.OFFLINE_TEMPLATES || [];
+    } else {
+      const resStatic = await fetch('data/agent_templates.json');
+      if (resStatic.ok) {
+        agentTemplates = await resStatic.json();
+      }
     }
   } catch (e) {
+    try {
+      const resStatic = await fetch('data/agent_templates.json');
+      if (resStatic.ok) {
+        agentTemplates = await resStatic.json();
+      }
+    } catch (err) {}
+  }
+  if (!agentTemplates || agentTemplates.length === 0) {
     agentTemplates = window.OFFLINE_TEMPLATES || [];
   }
   renderAgentTemplateButtons();
@@ -19994,17 +20080,38 @@ ${benefits}
 
 // ==================== CERPS 考照與題庫中心 ====================
 async function loadQuestions() {
+  if (window.OFFLINE_QUESTIONS && window.OFFLINE_QUESTIONS.length > 0) {
+    questionsData = window.OFFLINE_QUESTIONS;
+    const stat = document.getElementById('total-questions-stat');
+    if (stat) stat.textContent = questionsData.length;
+  }
   try {
     const res = await fetch('/api/questions?count=300');
     if (res.ok) {
       const data = await res.json();
       questionsData = data.questions || [];
       if(!questionsData || questionsData.length===0) questionsData = window.OFFLINE_QUESTIONS || [];
-      document.getElementById('total-questions-stat').textContent = questionsData.length;
+    } else {
+      const resStatic = await fetch('data/questions.json');
+      if (resStatic.ok) {
+        const data = await resStatic.json();
+        questionsData = data.questions || data || [];
+      }
     }
   } catch (e) {
-    questionsData = window.OFFLINE_QUESTIONS || []; document.getElementById('total-questions-stat').textContent = questionsData.length;
+    try {
+      const resStatic = await fetch('data/questions.json');
+      if (resStatic.ok) {
+        const data = await resStatic.json();
+        questionsData = data.questions || data || [];
+      }
+    } catch (err) {}
   }
+  if (!questionsData || questionsData.length === 0) {
+    questionsData = window.OFFLINE_QUESTIONS || [];
+  }
+  const stat = document.getElementById('total-questions-stat');
+  if (stat) stat.textContent = questionsData.length;
 }
 
 function startWeeklyQuiz() {

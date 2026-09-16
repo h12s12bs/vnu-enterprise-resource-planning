@@ -425,8 +425,9 @@
                   載入中...
                 </div>
               </div>
-              <div class="text-[11px] text-amber-200/90 font-medium">
-                💡 實作 SOP：解壓縮 ➔ 開啟 Antigravity 貼上 Prompt ➔ 執行 `python starter.py` 產出檔案 ➔ `python verify.py`
+              <div class="text-[11px] text-amber-200/90 font-medium space-y-1">
+                <div>💡 實作 SOP：本機 PowerShell 先登入 ➔ 解壓至非中文路徑 ➔ 執行 `python starter.py` ➔ `python verify.py` 驗收</div>
+                <div class="text-rose-300 font-bold">⚠️ 電腦教室關機將自動重置！成果請務必立即上傳個人 Google Drive 或 GitHub 備份！</div>
               </div>
             </div>
           </div>
@@ -518,14 +519,14 @@
 
               <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
                 <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i> 電腦教室實作步驟：
+                  <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i> 電腦教室實務操作 SOP（極簡 CLI 流程）：
                 </h4>
-                <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
-                  <li>下載上方專案包並解壓縮至電腦桌面。</li>
-                  <li>開啟終端機或 Antigravity，進入該專案目錄。</li>
-                  <li>複製右側 Prompt 貼給 Antigravity，引導 AI 補齊或擴充 `starter.py`。</li>
-                  <li>執行 `python starter.py` 產生交付檔案。</li>
-                  <li>執行 `python verify.py` 驗收成果是否通過！</li>
+                <ol class="text-xs text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                  <li><strong>本機登入（關鍵避坑）：</strong>開啟本機 PowerShell 執行 `antigravity login`，先完成 Google 帳號授權，避免全班同時在 Cloud Shell 登入造成併發塞車！</li>
+                  <li><strong>下載專案包：</strong>下載本週專案並解壓縮至非中文路徑（如 `D:/projects` 或隨身碟）。</li>
+                  <li><strong>執行與產生：</strong>在終端機中切換至該目錄，貼上右側 Prompt 引導 Antigravity，執行 `python starter.py` 產出交付檔案。</li>
+                  <li><strong>自我驗收：</strong>執行 `python verify.py` 驗收企業規則是否全數過關！</li>
+                  <li><strong class="text-rose-600">🚨 成果雲端備份（必做！）：</strong>電腦教室電腦關機後會自動重置還原！下課前請務必將成果檔案上傳至個人 Google Drive、GitHub 或課程平台作業區！</li>
                 </ol>
               </div>
             </div>

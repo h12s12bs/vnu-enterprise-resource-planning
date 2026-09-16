@@ -483,24 +483,53 @@ function switchTab(tabId) {
 
 // ==================== 18 週進度地圖與 Antigravity 專案 ====================
 async function loadCurriculum() {
+  if (window.OFFLINE_CURRICULUM && window.OFFLINE_CURRICULUM.length > 0) {
+    curriculumData = window.OFFLINE_CURRICULUM;
+  }
   try {
     const res = await fetch('/api/curriculum');
     if (res.ok) {
       curriculumData = await res.json();
+    } else {
+      const resStatic = await fetch('data/curriculum.json');
+      if (resStatic.ok) {
+        curriculumData = await resStatic.json();
+      }
     }
   } catch (e) {
-    console.warn('Using local fallback curriculum');
+    try {
+      const resStatic = await fetch('data/curriculum.json');
+      if (resStatic.ok) {
+        curriculumData = await resStatic.json();
+      }
+    } catch (err) {}
+  }
+  if (!curriculumData || curriculumData.length === 0) {
+    curriculumData = window.OFFLINE_CURRICULUM || [];
   }
 }
 
 async function loadAntigravityMissions() {
+  if (window.OFFLINE_MISSIONS && window.OFFLINE_MISSIONS.length > 0) {
+    antigravityMissions = window.OFFLINE_MISSIONS;
+  }
   try {
     const res = await fetch('/api/antigravity_missions');
     if (res.ok) {
       antigravityMissions = await res.json();
+    } else {
+      const resStatic = await fetch('data/antigravity_missions.json');
+      if (resStatic.ok) {
+        antigravityMissions = await resStatic.json();
+      }
     }
   } catch (e) {
-    console.warn('Using local fallback antigravity missions');
+    try {
+      const resStatic = await fetch('data/antigravity_missions.json');
+      if (resStatic.ok) {
+        antigravityMissions = await resStatic.json();
+      }
+    } catch (err) {}
   }
   if (!antigravityMissions || antigravityMissions.length === 0) {
     antigravityMissions = window.OFFLINE_MISSIONS || [];
@@ -558,10 +587,15 @@ function showWeekDetail(weekNum) {
     activeBtn.classList.add('ring-2', 'ring-blue-600', 'bg-blue-600', 'text-white');
   }
 
-  const weekInfo = curriculumData.find(w => w.week === weekNum) || {
+  const pptxCleanTitle = (WEEK_PPTX_MAP[weekNum] || '')
+    .replace(/^ERP_第\d+週_/, '')
+    .replace('.pptx', '')
+    .replace(/_/g, ' ');
+
+  const weekInfo = (curriculumData && curriculumData.find(w => w.week === weekNum)) || {
     week: weekNum,
-    title: `第 ${weekNum} 週 企業流程與核心管理`,
-    chapter: `ERP 標準教學單元 (W${weekNum})`,
+    title: pptxCleanTitle || `第 ${weekNum} 週 ERP 實務單元`,
+    chapter: `ERP 標準教學單元 (第 ${weekNum} 週)`,
     objective: '掌握企業流程整合與 ERP 主檔設定',
     concept_card: {
       hook: '本週著重於 ERP 核心單據流轉與跨部門勾稽。',
@@ -1023,13 +1057,29 @@ function updateBullwhipUI() {
 
 // ==================== AGENTIC AI 規劃實驗室 ====================
 async function loadAgentTemplates() {
+  if (window.OFFLINE_TEMPLATES && window.OFFLINE_TEMPLATES.length > 0) {
+    agentTemplates = window.OFFLINE_TEMPLATES;
+  }
   try {
     const res = await fetch('/api/agent_templates');
     if (res.ok) {
       agentTemplates = await res.json();
+    } else {
+      const resStatic = await fetch('data/agent_templates.json');
+      if (resStatic.ok) {
+        agentTemplates = await resStatic.json();
+      }
     }
   } catch (e) {
-    console.warn('Using local fallback templates');
+    try {
+      const resStatic = await fetch('data/agent_templates.json');
+      if (resStatic.ok) {
+        agentTemplates = await resStatic.json();
+      }
+    } catch (err) {}
+  }
+  if (!agentTemplates || agentTemplates.length === 0) {
+    agentTemplates = window.OFFLINE_TEMPLATES || [];
   }
   renderAgentTemplateButtons();
   if (agentTemplates.length > 0) {
@@ -1221,16 +1271,37 @@ ${benefits}
 
 // ==================== CERPS 考照與題庫中心 ====================
 async function loadQuestions() {
+  if (window.OFFLINE_QUESTIONS && window.OFFLINE_QUESTIONS.length > 0) {
+    questionsData = window.OFFLINE_QUESTIONS;
+    const stat = document.getElementById('total-questions-stat');
+    if (stat) stat.textContent = questionsData.length;
+  }
   try {
     const res = await fetch('/api/questions?count=300');
     if (res.ok) {
       const data = await res.json();
       questionsData = data.questions || [];
-      document.getElementById('total-questions-stat').textContent = questionsData.length;
+    } else {
+      const resStatic = await fetch('data/questions.json');
+      if (resStatic.ok) {
+        const data = await resStatic.json();
+        questionsData = data.questions || data || [];
+      }
     }
   } catch (e) {
-    console.warn('Questions API unavailable');
+    try {
+      const resStatic = await fetch('data/questions.json');
+      if (resStatic.ok) {
+        const data = await resStatic.json();
+        questionsData = data.questions || data || [];
+      }
+    } catch (err) {}
   }
+  if (!questionsData || questionsData.length === 0) {
+    questionsData = window.OFFLINE_QUESTIONS || [];
+  }
+  const stat = document.getElementById('total-questions-stat');
+  if (stat) stat.textContent = questionsData.length;
 }
 
 function startWeeklyQuiz() {
