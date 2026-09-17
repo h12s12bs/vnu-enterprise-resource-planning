@@ -2005,8 +2005,8 @@ async function handleStudentReportSubmit(e) {
     return;
   }
 
-  const sId = (studentProfile.id || '').trim();
-  const sName = (studentProfile.name || '').trim();
+  const sId = currentStudentInfo ? currentStudentInfo.studentId : '';
+  const sName = currentStudentInfo ? currentStudentInfo.studentName : '';
   if (!sId || !sName || sId === '未設定' || sName === '設定座號姓名') {
     alert('⚠️ 繳交前請先填妥「萬能科大學號」與「姓名」，以便老師登記成績！');
     openStudentModal();
@@ -2014,7 +2014,7 @@ async function handleStudentReportSubmit(e) {
   }
 
   const typeSelect = document.getElementById('report-type-select');
-  const reportType = typeSelect ? typeSelect.value : '期中報告';
+  const reportType = typeSelect ? typeSelect.value : '期中考';
   const titleInput = document.getElementById('report-title-input');
   const summaryInput = document.getElementById('report-summary-input');
   const urlInput = document.getElementById('report-url-input');
@@ -2121,7 +2121,7 @@ async function handleStudentReportSubmit(e) {
   }
 
   // 3. 解鎖學生專題成果勳章
-  unlockBadge('report_submitted', '📑 報告繳交達人', `已繳交 ${reportType}：《${title}》`);
+  unlockBadge('report_submitted', '📑 考評成果繳交達人', `已繳交 ${reportType}：《${title}》`);
 
   alert(`🎉 恭喜【進企四系4甲】${sName} 同學！\n\n您的《${title}》(${reportType}) 已成功上傳儲存！\n授課教師邱俊維博士將於線上評閱給分與提供回饋。`);
 
@@ -2129,7 +2129,7 @@ async function handleStudentReportSubmit(e) {
   if (form) form.reset();
   if (submitBtn) {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span>確認送出繳交報告</span>`;
+    submitBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span>確認送出繳交考評成果</span>`;
   }
   loadStudentPersonalReports();
 }
@@ -2173,7 +2173,7 @@ async function loadStudentPersonalReports() {
     container.innerHTML = `
       <div class="p-6 text-center text-slate-400 text-xs">
         <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
-        尚未繳交任何報告。請於左側選擇期中或期末報告進行繳交！
+        尚未繳交任何期中或期末考成果。請於左側選擇期中考或期末考進行繳交！
       </div>
     `;
     if (window.lucide) window.lucide.createIcons();
@@ -2181,10 +2181,10 @@ async function loadStudentPersonalReports() {
   }
 
   container.innerHTML = myReports.map(r => {
-    const isMidterm = r.report_type === '期中報告';
+    const isMidterm = (r.report_type === '期中考' || r.report_type === '期中報告');
     const typeBadge = isMidterm
-      ? `<span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded">期中報告 (40%)</span>`
-      : `<span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2 py-0.5 rounded">期末報告 (40%)</span>`;
+      ? `<span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded">期中考 (40%)</span>`
+      : `<span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2 py-0.5 rounded">期末考 (40%)</span>`;
     
     const isGraded = (r.score !== null && r.score !== undefined && r.score !== '');
     const gradeBadge = isGraded
@@ -2241,7 +2241,7 @@ function previewStudentReport(reportId) {
     } catch (e) {}
   }
   if (!rep) {
-    alert('找不到該篇報告資料！');
+    alert('找不到該次考評成果資料！');
     return;
   }
 
@@ -2267,8 +2267,9 @@ function previewStudentReport(reportId) {
   const commentInput = document.getElementById('preview-comment-input');
 
   if (badgeElem) {
-    badgeElem.textContent = rep.report_type || '專案報告';
-    badgeElem.className = rep.report_type === '期末報告'
+    const isFinal = (rep.report_type === '期末考' || rep.report_type === '期末報告');
+    badgeElem.textContent = rep.report_type || '專案考評';
+    badgeElem.className = isFinal
       ? 'bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded'
       : 'bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded';
   }
@@ -2387,9 +2388,9 @@ async function savePreviewModalGrade() {
       cert_bonus: currentPreviewReport.cert_applied ? 5 : 0,
       teacher_comment: ''
     };
-    if (currentPreviewReport.report_type === '期中報告') {
+    if (currentPreviewReport.report_type === '期中考' || currentPreviewReport.report_type === '期中報告') {
       curGrade.midterm_score = scoreNum;
-    } else if (currentPreviewReport.report_type === '期末報告') {
+    } else if (currentPreviewReport.report_type === '期末考' || currentPreviewReport.report_type === '期末報告') {
       curGrade.final_score = scoreNum;
     }
     if (commentVal) curGrade.teacher_comment = commentVal;
@@ -2540,8 +2541,8 @@ function renderTeacherGradeDashboard() {
   let totalScoreStudents = 0;
 
   allClassReports.forEach(r => {
-    if (r.report_type === '期中報告') midtermCount++;
-    if (r.report_type === '期末報告') finalCount++;
+    if (r.report_type === '期中考' || r.report_type === '期中報告') midtermCount++;
+    if (r.report_type === '期末考' || r.report_type === '期末報告') finalCount++;
     if (r.score !== null && r.score !== undefined && r.score !== '') {
       gradedCount++;
     } else {
@@ -2579,8 +2580,8 @@ function renderTeacherGradeDashboard() {
 
     // 學生繳交狀態比對
     const sKey = s.studentId || s.uid;
-    const hasMid = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
-    const hasFin = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+    const hasMid = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期中考' || r.report_type === '期中報告'));
+    const hasFin = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期末考' || r.report_type === '期末報告'));
     const hasPending = allClassReports.some(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.score === null || r.score === undefined || r.score === ''));
 
     if (filterStat === 'midterm_submitted' && !hasMid) return false;
@@ -2614,8 +2615,8 @@ function renderTeacherGradeDashboard() {
     const savedGrade = allClassGradesMap[sKey] || {};
 
     // 查找學生的期中與期末報告
-    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
-    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期中考' || r.report_type === '期中報告'));
+    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期末考' || r.report_type === '期末報告'));
 
     // 預設分數填入邏輯：優先採用已儲存成績，次之連動報告批改得分，否則依出席率預設 90
     const attendanceVal = (savedGrade.attendance !== undefined && savedGrade.attendance !== '') ? savedGrade.attendance : 90;
@@ -2648,7 +2649,7 @@ function renderTeacherGradeDashboard() {
       totalScoreStudents++;
     }
 
-    // 期中報告操作鈕
+    // 期中考操作鈕
     let midtermCell = '';
     if (midtermRep) {
       const isGraded = midtermRep.score !== null && midtermRep.score !== undefined && midtermRep.score !== '';
@@ -2656,7 +2657,7 @@ function renderTeacherGradeDashboard() {
         <div class="space-y-1">
           <input type="number" min="0" max="100" id="row-mid-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${midtermVal}" placeholder="40%" class="w-20 text-center font-bold text-indigo-700 bg-indigo-50/50 border border-indigo-200 rounded p-1 mx-auto block text-xs">
           <button type="button" onclick="previewStudentReport('${escapeHtml(midtermRep.id)}')" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold underline">
-            <span>檢視期中</span> ${isGraded ? `<span class="text-emerald-600">(${midtermRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
+            <span>檢視期中考</span> ${isGraded ? `<span class="text-emerald-600">(${midtermRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
           </button>
         </div>
       `;
@@ -2669,7 +2670,7 @@ function renderTeacherGradeDashboard() {
       `;
     }
 
-    // 期末報告操作鈕
+    // 期末考操作鈕
     let finalCell = '';
     if (finalRep) {
       const isGraded = finalRep.score !== null && finalRep.score !== undefined && finalRep.score !== '';
@@ -2677,7 +2678,7 @@ function renderTeacherGradeDashboard() {
         <div class="space-y-1">
           <input type="number" min="0" max="100" id="row-fin-${escapeHtml(sKey)}" oninput="calcRowTotal('${escapeHtml(sKey)}')" value="${finalVal}" placeholder="40%" class="w-20 text-center font-bold text-purple-700 bg-purple-50/50 border border-purple-200 rounded p-1 mx-auto block text-xs">
           <button type="button" onclick="previewStudentReport('${escapeHtml(finalRep.id)}')" class="inline-flex items-center gap-1 text-[10px] text-purple-600 hover:text-purple-800 font-semibold underline">
-            <span>檢視期末</span> ${isGraded ? `<span class="text-emerald-600">(${finalRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
+            <span>檢視期末考</span> ${isGraded ? `<span class="text-emerald-600">(${finalRep.score}分)</span>` : '<span class="text-amber-600">(待批)</span>'}
           </button>
         </div>
       `;
@@ -2858,14 +2859,14 @@ function exportAllGradesToExcel() {
     return;
   }
 
-  let csv = '\uFEFF學號,姓名,班級,Email,平時出席(20%),期中報告得分(40%),期末報告得分(40%),證照加分,學期總成績,期中報告繳交題名,期末報告繳交題名,證照加分申請,教師評語,登錄更新時間\n';
+  let csv = '\uFEFF學號,姓名,班級,Email,平時出席(20%),期中考得分(40%),期末考得分(40%),證照加分,學期總成績,期中考成果/題名,期末考成果/題名,證照加分申請,教師評語,登錄更新時間\n';
 
   allClassStudents.forEach(s => {
     const sKey = s.studentId || s.uid;
     const g = allClassGradesMap[sKey] || {};
 
-    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期中報告');
-    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && r.report_type === '期末報告');
+    const midtermRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期中考' || r.report_type === '期中報告'));
+    const finalRep = allClassReports.find(r => (r.student_id === s.studentId || r.uid === s.uid) && (r.report_type === '期末考' || r.report_type === '期末報告'));
 
     const att = (g.attendance !== undefined && g.attendance !== '') ? g.attendance : 90;
     const mid = (g.midterm_score !== undefined && g.midterm_score !== '') ? g.midterm_score : (midtermRep ? midtermRep.score || '' : '');
