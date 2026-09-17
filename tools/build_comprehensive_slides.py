@@ -434,14 +434,14 @@ def get_week_01_slides():
             "type": "content", "badge": "概念認識", "title": "什麼是 Google Antigravity 與每週專案包？",
             "bullets": [
                 "Antigravity 是先進的 Agentic AI 開發環境與協同程式助手",
-                "在電腦教室中，每位同學都有一台電腦，本課程不搞『只在網頁上隨便點一點』的假模擬",
-                "我們要讓每位同學真正拿到【每週企業實戰專案包 (Starter Code)】：",
-                "• 內含真實 ERP 企業營運主檔資料 (`sample_data.json`)",
+                "在電腦教室中，每位同學都有一台電腦，本課程帶領大家一人一機動手實作",
+                "我們要讓每位同學實際拿到【每週企業實戰專案包 (Starter Code)】：",
+                "• 內含模擬企業營運與教學情境資料 (`sample_data.json`)",
                 "• 內含實務邏輯程式碼架構 (`starter.py`)",
                 "• 內含自動批改驗算測試引擎 (`verify.py`)",
                 "同學寫出東西、執行過關，就真正掌握了企業流程自動化！"
             ],
-            "footer": "做中學、學中做，累積真實企業實戰力！"
+            "footer": "做中學、學中做，累積扎實實務競爭力！"
         },
         {
             "type": "content", "badge": "步驟 21", "title": "【環境檢查】步驟 21：檢查電腦是否已有 Python",
@@ -1157,17 +1157,17 @@ def generate_weekly_template_slides(week_num, week_title, chapter, objective, ho
             "bullets": [
                 f"實作專案主題：{antigravity_topic}",
                 f"專案目錄位置：`02_每週Antigravity實作專案/` 對應第 {week_num:02d} 週資料夾",
-                "檔案 1 `sample_data.json`：包含本週真實業務測試情境資料",
+                "檔案 1 `sample_data.json`：包含本週模擬業務測試情境資料",
                 "檔案 2 `starter.py`：待完成之核心業務邏輯骨架程式碼",
                 "檔案 3 `verify.py`：自動化單元測試與評分檢驗腳本",
                 "本週任務：補充並完善 `starter.py` 中的關鍵函式，使測試全數通過！"
             ],
-            "footer": "現在請全班開啟 VS Code，打開本週專案資料夾！"
+            "footer": "現在請全班開啟終端機或 Antigravity，進入本週專案資料夾！"
         },
         {
             "type": "content", "badge": "代碼導讀", "title": "實作核心函式與資料結構逐行導讀",
             "bullets": [
-                "載入資料：透過 `json.load()` 讀取真實業務單據陣列",
+                "載入資料：透過 `json.load()` 讀取模擬業務單據陣列",
                 "資料走訪與比對：使用迴圈遍歷每筆項目，核對關鍵鍵值",
                 "商業規則運算：依據本週核心演算法公式計算目標數值",
                 "異常回傳格式：若發現資料不一致，將錯誤紀錄存入 `error_log` 列表回傳",
@@ -1178,10 +1178,10 @@ def generate_weekly_template_slides(week_num, week_title, chapter, objective, ho
         {
             "type": "content", "badge": "實作步驟", "title": "【實作步驟指引】在終端機中執行與修改流程",
             "bullets": [
-                f"步驟 1：在 VS Code 終端機切換目錄至第 {week_num:02d} 週資料夾",
+                f"步驟 1：在終端機（PowerShell）切換目錄至第 {week_num:02d} 週資料夾",
                 "步驟 2：開啟 `starter.py`，找到標註 `# TODO: 請在此處實作業務邏輯` 之區塊",
-                "步驟 3：依投影片指引補齊運算式與邏輯判斷條件",
-                "步驟 4：儲存檔案 (Ctrl + S)，在終端機執行 `python starter.py` 查看輸出結果",
+                "步驟 3：依投影片指引補齊運算式與邏輯判斷條件（或請 Antigravity 協同編寫）",
+                "步驟 4：儲存檔案後，在終端機執行 `python starter.py` 查看輸出結果",
                 "步驟 5：執行 `python verify.py` 進行自我驗收，看到 PASSED 綠字代表滿分過關！"
             ],
             "footer": "若遇到錯誤，終端機會清楚指出哪一個測試案例未通過，回頭檢查邏輯！"

@@ -1193,7 +1193,7 @@ def generate_all_projects():
 
 ---
 
-## 🏢 企業真實業務情境
+## 🏢 企業模擬業務情境
 {m['scenario']}
 
 ---
@@ -1213,7 +1213,7 @@ def generate_all_projects():
    cd {folder_name}
    ```
 2. **檢視起始程式碼與資料**：
-   - 查看 `sample_data.json`：觀察企業真實資料結構。
+   - 查看 `sample_data.json`：觀察企業模擬情境資料結構。
    - 查看 `starter.py`：檢視核心架構與 `# TODO` 任務區。
 3. **使用 Antigravity 進行實作**：
    - 將上方的「Antigravity AI Agent 提示詞」貼給 Antigravity，請 AI 協助你完成、除錯並擴充 `starter.py`。
