@@ -567,16 +567,16 @@ const WEEK_PPTX_MAP = {
   6: "ERP_第06週_採購與庫存管理_(MM)_-_收料檢驗與三向比對.pptx",
   7: "ERP_第07週_生產規劃與控制_(PP)_-_主排程與_BOM_表.pptx",
   8: "ERP_第08週_生產規劃與控制_(PP)_-_物料需求規劃_(MRP).pptx",
-  9: "ERP_第09週_期中學習評量與證照考點總複習.pptx",
+  9: "ERP_第09週_期中考與學習評量_✕_證照考點總複習.pptx",
   10: "ERP_第10週_會計與財務管理模組_(FI_CO).pptx",
   11: "ERP_第11週_人力資源管理模組_(HR).pptx",
-  12: "ERP_第12週_供應鏈管理_(SCM)_與跨企業協同運作.pptx",
+  12: "ERP_第12週_供應鏈管理_(SCM)_與跨企業協同.pptx",
   13: "ERP_第13週_客戶關係管理_(CRM)_與全通路行銷.pptx",
   14: "ERP_第14週_商業智慧_(BI)_與企業營運大數據分析.pptx",
   15: "ERP_第15週_ERP_系統導入方法論與系統評選.pptx",
   16: "ERP_第16週_AI_時代的_ERP：AI_Agent_與流程自動化實務.pptx",
   17: "ERP_第17週_ERP_專業考前總衝刺與全真模擬測驗.pptx",
-  18: "ERP_第18週_期末成果驗收_／_企業資源規劃專業證照檢定.pptx"
+  18: "ERP_第18週_期末考_／_企業資源規劃期末成果發表與證照檢定.pptx"
 };
 
 function showWeekDetail(weekNum) {
@@ -1316,25 +1316,217 @@ function startFilteredQuiz() {
   const ch = document.getElementById('exam-chapter-select').value;
   let pool = questionsData;
   let title = '全章節精選綜合練習';
-  if (ch !== 'all') {
+  let count = 10;
+  if (ch === 'midterm_pool') {
+    pool = questionsData.filter(q => q.chapter <= 8);
+    title = '【期中考題庫範圍】第 1～8 章綜合抽測 (20題)';
+    count = 20;
+  } else if (ch === 'final_pool') {
+    pool = questionsData.filter(q => q.chapter >= 9);
+    title = '【期末考題庫範圍】第 9～16 章綜合抽測 (20題)';
+    count = 20;
+  } else if (ch !== 'all') {
     const chNum = parseInt(ch);
     pool = questionsData.filter(q => q.chapter === chNum);
     title = `第 ${chNum} 章 自主練習`;
+    count = Math.min(10, pool.length);
   }
-  const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 10);
-  startExamSession(title, shuffled, 15);
+  const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, count);
+  startExamSession(title, shuffled, Math.ceil(count * 1.5));
 }
 
 function startFullExam(mode) {
   switchTab('exam');
   if (mode === 'midterm_50') {
-    // CH01~CH07 + AI ERP
-    const pool = questionsData.filter(q => q.chapter <= 7 || q.chapter === 16);
+    // 期中考範圍：第 1 章 ~ 第 8 章 (105 題池)
+    const pool = questionsData.filter(q => q.chapter <= 8);
     const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 50);
-    startExamSession('期中全真模擬檢定 (50題)', shuffled, 60);
+    startExamSession('期中考全真模擬檢定 (50題)', shuffled, 60);
+  } else if (mode === 'final_50') {
+    // 期末考範圍：第 9 章 ~ 第 16 章 (95 題池)
+    const pool = questionsData.filter(q => q.chapter >= 9);
+    const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 50);
+    startExamSession('期末考全真模擬檢定 (50題)', shuffled, 60);
   } else if (mode === 'final_100') {
+    // 全冊 200 題池
     const shuffled = [...questionsData].sort(() => 0.5 - Math.random()).slice(0, 100);
-    startExamSession('期末 CERPS 考照全真衝刺 (100題)', shuffled, 100);
+    startExamSession('CERPS 證照與全真考照衝刺 (100題)', shuffled, 100);
+  }
+}
+
+// ==================== 題庫線上完整展開、下載與列印 ====================
+let currentViewingBankType = 'midterm';
+
+function openQuestionBankViewer(bankType) {
+  currentViewingBankType = bankType;
+  const box = document.getElementById('question-bank-viewer-box');
+  const titleEl = document.getElementById('qb-viewer-title');
+  const subEl = document.getElementById('qb-viewer-subtitle');
+  const listEl = document.getElementById('qb-viewer-list');
+  if (!box || !listEl) return;
+
+  let pool = [];
+  let bankName = '';
+  let bankRange = '';
+
+  if (bankType === 'midterm') {
+    pool = questionsData.filter(q => q.chapter <= 8);
+    bankName = '📘 期中考全部考題題庫（含標準答案與詳解）';
+    bankRange = `涵蓋第 1 章 ～ 第 8 章 ｜ 共 ${pool.length} 題 ｜ 綠字粗體為官方標準答案`;
+  } else if (bankType === 'final') {
+    pool = questionsData.filter(q => q.chapter >= 9);
+    bankName = '📙 期末考全部考題題庫（含標準答案與詳解）';
+    bankRange = `涵蓋第 9 章 ～ 第 16 章 ｜ 共 ${pool.length} 題 ｜ 綠字粗體為官方標準答案`;
+  } else {
+    pool = [...questionsData];
+    bankName = '📚 全學期總題庫完整合輯（含標準答案與詳解）';
+    bankRange = `涵蓋全冊第 1 章 ～ 第 16 章 ｜ 共 ${pool.length} 題 ｜ 綠字粗體為官方標準答案`;
+  }
+
+  // 排序依章節與題號
+  pool.sort((a, b) => (a.chapter - b.chapter) || (a.id - b.id));
+
+  if (titleEl) titleEl.textContent = bankName;
+  if (subEl) subEl.textContent = bankRange;
+
+  let lastCh = null;
+  listEl.innerHTML = pool.map((q, idx) => {
+    let chHeader = '';
+    if (q.chapter !== lastCh) {
+      lastCh = q.chapter;
+      chHeader = `
+        <div class="sticky top-0 z-10 bg-gradient-to-r from-blue-700 to-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm mt-4 mb-2 flex items-center justify-between">
+          <span>【第 ${q.chapter} 章：${q.chapter_title}】</span>
+          <span class="text-[11px] font-normal text-blue-100">模組：${q.module || 'ERP'}</span>
+        </div>
+      `;
+    }
+
+    return `
+      ${chHeader}
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2 text-xs hover:border-blue-300 transition">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+              ${idx + 1}
+            </span>
+            <span class="font-extrabold text-slate-900">${q.question}</span>
+          </div>
+          <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded shrink-0">
+            標準答案：(${q.answer})
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pl-8 pt-1">
+          ${q.options.map((opt, optIdx) => {
+            const isAns = (optIdx + 1 === q.answer);
+            return `
+              <div class="p-2 rounded-lg text-xs ${isAns ? 'bg-emerald-100 text-emerald-900 font-bold border border-emerald-300' : 'bg-white text-slate-700 border border-slate-200'}">
+                (${optIdx + 1}) ${opt} ${isAns ? '✓' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-lg text-[11px] text-blue-950 whitespace-pre-line leading-relaxed pl-8">
+          <strong>💡 考點解析：</strong>${q.explanation || '本題檢測學生對 ERP 核心流程與觀念之掌握。'}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  box.classList.remove('hidden');
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closeQuestionBankViewer() {
+  const box = document.getElementById('question-bank-viewer-box');
+  if (box) box.classList.add('hidden');
+}
+
+function getBankExportHtml() {
+  let pool = [];
+  let bankTitle = '';
+  if (currentViewingBankType === 'midterm') {
+    pool = questionsData.filter(q => q.chapter <= 8);
+    bankTitle = '萬能科技大學 11501《企業資源規劃》期中考全部題庫（含答案）';
+  } else if (currentViewingBankType === 'final') {
+    pool = questionsData.filter(q => q.chapter >= 9);
+    bankTitle = '萬能科技大學 11501《企業資源規劃》期末考全部題庫（含答案）';
+  } else {
+    pool = [...questionsData];
+    bankTitle = '萬能科技大學 11501《企業資源規劃》全學期總題庫完整版（含答案）';
+  }
+  pool.sort((a, b) => (a.chapter - b.chapter) || (a.id - b.id));
+
+  let html = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>${bankTitle}</title>
+<style>
+  body { font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; line-height: 1.6; margin: 30px; color: #1e293b; }
+  h1 { text-align: center; color: #1e3a8a; font-size: 22px; margin-bottom: 5px; }
+  .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 25px; }
+  .ch-header { background: #1e40af; color: white; padding: 6px 12px; font-weight: bold; font-size: 14px; border-radius: 4px; margin-top: 20px; }
+  .q-box { border-bottom: 1px solid #e2e8f0; padding: 12px 0; page-break-inside: avoid; }
+  .q-title { font-weight: bold; font-size: 13px; margin-bottom: 6px; }
+  .ans-badge { color: #b91c1c; font-weight: bold; margin-left: 6px; }
+  .opts { margin-left: 20px; font-size: 12.5px; }
+  .opt { margin-bottom: 3px; }
+  .opt.correct { color: #15803d; font-weight: bold; }
+  .exp { margin-left: 20px; background: #eff6ff; padding: 6px 10px; font-size: 11.5px; color: #1e3a8a; border-left: 3px solid #3b82f6; margin-top: 6px; border-radius: 2px; }
+  @media print { body { margin: 15mm; } button { display: none; } }
+</style>
+</head>
+<body>
+<h1>${bankTitle}</h1>
+<div class="sub">授課教師：邱俊維 博士 ｜ 題數：共 ${pool.length} 題 ｜ 命題公告：考試直接從此題庫抽題</div>
+`;
+
+  let lastCh = null;
+  pool.forEach((q, idx) => {
+    if (q.chapter !== lastCh) {
+      lastCh = q.chapter;
+      html += `<div class="ch-header">【第 ${q.chapter} 章：${q.chapter_title}】（${q.module || 'ERP'}）</div>`;
+    }
+    html += `
+    <div class="q-box">
+      <div class="q-title">${idx + 1}. ${q.question} <span class="ans-badge">【標準答案：(${q.answer})】</span></div>
+      <div class="opts">
+        ${q.options.map((opt, i) => `<div class="opt ${i + 1 === q.answer ? 'correct' : ''}">(${i + 1}) ${opt} ${i + 1 === q.answer ? '✓' : ''}</div>`).join('')}
+      </div>
+      <div class="exp">💡 解析：${(q.explanation || '').replace(/\n/g, ' ')}</div>
+    </div>`;
+  });
+
+  html += `</body></html>`;
+  return { html, bankTitle, count: pool.length };
+}
+
+function downloadCurrentBankHtml() {
+  const { html, bankTitle } = getBankExportHtml();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${bankTitle}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printCurrentQuestionBank() {
+  const { html } = getBankExportHtml();
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 500);
+  } else {
+    alert('請允許快顯視窗以便開啟列印畫面！');
   }
 }
 

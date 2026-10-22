@@ -25,16 +25,23 @@ def extract_paragraphs(docx_path):
         return paras
 
 def split_options(text):
+    # 修正原書題庫 Word 檔內之排版筆誤
+    text = text.replace('(3)前二者均是；(3)以上皆非', '(3)前二者均是；(4)以上皆非')
+    text = text.replace('對關鍵性產能和料品的供給狀況力以估計', '對關鍵性產能和料品的供給狀況加以估計')
+    text = text.replace('銷貨收入減生產成本成本', '銷貨收入減銷貨成本(生產成本)')
+    text = text.replace('全貎', '全貌')
+    text = text.replace('(1)登錄、過帳、試算、編表；(2)調整、試算、結帳、編表；(3)登錄、試算、結帳、編表；(4)登錄、過帳、試算、編表',
+                        '(1)登錄、過帳、試算、編表；(2)調整、試算、結帳、編表；(3)登錄、試算、結帳、編表；(4)分錄、過帳、調整、編表')
+
     pattern = r'\(([1-4])\)\s*'
     parts = re.split(pattern, text)
     if len(parts) >= 9:
         stem = parts[0].strip()
-        options = {}
-        for i in range(1, len(parts), 2):
-            opt_num = parts[i]
+        opts_list = []
+        for i in range(1, 9, 2):
             opt_val = parts[i+1].strip().rstrip('；;。')
-            options[opt_num] = opt_val
-        return stem, [options.get('1',''), options.get('2',''), options.get('3',''), options.get('4','')]
+            opts_list.append(opt_val)
+        return stem, opts_list
     else:
         return text, ["選項 1", "選項 2", "選項 3", "選項 4"]
 

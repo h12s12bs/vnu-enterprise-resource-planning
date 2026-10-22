@@ -1102,44 +1102,168 @@
             ERP 實務檢定與全真題庫測驗中心
           </h1>
           <p class="text-xs sm:text-sm text-slate-500">
-            收錄 15 章教材題庫 (180 題) ＋ 最新 20+ 題 AI-ERP 專屬考點，平時隨堂練習，考取相關證照享學期總成績特別加分！
+            收錄張緯良《企業資源規劃 4e》原廠 15 章題庫 (180 題) ＋ CERPS AI-ERP 認證精選 (20 題)，期中考與期末考皆從此題庫抽題命題！
           </p>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button onclick="startFullExam('midterm_50')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i data-lucide="clock" class="w-4 h-4"></i>
-            <span>期中全真模考 (50題)</span>
+            <span>期中考全真模考 (50題)</span>
+          </button>
+          <button onclick="startFullExam('final_50')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="file-check" class="w-4 h-4"></i>
+            <span>期末考全真模考 (50題)</span>
           </button>
           <button onclick="startFullExam('final_100')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i data-lucide="trophy" class="w-4 h-4"></i>
-            <span>期末全真衝刺 (100題)</span>
+            <span>證照總衝刺 (100題)</span>
           </button>
+        </div>
+      </div>
+
+      <!-- 📥 期中考 & 期末考 全部考題電子檔下載專區（含標準答案與詳解） -->
+      <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-amber-50 rounded-2xl p-5 border border-blue-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <i data-lucide="book-open-check" class="w-5 h-5 text-blue-600"></i>
+              <span>📥 期中考 ✕ 期末考「全部考題電子檔（含標準答案與詳解）」下載專區</span>
+            </h2>
+            <p class="text-xs text-slate-600 mt-0.5">
+              📢 <strong>命題公告：</strong>本學期<strong>期中考（第 1～8 章，共 105 題）</strong>與<strong>期末考（第 9～16 章，共 95 題）</strong>皆直接從下方兩份題庫抽題考試！每題均已附上官方標準答案與詳解，請同學下載熟讀。
+            </p>
+          </div>
+          <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-bold px-3 py-1 rounded-full shrink-0">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 200 題答案已 100% 雙重檢核無誤
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Card 1: 期中考全部題庫 -->
+          <div class="bg-white rounded-xl p-4 border-2 border-blue-200 shadow-sm flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">期中考必備</span>
+                <span class="text-xs font-mono font-bold text-blue-700">共 105 題（含答案）</span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900">📘 期中考全部考題題庫 (第 1～8 章)</h3>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                涵蓋：資訊技術與競爭優勢、ERP 概說與 BPR、導入方法、系統評選與建置、存貨管理(MM)、銷售與配銷(SD)、生產規劃(PP/BOM/MRP)。
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <a href="static/exam_banks/ERP_Midterm_Question_Bank_With_Answers.docx" download="萬能科大_企業資源規劃_期中考全部題庫(含標準答案與詳解_第1至8章_105題).docx" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>下載 Word 電子檔 (.docx)</span>
+              </a>
+              <button onclick="openQuestionBankViewer('midterm')" class="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>線上展開／列印</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: 期末考全部題庫 -->
+          <div class="bg-white rounded-xl p-4 border-2 border-indigo-200 shadow-sm flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">期末考必備</span>
+                <span class="text-xs font-mono font-bold text-indigo-700">共 95 題（含答案）</span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900">📙 期末考全部考題題庫 (第 9～16 章)</h3>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                涵蓋：採購與三向比對(MM)、在製品管理(SFC)、人力資源(HR)、財務與管理會計(FI/CO)、變革管理、未來展望、AI Agent 與流程自動化。
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <a href="static/exam_banks/ERP_Final_Question_Bank_With_Answers.docx" download="萬能科大_企業資源規劃_期末考全部題庫(含標準答案與詳解_第9至16章_95題).docx" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>下載 Word 電子檔 (.docx)</span>
+              </a>
+              <button onclick="openQuestionBankViewer('final')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>線上展開／列印</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: 全學期 200 題總題庫合輯 -->
+          <div class="bg-white rounded-xl p-4 border-2 border-amber-200 shadow-sm flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="bg-amber-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">期中＋期末＋證照</span>
+                <span class="text-xs font-mono font-bold text-amber-700">全 200 題（含答案）</span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900">📚 全學期總題庫完整合輯 (第 1～16 章)</h3>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                一次收錄期中考 (105 題) ＋ 期末考 (95 題) 全部 200 題完整試題、答案速查表與考點解析，適合整學期複習與證照衝刺。
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <a href="static/exam_banks/ERP_All_200_Question_Bank_With_Answers.docx" download="萬能科大_企業資源規劃_全學期總題庫完整版(含標準答案與詳解_200題).docx" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>下載 200 題總題庫 (.docx)</span>
+              </a>
+              <button onclick="openQuestionBankViewer('all')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>展開全部 200 題</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 線上題庫完整檢視與列印區塊 (點擊「線上展開／列印」時顯示) -->
+      <div id="question-bank-viewer-box" class="hidden bg-white rounded-2xl p-6 shadow-md border-2 border-blue-300 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <h3 id="qb-viewer-title" class="text-lg font-extrabold text-slate-900">📘 期中考全部考題題庫（含標準答案與詳解）</h3>
+            <p id="qb-viewer-subtitle" class="text-xs text-slate-500 mt-0.5">共 105 題 ｜ 依章節排序，綠字標示為官方標準答案</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="downloadCurrentBankHtml()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="file-down" class="w-4 h-4"></i>
+              <span>下載可列印題庫檔 (.html)</span>
+            </button>
+            <button onclick="printCurrentQuestionBank()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>直接列印 ／ 另存 PDF</span>
+            </button>
+            <button onclick="closeQuestionBankViewer()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg transition">
+              ✕ 收合題庫
+            </button>
+          </div>
+        </div>
+        <div id="qb-viewer-list" class="space-y-3 max-h-[650px] overflow-y-auto pr-2">
+          <!-- Populated dynamically by JS -->
         </div>
       </div>
 
       <!-- Exam Mode Selector & Chapter Filter -->
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center space-x-2">
-          <span class="text-xs font-bold text-slate-700">章節自主練習：</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-slate-700">範圍／章節自主練習：</span>
           <select id="exam-chapter-select" onchange="filterQuestionsByChapter()" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-white">
-            <option value="all">全章節綜合練習 (隨機 10 題)</option>
-            <option value="1">第 1 章 資訊技術與競爭優勢</option>
-            <option value="2">第 2 章 企業資源規劃概說 (BPR)</option>
-            <option value="3">第 3 章 導入方法與程序</option>
-            <option value="4">第 4 章 系統評選</option>
-            <option value="5">第 5 章 系統建置</option>
-            <option value="6">第 6 章 存貨管理 (MM)</option>
-            <option value="7">第 7 章 銷售與收帳管理 (SD)</option>
-            <option value="8">第 8 章 生產規劃 (PP)</option>
-            <option value="9">第 9 章 採購與付款管理 (MM)</option>
-            <option value="10">第 10 章 在製品管理</option>
-            <option value="11">第 11 章 人力資源管理 (HR)</option>
-            <option value="12">第 12 章 財務會計 (FI)</option>
-            <option value="13">第 13 章 管理會計 (CO)</option>
-            <option value="14">第 14 章 企業變革管理</option>
-            <option value="15">第 15 章 未來展望與新興技術</option>
-            <option value="16">★ AI ERP 與 Agentic AI 前瞻考點</option>
+            <option value="midterm_pool">📘 【期中考題庫範圍】第 1～8 章綜合抽測 (隨機 20 題)</option>
+            <option value="final_pool">📙 【期末考題庫範圍】第 9～16 章綜合抽測 (隨機 20 題)</option>
+            <option value="all">🌐 全學期全章節綜合練習 (隨機 10 題)</option>
+            <option value="1">第 1 章 資訊技術與競爭優勢 (期中考範圍)</option>
+            <option value="2">第 2 章 企業資源規劃概說 BPR (期中考範圍)</option>
+            <option value="3">第 3 章 導入方法與程序 (期中考範圍)</option>
+            <option value="4">第 4 章 系統評選 (期中考範圍)</option>
+            <option value="5">第 5 章 系統建置 (期中考範圍)</option>
+            <option value="6">第 6 章 存貨管理 MM (期中考範圍)</option>
+            <option value="7">第 7 章 銷售與收帳管理 SD (期中考範圍)</option>
+            <option value="8">第 8 章 生產規劃 PP (期中考範圍)</option>
+            <option value="9">第 9 章 採購與付款管理 MM (期末考範圍)</option>
+            <option value="10">第 10 章 在製品管理 SFC (期末考範圍)</option>
+            <option value="11">第 11 章 人力資源管理 HR (期末考範圍)</option>
+            <option value="12">第 12 章 財務會計 FI (期末考範圍)</option>
+            <option value="13">第 13 章 管理會計 CO (期末考範圍)</option>
+            <option value="14">第 14 章 企業變革管理 (期末考範圍)</option>
+            <option value="15">第 15 章 未來展望與新興技術 (期末考範圍)</option>
+            <option value="16">★ 第 16 章 AI ERP 與 Agentic AI 考點 (期末考範圍)</option>
           </select>
           <button onclick="startFilteredQuiz()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">
             開始練題
@@ -1147,7 +1271,7 @@
         </div>
 
         <div class="text-xs text-slate-500 font-mono">
-          題庫總量：<strong class="text-blue-700 font-bold" id="total-questions-stat">200</strong> 題 ｜ 及格門檻：70 分
+          題庫總量：<strong class="text-blue-700 font-bold" id="total-questions-stat">200</strong> 題（期中 105 題 ＋ 期末 95 題）｜ 及格門檻：70 分
         </div>
       </div>
 

@@ -6,5 +6,8 @@ _*
 *滄海*
 *AI賦能ERP規劃師*
 *.docx
+!static/exam_banks/*.docx
+!03_期中期末考題庫_電子檔/*.docx
+!企業資源規劃_18週教學大綱與進度表(證照導向_2小時).docx
 ERP_第01週_課程導論與ERP概念演進(2小時完整版).pptx
 企業資源規劃.html
